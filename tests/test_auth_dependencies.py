@@ -39,6 +39,20 @@ def test_production_settings_accept_valid_configuration() -> None:
     assert settings.app_env == "production"
 
 
+def test_production_settings_reject_placeholders() -> None:
+    with pytest.raises(ValueError, match="Production configuration missing"):
+        Settings(
+            _env_file=None,
+            app_env="production",
+            database_url="postgresql+asyncpg://user:pass@db/education",
+            jwt_secret="replace-with-long-random-jwt-secret",
+            telegram_bot_token="replace-with-telegram-bot-token",
+            telegram_webhook_secret="replace-with-random-webhook-secret",
+            payment_webhook_secret="replace-with-random-payment-webhook-secret",
+            gemini_api_key="replace-with-gemini-api-key",
+        )
+
+
 def test_authorize_role_rejects_disallowed_role() -> None:
     with pytest.raises(HTTPException) as error:
         authorize_role("STUDENT", {"TEACHER"})

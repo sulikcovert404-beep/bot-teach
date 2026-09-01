@@ -33,7 +33,11 @@ class Settings(BaseSettings):
             "PAYMENT_WEBHOOK_SECRET": self.payment_webhook_secret,
             "GEMINI_API_KEY": self.gemini_api_key,
         }
-        missing = [name for name, value in required.items() if not value.strip()]
+        missing = [
+            name
+            for name, value in required.items()
+            if not value.strip() or value.strip().lower().startswith("replace-with-")
+        ]
         if missing:
             raise ValueError(f"Production configuration missing: {', '.join(missing)}")
         if len(self.jwt_secret) < 32:
