@@ -52,3 +52,36 @@ async def test_gemini_provider_sends_output_token_cap(monkeypatch: pytest.Monkey
         "contents": [{"parts": [{"text": "Explain photosynthesis"}]}],
         "generationConfig": {"maxOutputTokens": 321},
     }
+
+
+@pytest.mark.asyncio
+async def test_gemini_provider_uses_current_default_model(monkeypatch: pytest.MonkeyPatch) -> None:
+    captured: dict[str, object] = {}
+
+    class Response:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, object]:
+            return {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}
+
+    class Client:
+        async def __aenter__(self) -> Self:
+            return self
+
+        async def __aexit__(self, *_args: object) -> None:
+            return None
+
+        async def post(self, url: str, **kwargs: object) -> Response:
+            captured["url"] = url
+            captured.update(kwargs)
+            return Response()
+
+    monkeypatch.setattr("httpx.AsyncClient", lambda **_kwargs: Client())
+    result = await GeminiProvider("x" * 32).generate(AIRequest(prompt="hello", max_tokens=64))
+
+    assert result.text == "ok"
+    assert captured["url"] == (
+        "https://generativelanguage.googleapis.com/v1beta/models/"
+        "gemini-3.6-flash:generateContent"
+    )
