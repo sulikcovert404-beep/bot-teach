@@ -1,11 +1,39 @@
 from __future__ import annotations
 
 from datetime import datetime
+from typing import Any
 
-from sqlalchemy import DateTime, Float, ForeignKey, Integer, String, UniqueConstraint, func
+from pgvector.sqlalchemy import Vector
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    TypeDecorator,
+    UniqueConstraint,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
+
+
+class EmbeddingVector(TypeDecorator[Any]):
+    """Use pgvector in PostgreSQL and JSON for SQLite tests/development."""
+
+    impl = JSON
+    cache_ok = True
+
+    def __init__(self, dimensions: int = 768) -> None:
+        super().__init__()
+        self.dimensions = dimensions
+
+    def load_dialect_impl(self, dialect):  # type: ignore[no-untyped-def]
+        if dialect.name == "postgresql":
+            return dialect.type_descriptor(Vector(self.dimensions))
+        return dialect.type_descriptor(JSON())
 
 
 class User(Base):
@@ -215,4 +243,15 @@ class SourceChunk(Base):
     chunk_index: Mapped[int] = mapped_column()
     text: Mapped[str] = mapped_column(String(8_000))
     page: Mapped[int | None] = mapped_column()
+    source_type: Mapped[str | None] = mapped_column(String(64), index=True)
+    book_id: Mapped[int | None] = mapped_column(ForeignKey("books.id"), index=True)
+    grade: Mapped[str | None] = mapped_column(String(64), index=True)
+    subject: Mapped[str | None] = mapped_column(String(128), index=True)
+    chapter: Mapped[str | None] = mapped_column(String(255), index=True)
+    lesson: Mapped[str | None] = mapped_column(String(255), index=True)
+    page_start: Mapped[int | None] = mapped_column()
+    page_end: Mapped[int | None] = mapped_column()
+    content_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    embedding_model: Mapped[str | None] = mapped_column(String(128), index=True)
+    embedding: Mapped[list[float] | None] = mapped_column(EmbeddingVector(768), nullable=True)
     document: Mapped[SourceDocument] = relationship(back_populates="chunks")

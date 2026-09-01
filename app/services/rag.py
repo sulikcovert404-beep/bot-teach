@@ -8,6 +8,7 @@ class SourceChunk:
     text: str
     source_id: str
     page: int | None = None
+    score: float | None = None
 
 
 class Retriever(Protocol):
