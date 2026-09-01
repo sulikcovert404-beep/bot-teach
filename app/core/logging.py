@@ -1,5 +1,6 @@
 import logging
 import re
+import time
 import uuid
 from collections import Counter
 from threading import Lock
@@ -60,6 +61,7 @@ class RequestLoggingMiddleware:
         candidate = incoming_headers.get("x-request-id", "")
         request_id = candidate if _REQUEST_ID_PATTERN.fullmatch(candidate) else str(uuid.uuid4())
         status_code = 500
+        started_at = time.perf_counter()
 
         async def send_with_status(message: Message) -> None:
             nonlocal status_code
@@ -93,9 +95,10 @@ class RequestLoggingMiddleware:
         await self.app(scope, receive, send_with_status)
         request_metrics.observe(status_code)
         logger.info(
-            "request method=%s path=%s status=%s request_id=%s",
+            "request method=%s path=%s status=%s request_id=%s duration_ms=%.2f",
             scope.get("method"),
             scope.get("path"),
             status_code,
             request_id,
+            (time.perf_counter() - started_at) * 1000,
         )
