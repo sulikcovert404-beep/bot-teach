@@ -1,11 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.domain.entitlements.models import FeatureCode
 from app.security.entitlements import require_feature_access
 from app.services.ai_gateway import GeminiProvider, ModelRouter
 from app.services.teacher_assistant import TeacherAssistant
+from app.services.usage_repository import record_usage
 
 router = APIRouter(prefix="/teacher", tags=["teacher-assistant"])
 
@@ -26,7 +29,8 @@ class LessonPlanResponse(BaseModel):
 @router.post("/lesson-plan", response_model=LessonPlanResponse)
 async def create_lesson_plan(
     request: LessonPlanRequest,
-    _subject: str = Depends(require_feature_access(FeatureCode.TEACHER_ASSISTANT)),
+    subject: str = Depends(require_feature_access(FeatureCode.TEACHER_ASSISTANT)),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> LessonPlanResponse:
     settings = get_settings()
     if not settings.gemini_api_key:
@@ -42,4 +46,21 @@ async def create_lesson_plan(
         minutes=request.minutes,
         max_tokens=request.max_tokens,
     )
+    try:
+        user_id = int(subject)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user identity") from exc
+    await record_usage(
+        session,
+        user_id=user_id,
+        task_type="teacher_assistant",
+        model=result.model,
+        requested_tokens=request.max_tokens,
+        charged_tokens=(
+            min(result.usage_tokens, request.max_tokens)
+            if result.usage_tokens is not None
+            else request.max_tokens
+        ),
+    )
+    await session.commit()
     return LessonPlanResponse(text=result.text, model=result.model)
