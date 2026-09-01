@@ -3,7 +3,7 @@ import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.base import Base
-from app.db.models import PaymentTransaction, Subscription
+from app.db.models import AuditLog, PaymentTransaction, Subscription
 from app.services.payments import apply_payment_callback, create_payment_intent
 
 
@@ -41,4 +41,6 @@ async def test_payment_callback_is_idempotent_and_activates_subscription() -> No
         assert subscription.active_until.tzinfo is not None or subscription.active_until.tzinfo is None
         loaded = await session.get(PaymentTransaction, transaction.id)
         assert loaded is not None and loaded.status == "SUCCEEDED"
+        audit_logs = await session.scalars(AuditLog.__table__.select())
+        assert len(audit_logs.all()) == 2
     await engine.dispose()

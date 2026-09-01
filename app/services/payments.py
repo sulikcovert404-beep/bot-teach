@@ -5,6 +5,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import PaymentTransaction, Subscription
+from app.services.audit_repository import record_audit_log
 
 
 async def create_payment_intent(
@@ -21,6 +22,14 @@ async def create_payment_intent(
     )
     session.add(transaction)
     await session.flush()
+    await record_audit_log(
+        session,
+        actor_user_id=user_id,
+        action="payment_intent_created",
+        resource_type="payment_transaction",
+        resource_id=transaction.provider_transaction_id,
+        metadata={"provider": provider, "amount": amount, "plan": plan},
+    )
     return transaction
 
 
@@ -53,5 +62,13 @@ async def apply_payment_callback(
             session.add(subscription)
         subscription.plan = plan
         subscription.active_until = datetime.now(UTC) + timedelta(days=active_days)
+    await record_audit_log(
+        session,
+        actor_user_id=None,
+        action="payment_callback_applied",
+        resource_type="payment_transaction",
+        resource_id=transaction.provider_transaction_id,
+        metadata={"status": status, "plan": plan},
+    )
     await session.flush()
     return transaction
