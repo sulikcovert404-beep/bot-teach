@@ -1,5 +1,7 @@
+from urllib.parse import urlsplit
+
 from fastapi import APIRouter, Depends, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
@@ -16,6 +18,18 @@ class IngestRequest(BaseModel):
     title: str = Field(min_length=1, max_length=255)
     text: str = Field(min_length=1, max_length=1_000_000)
     uri: str | None = Field(default=None, max_length=2_000)
+
+    @field_validator("uri")
+    @classmethod
+    def validate_uri(cls, value: str | None) -> str | None:
+        if value is None or not value.strip():
+            return None
+        parsed = urlsplit(value)
+        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+            raise ValueError("Source URI must be an absolute http or https URL")
+        if parsed.username is not None or parsed.password is not None:
+            raise ValueError("Source URI must not contain embedded credentials")
+        return value
 
 
 class IngestResponse(BaseModel):
