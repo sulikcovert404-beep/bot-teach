@@ -16,6 +16,7 @@ from app.api.routes.payments import router as payments_router
 from app.api.routes.sources import router as sources_router
 from app.api.routes.study_plan import router as study_plan_router
 from app.api.routes.subscriptions import router as subscriptions_router
+from app.api.routes.teacher import router as teacher_router
 from app.api.routes.telegram import router as telegram_router
 from app.api.routes.tutor import router as tutor_router
 from app.api.routes.v1 import router as v1_router
@@ -61,4 +62,5 @@ app.include_router(study_plan_router, prefix="/api/v1")
 app.include_router(sources_router, prefix="/api/v1")
 app.include_router(payments_router, prefix="/api/v1")
 app.include_router(telegram_router, prefix="/api/v1")
+app.include_router(teacher_router, prefix="/api/v1")
 app.include_router(tutor_router, prefix="/api/v1")
