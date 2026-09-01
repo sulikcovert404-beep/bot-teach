@@ -16,6 +16,10 @@ jobs:
       - run: python -m ruff check app tests
       - run: python -m mypy app
       - run: python -m pytest -q
+      - name: Verify migration chain
+        env:
+          DATABASE_URL: sqlite:///ci-migrations.sqlite
+        run: python -m alembic upgrade head
 
   docker:
     runs-on: ubuntu-latest
