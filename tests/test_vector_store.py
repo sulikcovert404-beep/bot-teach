@@ -1,7 +1,10 @@
 import pytest
+from sqlalchemy.schema import CreateTable
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.base import Base
+from app.db.models import SourceChunk
 from app.services.vector_store import PgVectorStore, VectorSearchRequest
 
 
@@ -27,3 +30,9 @@ async def test_pgvector_store_rejects_invalid_embedding_before_database_call() -
         with pytest.raises(RuntimeError, match="PostgreSQL"):
             await store.upsert_embedding(chunk_id=1, embedding=[0.1], embedding_model="model")
     await engine.dispose()
+
+
+def test_source_chunk_embedding_compiles_to_pgvector() -> None:
+    statement = str(CreateTable(SourceChunk.__table__).compile(dialect=postgresql.dialect()))
+    assert "embedding VECTOR(768)" in statement
+    assert "content_hash VARCHAR(64)" in statement
