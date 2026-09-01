@@ -36,4 +36,14 @@ Invoke-WebRequest http://localhost:8000/health/ready
 6. در صورت خطا، ابتدا ترافیک را برگردانید و سپس rollback سازگار با migration را
    طبق runbook اجرا کنید.
 
+برای اجرای همین چرخه در محیط staging می‌توان از اسکریپت قابل تکرار زیر استفاده کرد:
+
+```powershell
+.\scripts\staging-smoke.ps1
+```
+
+این اسکریپت ابتدا migrationها را اجرا می‌کند، سرویس‌های `db` و `api` را بالا می‌آورد
+و تا موفقیت readiness و تأیید migration head منتظر می‌ماند. در صورت خطا با exit
+غیرصفر متوقف می‌شود.
+
 SQLite فقط برای development و test است و نباید محل دادهٔ production باشد.
