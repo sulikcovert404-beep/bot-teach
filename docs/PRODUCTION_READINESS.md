@@ -26,6 +26,7 @@
 - اتصال به PostgreSQL staging و اجرای query/readiness واقعی
 - تأیید provider واقعی Gemini و Telegram با secret manager؛ secretها نباید در Git باشند
 - اتصال payment provider واقعی و آزمون callback در محیط sandbox
+- تنظیم `PAYMENT_PROVIDER_URL` و `PAYMENT_PROVIDER_API_KEY` و تطبیق قرارداد `/v1/checkout`
 - backup/restore drill روی PostgreSQL جداگانه
 - بررسی rate limit مشترک بین replicaها و observability متمرکز
 - تست end-to-end روی staging و audit نهایی requirement-by-requirement

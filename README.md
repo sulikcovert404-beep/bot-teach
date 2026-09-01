@@ -44,6 +44,8 @@ Platform API: `GET /api/v1/platform`
 - providerهای AI پشت gateway و Model Router قرار دارند
 - در محیط چند replica، rate limit با `REDIS_URL` روی Redis مشترک اجرا می‌شود؛ بدون آن
   فقط fallback توسعه‌ای تک‌پردازه فعال است.
+- با تنظیم `PAYMENT_PROVIDER_URL` و `PAYMENT_PROVIDER_API_KEY`، مسیر ایجاد intent به
+  adapter HTTP provider متصل می‌شود؛ در صورت خالی بودن، foundation داخلی فعال می‌ماند.
 - secrets در `.env` محلی، نه در Git
 
 ## توسعه و اعتبارسنجی
