@@ -17,6 +17,13 @@ def test_request_id_is_propagated_when_valid() -> None:
     assert response.headers["x-request-id"] == "trace-123"
 
 
+def test_request_id_is_replaced_when_invalid() -> None:
+    response = TestClient(app).get("/health", headers={"X-Request-ID": "bad value"})
+    request_id = response.headers["x-request-id"]
+    assert request_id != "bad value"
+    assert len(request_id) == 36
+
+
 def test_prometheus_metrics_contract() -> None:
     response = TestClient(app).get("/metrics/prometheus")
     assert response.status_code == 200

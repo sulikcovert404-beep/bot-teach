@@ -65,7 +65,11 @@ class RequestLoggingMiddleware:
             nonlocal status_code
             if message["type"] == "http.response.start":
                 status_code = int(message["status"])
-                headers = list(message.get("headers", []))
+                headers = [
+                    (key, value)
+                    for key, value in message.get("headers", [])
+                    if key.lower() != b"x-request-id"
+                ]
                 headers.append((b"x-request-id", request_id.encode()))
                 headers.extend(
                     [
