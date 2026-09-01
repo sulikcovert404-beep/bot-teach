@@ -2,7 +2,9 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 
 from app.core.config import get_settings
+from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_user
+from app.security.entitlements import require_feature_access
 from app.services.ai_gateway import AIRequest, GeminiProvider, ModelRouter
 from app.services.educational_ai import EducationalAI
 
@@ -70,13 +72,19 @@ def _educational_ai() -> EducationalAI:
 
 
 @router.post("/summarize", response_model=GenerateResponse)
-async def summarize(request: SummarizeRequest, _subject: str = Depends(require_user)) -> GenerateResponse:
+async def summarize(
+    request: SummarizeRequest,
+    _subject: str = Depends(require_feature_access(FeatureCode.SMART_SUMMARY)),
+) -> GenerateResponse:
     result = await _educational_ai().summarize(request.text, max_tokens=request.max_tokens)
     return GenerateResponse(text=result.text, model=result.model, task_type="smart_summary")
 
 
 @router.post("/questions", response_model=GenerateResponse)
-async def generate_questions(request: QuestionsRequest, _subject: str = Depends(require_user)) -> GenerateResponse:
+async def generate_questions(
+    request: QuestionsRequest,
+    _subject: str = Depends(require_feature_access(FeatureCode.QUESTION_GENERATOR)),
+) -> GenerateResponse:
     result = await _educational_ai().generate_questions(
         request.text, count=request.count, max_tokens=request.max_tokens
     )
@@ -84,7 +92,10 @@ async def generate_questions(request: QuestionsRequest, _subject: str = Depends(
 
 
 @router.post("/exam", response_model=GenerateResponse)
-async def generate_exam(request: ExamRequest, _subject: str = Depends(require_user)) -> GenerateResponse:
+async def generate_exam(
+    request: ExamRequest,
+    _subject: str = Depends(require_feature_access(FeatureCode.EXAM_GENERATOR)),
+) -> GenerateResponse:
     result = await _educational_ai().generate_exam(
         request.text, count=request.count, max_tokens=request.max_tokens
     )
@@ -93,7 +104,8 @@ async def generate_exam(request: ExamRequest, _subject: str = Depends(require_us
 
 @router.post("/exam/correct", response_model=GenerateResponse)
 async def correct_exam(
-    request: ExamCorrectionRequest, _subject: str = Depends(require_user)
+    request: ExamCorrectionRequest,
+    _subject: str = Depends(require_feature_access(FeatureCode.EXAM_CORRECTOR)),
 ) -> GenerateResponse:
     result = await _educational_ai().correct_exam(
         request.answer_key, request.answers, max_tokens=request.max_tokens
