@@ -51,6 +51,11 @@ class Settings(BaseSettings):
             raise ValueError(f"Production configuration missing: {', '.join(missing)}")
         if len(self.jwt_secret) < 32:
             raise ValueError("JWT_SECRET must be at least 32 characters in production")
+        if self.payment_provider_url.strip():
+            if not self.payment_provider_api_key.strip():
+                raise ValueError("PAYMENT_PROVIDER_API_KEY is required when a payment provider is configured")
+            if not self.payment_provider_url.startswith("https://"):
+                raise ValueError("PAYMENT_PROVIDER_URL must use HTTPS in production")
         return self
 
 

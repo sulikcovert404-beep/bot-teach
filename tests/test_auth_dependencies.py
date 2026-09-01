@@ -54,6 +54,37 @@ def test_production_settings_reject_placeholders() -> None:
         )
 
 
+def test_production_payment_provider_requires_secure_configuration() -> None:
+    with pytest.raises(ValueError, match="PAYMENT_PROVIDER_API_KEY"):
+        Settings(
+            _env_file=None,
+            app_env="production",
+            database_url="postgresql+asyncpg://user:pass@db/education",
+            jwt_secret="x" * 32,
+            telegram_bot_token="telegram-token",
+            telegram_webhook_secret="webhook-secret",
+            payment_webhook_secret="payment-secret",
+            gemini_api_key="gemini-key",
+            redis_url="redis://redis:6379/0",
+            payment_provider_url="https://gateway.test",
+        )
+
+    with pytest.raises(ValueError, match="HTTPS"):
+        Settings(
+            _env_file=None,
+            app_env="production",
+            database_url="postgresql+asyncpg://user:pass@db/education",
+            jwt_secret="x" * 32,
+            telegram_bot_token="telegram-token",
+            telegram_webhook_secret="webhook-secret",
+            payment_webhook_secret="payment-secret",
+            gemini_api_key="gemini-key",
+            redis_url="redis://redis:6379/0",
+            payment_provider_url="http://gateway.test",
+            payment_provider_api_key="provider-key",
+        )
+
+
 def test_authorize_role_rejects_disallowed_role() -> None:
     with pytest.raises(HTTPException) as error:
         authorize_role("STUDENT", {"TEACHER"})
