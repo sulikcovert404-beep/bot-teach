@@ -1,4 +1,5 @@
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -22,7 +23,7 @@ class Settings(BaseSettings):
 
     model_config = SettingsConfigDict(
         env_file=".env",
-        secrets_dir="/run/secrets",
+        secrets_dir="/run/secrets" if Path("/run/secrets").is_dir() else None,
         extra="ignore",
     )
 
