@@ -5,8 +5,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from app.api.routes.auth import get_session
+from app.core.config import get_settings
 from app.db.models import Exam, ExamQuestion
+from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_user
+from app.security.entitlements import require_feature_access
+from app.services.ai_gateway import GeminiProvider, ModelRouter
+from app.services.educational_ai import EducationalAI
 
 router = APIRouter(prefix="/exams", tags=["exams"])
 
@@ -34,6 +39,7 @@ class ExamResponse(BaseModel):
     id: int
     title: str
     questions: list[ExamQuestionResponse]
+    generated_content: str | None = None
 
 
 def _response(exam: Exam) -> ExamResponse:
@@ -50,6 +56,7 @@ def _response(exam: Exam) -> ExamResponse:
             )
             for question in exam.questions
         ],
+        generated_content=exam.generated_content,
     )
 
 
@@ -97,3 +104,25 @@ async def list_exams(
         .order_by(Exam.created_at.desc())
     )
     return [_response(exam) for exam in result.all()]
+
+
+@router.post("/generate", response_model=ExamResponse, status_code=201)
+async def generate_and_save_exam(
+    request: ExamRequest,
+    subject: str = Depends(require_feature_access(FeatureCode.EXAM_GENERATOR)),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> ExamResponse:
+    settings = get_settings()
+    if not settings.gemini_api_key:
+        raise HTTPException(status_code=503, detail="AI provider unavailable")
+    result = await EducationalAI(
+        GeminiProvider(settings.gemini_api_key), ModelRouter(settings.ai_default_model)
+    ).generate_exam(
+        "\n".join(question.prompt for question in request.questions),
+        count=len(request.questions),
+    )
+    exam = Exam(user_id=int(subject), title=request.title, generated_content=result.text)
+    session.add(exam)
+    await session.commit()
+    await session.refresh(exam)
+    return _response(exam)
