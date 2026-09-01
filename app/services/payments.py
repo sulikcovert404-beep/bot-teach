@@ -36,6 +36,7 @@ async def create_payment_intent(
         provider=provider,
         provider_transaction_id=provider_transaction_id,
         checkout_url=checkout_url,
+        plan=plan,
         amount=amount,
         status="PENDING",
     )
@@ -69,6 +70,8 @@ async def apply_payment_callback(
     )
     if transaction is None:
         return None
+    if transaction.plan != plan:
+        raise ValueError("Payment callback plan does not match transaction")
     if transaction.status == "SUCCEEDED":
         return transaction
     transaction.status = status

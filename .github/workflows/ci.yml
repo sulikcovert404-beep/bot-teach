@@ -55,7 +55,7 @@ jobs:
             if response=$(curl --silent --show-error --fail http://localhost:8000/health/ready); then
               echo "$response"
               test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["status"])')" = "ready"
-              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "c0d1e2f3a4b5"
+              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "d1e2f3a4b5c6"
               exit 0
             fi
             sleep 2

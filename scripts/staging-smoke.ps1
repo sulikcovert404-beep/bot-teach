@@ -3,7 +3,7 @@ param(
     [string]$BaseUrl = "http://localhost:8000",
     [int]$Attempts = 30,
     [int]$DelaySeconds = 2,
-    [string]$ExpectedMigrationHead = "c0d1e2f3a4b5"
+    [string]$ExpectedMigrationHead = "d1e2f3a4b5c6"
 )
 
 $ErrorActionPreference = "Stop"
