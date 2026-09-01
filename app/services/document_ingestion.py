@@ -2,7 +2,7 @@ from dataclasses import dataclass
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import joinedload
+from sqlalchemy.orm import joinedload, selectinload
 
 from app.db.models import SourceChunk as SourceChunkModel
 from app.db.models import SourceDocument
@@ -46,7 +46,11 @@ async def ingest_document(
     if not source_id.strip() or not title.strip():
         raise ValueError("Source id and title are required")
     chunks = split_text(text, chunk_size=chunk_size)
-    document = await session.scalar(select(SourceDocument).where(SourceDocument.source_id == source_id))
+    document = await session.scalar(
+        select(SourceDocument)
+        .options(selectinload(SourceDocument.chunks))
+        .where(SourceDocument.source_id == source_id)
+    )
     if document is not None:
         document.title = title
         document.uri = uri

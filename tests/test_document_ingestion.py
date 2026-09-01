@@ -24,6 +24,13 @@ async def test_ingest_and_retrieve_source_chunks() -> None:
         chunks = await DatabaseRetriever(session).retrieve("فتوسنتز")
         assert len(chunks) == 1
         assert chunks[0].source_id == "book-1"
+        updated = await ingest_document(
+            session, source_id="book-1", title="علوم جدید", text="سلول جدید است.", chunk_size=40
+        )
+        await session.commit()
+        assert updated.chunk_count == 1
+        refreshed = await DatabaseRetriever(session).retrieve("جدید")
+        assert len(refreshed) == 1
     await engine.dispose()
 
 
