@@ -1,7 +1,7 @@
 import pytest
-from sqlalchemy.schema import CreateTable
 from sqlalchemy.dialects import postgresql
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+from sqlalchemy.schema import CreateTable
 
 from app.db.base import Base
 from app.db.models import SourceChunk
