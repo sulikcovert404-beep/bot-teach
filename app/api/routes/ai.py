@@ -1,12 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_user
 from app.security.entitlements import require_feature_access
 from app.services.ai_gateway import AIRequest, GeminiProvider, ModelRouter
 from app.services.educational_ai import EducationalAI
+from app.services.usage_repository import record_usage
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
@@ -47,8 +50,36 @@ class ExamCorrectionRequest(BaseModel):
     max_tokens: int = Field(default=1200, ge=1, le=4000)
 
 
+async def _record_ai_usage(
+    session: AsyncSession,
+    subject: str,
+    *,
+    task_type: str,
+    model: str,
+    requested_tokens: int,
+    usage_tokens: int | None,
+) -> None:
+    try:
+        user_id = int(subject)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user identity") from exc
+    await record_usage(
+        session,
+        user_id=user_id,
+        task_type=task_type,
+        model=model,
+        requested_tokens=requested_tokens,
+        charged_tokens=usage_tokens if usage_tokens is not None else requested_tokens,
+    )
+    await session.commit()
+
+
 @router.post("/generate", response_model=GenerateResponse)
-async def generate(request: GenerateRequest, _subject: str = Depends(require_user)) -> GenerateResponse:
+async def generate(
+    request: GenerateRequest,
+    subject: str = Depends(require_user),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> GenerateResponse:
     settings = get_settings()
     if not settings.gemini_api_key:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable")
@@ -67,6 +98,14 @@ async def generate(request: GenerateRequest, _subject: str = Depends(require_use
         result = await GeminiProvider(settings.gemini_api_key).generate(routed)
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
+    await _record_ai_usage(
+        session,
+        subject,
+        task_type=request.task_type,
+        model=result.model,
+        requested_tokens=routed.max_tokens,
+        usage_tokens=result.usage_tokens,
+    )
     return GenerateResponse(text=result.text, model=result.model, task_type=request.task_type)
 
 
@@ -80,19 +119,23 @@ def _educational_ai() -> EducationalAI:
 @router.post("/summarize", response_model=GenerateResponse)
 async def summarize(
     request: SummarizeRequest,
-    _subject: str = Depends(require_feature_access(FeatureCode.SMART_SUMMARY)),
+    subject: str = Depends(require_feature_access(FeatureCode.SMART_SUMMARY)),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().summarize(request.text, max_tokens=request.max_tokens)
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
+    await _record_ai_usage(session, subject, task_type="smart_summary", model=result.model,
+                           requested_tokens=request.max_tokens, usage_tokens=result.usage_tokens)
     return GenerateResponse(text=result.text, model=result.model, task_type="smart_summary")
 
 
 @router.post("/questions", response_model=GenerateResponse)
 async def generate_questions(
     request: QuestionsRequest,
-    _subject: str = Depends(require_feature_access(FeatureCode.QUESTION_GENERATOR)),
+    subject: str = Depends(require_feature_access(FeatureCode.QUESTION_GENERATOR)),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().generate_questions(
@@ -100,13 +143,16 @@ async def generate_questions(
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
+    await _record_ai_usage(session, subject, task_type="question_generator", model=result.model,
+                           requested_tokens=request.max_tokens, usage_tokens=result.usage_tokens)
     return GenerateResponse(text=result.text, model=result.model, task_type="question_generator")
 
 
 @router.post("/exam", response_model=GenerateResponse)
 async def generate_exam(
     request: ExamRequest,
-    _subject: str = Depends(require_feature_access(FeatureCode.EXAM_GENERATOR)),
+    subject: str = Depends(require_feature_access(FeatureCode.EXAM_GENERATOR)),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().generate_exam(
@@ -114,13 +160,16 @@ async def generate_exam(
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
+    await _record_ai_usage(session, subject, task_type="exam_generator", model=result.model,
+                           requested_tokens=request.max_tokens, usage_tokens=result.usage_tokens)
     return GenerateResponse(text=result.text, model=result.model, task_type="exam_generator")
 
 
 @router.post("/exam/correct", response_model=GenerateResponse)
 async def correct_exam(
     request: ExamCorrectionRequest,
-    _subject: str = Depends(require_feature_access(FeatureCode.EXAM_CORRECTOR)),
+    subject: str = Depends(require_feature_access(FeatureCode.EXAM_CORRECTOR)),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().correct_exam(
@@ -128,4 +177,6 @@ async def correct_exam(
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
+    await _record_ai_usage(session, subject, task_type="exam_corrector", model=result.model,
+                           requested_tokens=request.max_tokens, usage_tokens=result.usage_tokens)
     return GenerateResponse(text=result.text, model=result.model, task_type="exam_corrector")
