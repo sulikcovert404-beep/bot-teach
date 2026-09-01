@@ -16,6 +16,7 @@ from app.services.ai_gateway import GeminiProvider, ModelRouter
 from app.services.ai_tutor import AITutor
 from app.services.document_ingestion import DatabaseRetriever
 from app.services.telegram_bot import TelegramBotClient
+from app.services.usage_repository import record_usage
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 
@@ -141,5 +142,18 @@ async def educational_reply(
         ).answer(text)
     except RuntimeError:
         return "پاسخ‌گویی هوشمند موقتاً با مشکل مواجه شد. لطفاً دوباره تلاش کنید."
+    requested_tokens = 1_200
+    await record_usage(
+        session,
+        user_id=user.id,
+        task_type="ai_tutor",
+        model=result.model,
+        requested_tokens=requested_tokens,
+        charged_tokens=(
+            min(result.usage_tokens, requested_tokens)
+            if result.usage_tokens is not None
+            else requested_tokens
+        ),
+    )
     await session.commit()
     return result.text
