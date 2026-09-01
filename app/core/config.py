@@ -9,6 +9,7 @@ class Settings(BaseSettings):
     log_level: str = "INFO"
     database_url: str = ""
     telegram_bot_token: str = ""
+    telegram_webhook_secret: str = ""
     gemini_api_key: str = ""
     ai_default_model: str = "gemini-2.0-flash"
     jwt_secret: str = ""

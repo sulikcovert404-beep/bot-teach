@@ -12,6 +12,7 @@ from app.api.routes.flashcards import router as flashcards_router
 from app.api.routes.health import router as health_router
 from app.api.routes.study_plan import router as study_plan_router
 from app.api.routes.subscriptions import router as subscriptions_router
+from app.api.routes.telegram import router as telegram_router
 from app.api.routes.v1 import router as v1_router
 from app.api.routes.worksheets import router as worksheets_router
 from app.core.config import get_settings
@@ -50,3 +51,4 @@ app.include_router(curriculum_router, prefix="/api/v1")
 app.include_router(flashcards_router, prefix="/api/v1")
 app.include_router(subscriptions_router, prefix="/api/v1")
 app.include_router(study_plan_router, prefix="/api/v1")
+app.include_router(telegram_router, prefix="/api/v1")
