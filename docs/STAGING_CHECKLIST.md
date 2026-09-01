@@ -16,7 +16,7 @@ secretهای staging آماده نیستند، موارد اجراشده را ح
 - [ ] `docker compose config` بدون خطا اجرا شد.
 - [ ] image با کاربر non-root build شد.
 - [ ] سرویس‌های `db` و `redis` healthy شدند.
-- [ ] migration container تا head (`d1e2f3a4b5c6`) موفق شد.
+- [ ] migration container تا head (`e2f3a4b5c6d7`) موفق شد.
 - [ ] API پس از migration بالا آمد.
 
 ## Smoke tests

@@ -42,7 +42,7 @@ async def test_readiness_checks_redis_when_configured(monkeypatch: pytest.Monkey
 
     class Session:
         async def execute(self, query) -> Result:
-            return Result(1 if "SELECT 1" in str(query) else "d1e2f3a4b5c6")
+            return Result(1 if "SELECT 1" in str(query) else "e2f3a4b5c6d7")
 
         async def __aenter__(self) -> Self:
             return self
@@ -71,4 +71,4 @@ async def test_readiness_checks_redis_when_configured(monkeypatch: pytest.Monkey
     monkeypatch.setattr(health_route, "build_session_factory", lambda _url: Factory())
     monkeypatch.setattr(health_route, "Redis", Redis)
 
-    assert await health_route.readiness() == {"status": "ready", "migration_head": "d1e2f3a4b5c6"}
+    assert await health_route.readiness() == {"status": "ready", "migration_head": "e2f3a4b5c6d7"}
