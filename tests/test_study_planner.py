@@ -29,3 +29,4 @@ def test_build_study_plan_rejects_invalid_limits_and_tasks() -> None:
 def test_study_plan_routes_require_authentication() -> None:
     client = TestClient(app)
     assert client.get("/api/v1/study-plan").status_code == 401
+    assert client.patch("/api/v1/study-plan/tasks/1", json={"completed": True}).status_code == 401

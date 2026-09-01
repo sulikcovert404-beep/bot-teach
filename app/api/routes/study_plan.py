@@ -29,6 +29,19 @@ class PlannedTaskResponse(BaseModel):
     minutes: int
 
 
+class StudyPlanTaskUpdate(BaseModel):
+    completed: bool
+
+
+class StudyPlanTaskResponse(BaseModel):
+    id: int
+    lesson_id: int
+    day_number: int
+    title: str
+    minutes: int
+    completed: bool
+
+
 class PlannedDayResponse(BaseModel):
     day_number: int
     tasks: list[PlannedTaskResponse]
@@ -68,6 +81,30 @@ async def create_study_plan(
         )
         for day in plan
     ]
+
+
+@router.patch("/tasks/{task_id}", response_model=StudyPlanTaskResponse)
+async def update_study_task(
+    task_id: int,
+    request: StudyPlanTaskUpdate,
+    subject: str = Depends(require_user),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> StudyPlanTask:
+    try:
+        user_id = int(subject)
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail="Invalid user identity") from exc
+    task = await session.scalar(
+        select(StudyPlanTask)
+        .join(StudyPlan, StudyPlan.id == StudyPlanTask.plan_id)
+        .where(StudyPlanTask.id == task_id, StudyPlan.user_id == user_id)
+    )
+    if task is None:
+        raise HTTPException(status_code=404, detail="Study plan task not found")
+    task.completed = request.completed
+    await session.commit()
+    await session.refresh(task)
+    return task
 
 
 @router.get("", response_model=list[PlannedDayResponse])
