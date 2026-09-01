@@ -15,6 +15,8 @@ def test_health() -> None:
     assert response.headers["x-content-type-options"] == "nosniff"
     assert response.headers["x-frame-options"] == "DENY"
     assert response.headers["referrer-policy"] == "no-referrer"
+    assert "default-src 'self'" in response.headers["content-security-policy"]
+    assert response.headers["permissions-policy"] == "camera=(), microphone=(), geolocation=()"
 
 
 def test_platform_info() -> None:
