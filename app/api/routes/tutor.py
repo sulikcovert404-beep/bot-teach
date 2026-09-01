@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -32,12 +32,13 @@ async def tutor_answer(
 ) -> TutorResponse:
     settings = get_settings()
     if not settings.gemini_api_key:
-        from fastapi import HTTPException, status
-
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable")
-    result = await AITutor(
-        GeminiProvider(settings.gemini_api_key),
-        ModelRouter(settings.ai_default_model),
-        DatabaseRetriever(session),
-    ).answer(request.query, max_tokens=request.max_tokens)
+    try:
+        result = await AITutor(
+            GeminiProvider(settings.gemini_api_key),
+            ModelRouter(settings.ai_default_model),
+            DatabaseRetriever(session),
+        ).answer(request.query, max_tokens=request.max_tokens)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
     return TutorResponse(text=result.text, model=result.model)

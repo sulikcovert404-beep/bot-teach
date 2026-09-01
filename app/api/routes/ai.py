@@ -60,7 +60,10 @@ async def generate(request: GenerateRequest, _subject: str = Depends(require_use
             task_type=request.task_type,
         )
     )
-    result = await GeminiProvider(settings.gemini_api_key).generate(routed)
+    try:
+        result = await GeminiProvider(settings.gemini_api_key).generate(routed)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
     return GenerateResponse(text=result.text, model=result.model, task_type=request.task_type)
 
 
@@ -76,7 +79,10 @@ async def summarize(
     request: SummarizeRequest,
     _subject: str = Depends(require_feature_access(FeatureCode.SMART_SUMMARY)),
 ) -> GenerateResponse:
-    result = await _educational_ai().summarize(request.text, max_tokens=request.max_tokens)
+    try:
+        result = await _educational_ai().summarize(request.text, max_tokens=request.max_tokens)
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
     return GenerateResponse(text=result.text, model=result.model, task_type="smart_summary")
 
 
@@ -85,9 +91,12 @@ async def generate_questions(
     request: QuestionsRequest,
     _subject: str = Depends(require_feature_access(FeatureCode.QUESTION_GENERATOR)),
 ) -> GenerateResponse:
-    result = await _educational_ai().generate_questions(
-        request.text, count=request.count, max_tokens=request.max_tokens
-    )
+    try:
+        result = await _educational_ai().generate_questions(
+            request.text, count=request.count, max_tokens=request.max_tokens
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
     return GenerateResponse(text=result.text, model=result.model, task_type="question_generator")
 
 
@@ -96,9 +105,12 @@ async def generate_exam(
     request: ExamRequest,
     _subject: str = Depends(require_feature_access(FeatureCode.EXAM_GENERATOR)),
 ) -> GenerateResponse:
-    result = await _educational_ai().generate_exam(
-        request.text, count=request.count, max_tokens=request.max_tokens
-    )
+    try:
+        result = await _educational_ai().generate_exam(
+            request.text, count=request.count, max_tokens=request.max_tokens
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
     return GenerateResponse(text=result.text, model=result.model, task_type="exam_generator")
 
 
@@ -107,7 +119,10 @@ async def correct_exam(
     request: ExamCorrectionRequest,
     _subject: str = Depends(require_feature_access(FeatureCode.EXAM_CORRECTOR)),
 ) -> GenerateResponse:
-    result = await _educational_ai().correct_exam(
-        request.answer_key, request.answers, max_tokens=request.max_tokens
-    )
+    try:
+        result = await _educational_ai().correct_exam(
+            request.answer_key, request.answers, max_tokens=request.max_tokens
+        )
+    except RuntimeError as exc:
+        raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
     return GenerateResponse(text=result.text, model=result.model, task_type="exam_corrector")
