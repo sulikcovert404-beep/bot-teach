@@ -14,5 +14,6 @@ def test_rate_limit_returns_429_after_window_quota() -> None:
 
     client = TestClient(app)
     assert client.get("/").status_code == 200
-    assert client.get("/").status_code == 429
-
+    response = client.get("/")
+    assert response.status_code == 429
+    assert int(response.headers["retry-after"]) >= 1

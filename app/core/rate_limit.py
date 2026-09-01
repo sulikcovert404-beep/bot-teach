@@ -22,16 +22,35 @@ class InMemoryRateLimitMiddleware:
         client = scope.get("client")
         key = client[0] if client else "unknown"
         now = time.monotonic()
+        self._prune(now)
         started, count = self._windows[key]
         if now - started >= self.window_seconds:
             started, count = now, 0
         if count >= self.requests:
-            await self._reject(send)
+            retry_after = max(1, int(self.window_seconds - (now - started)))
+            await self._reject(send, retry_after)
             return
         self._windows[key] = (started, count + 1)
         await self.app(scope, receive, send)
 
-    async def _reject(self, send: Send) -> None:
+    def _prune(self, now: float) -> None:
+        expired = [
+            key for key, (started, _count) in self._windows.items()
+            if now - started >= self.window_seconds
+        ]
+        for key in expired:
+            del self._windows[key]
+
+    async def _reject(self, send: Send, retry_after: int) -> None:
         body = b'{"detail":"Rate limit exceeded"}'
-        await send({"type": "http.response.start", "status": 429, "headers": [(b"content-type", b"application/json")]})
+        await send(
+            {
+                "type": "http.response.start",
+                "status": 429,
+                "headers": [
+                    (b"content-type", b"application/json"),
+                    (b"retry-after", str(retry_after).encode()),
+                ],
+            }
+        )
         await send({"type": "http.response.body", "body": body})
