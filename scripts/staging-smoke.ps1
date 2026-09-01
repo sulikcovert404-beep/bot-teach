@@ -7,14 +7,8 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-Write-Host "Applying database migrations..."
-docker compose run --rm api alembic upgrade head
-if ($LASTEXITCODE -ne 0) {
-    throw "Migration command failed with exit code $LASTEXITCODE"
-}
-
 Write-Host "Starting staging services..."
-docker compose up -d db api
+docker compose up -d db migrate api
 if ($LASTEXITCODE -ne 0) {
     throw "Compose startup failed with exit code $LASTEXITCODE"
 }

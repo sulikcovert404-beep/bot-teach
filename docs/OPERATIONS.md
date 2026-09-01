@@ -42,7 +42,7 @@ Invoke-WebRequest http://localhost:8000/health/ready
 .\scripts\staging-smoke.ps1
 ```
 
-این اسکریپت ابتدا migrationها را اجرا می‌کند، سرویس‌های `db` و `api` را بالا می‌آورد
+این اسکریپت سرویس‌های `db`، migration یک‌باره و `api` را بالا می‌آورد
 و تا موفقیت readiness و تأیید migration head منتظر می‌ماند. در صورت خطا با exit
 غیرصفر متوقف می‌شود.
 
