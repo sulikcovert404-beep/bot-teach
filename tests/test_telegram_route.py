@@ -1,5 +1,7 @@
 from fastapi.testclient import TestClient
+from sqlalchemy.exc import IntegrityError
 
+from app.api.routes.auth import get_session
 from app.api.routes.telegram import get_bot_client, reply_for_text
 from app.core.config import get_settings
 from app.main import app
@@ -73,3 +75,37 @@ def test_webhook_maps_telegram_provider_failure(monkeypatch) -> None:
         assert response.status_code == 502
     finally:
         app.dependency_overrides.pop(get_bot_client, None)
+
+
+def test_webhook_ignores_duplicate_update(monkeypatch) -> None:
+    monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
+    sent: list[tuple[int, str]] = []
+
+    class FakeBot:
+        async def send_text(self, chat_id: int, text: str) -> None:
+            sent.append((chat_id, text))
+
+    class DuplicateSession:
+        def add(self, _object) -> None:
+            return None
+
+        async def flush(self) -> None:
+            raise IntegrityError("duplicate", {}, RuntimeError("unique constraint"))
+
+        async def rollback(self) -> None:
+            return None
+
+    app.dependency_overrides[get_bot_client] = lambda: FakeBot()
+    app.dependency_overrides[get_session] = lambda: DuplicateSession()
+    try:
+        response = TestClient(app).post(
+            "/api/v1/telegram/webhook",
+            headers={"X-Telegram-Bot-Api-Secret-Token": "secret"},
+            json={"update_id": 99, "message": {"chat": {"id": 42}, "text": "سلام"}},
+        )
+        assert response.status_code == 200
+        assert response.json() == {"accepted": True}
+        assert sent == []
+    finally:
+        app.dependency_overrides.pop(get_bot_client, None)
+        app.dependency_overrides.pop(get_session, None)
