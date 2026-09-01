@@ -2,6 +2,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.admin import router as admin_router
@@ -43,6 +44,14 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
 app.mount("/mini-app", StaticFiles(directory="web/mini-app", html=True), name="mini-app")
 app.add_middleware(RequestLoggingMiddleware)
+if settings.cors_allowed_origins.strip():
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=[origin.strip() for origin in settings.cors_allowed_origins.split(",") if origin.strip()],
+        allow_credentials=False,
+        allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+        allow_headers=["Authorization", "Content-Type", "X-Telegram-Bot-Api-Secret-Token", "X-Payment-Webhook-Secret"],
+    )
 app.add_middleware(
     InMemoryRateLimitMiddleware,
     requests=settings.rate_limit_requests,

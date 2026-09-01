@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     jwt_secret: str = ""
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
+    cors_allowed_origins: str = ""
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
