@@ -68,7 +68,7 @@ jobs:
       - name: Verify PostgreSQL backup archive
         run: |
           docker compose exec -T db sh -c \
-            'pg_dump --format=custom --file=/tmp/education.dump --dbname=postgresql://postgres:postgres@localhost:5432/education && pg_restore --list /tmp/education.dump'
+            'pg_dump --format=custom --file=/tmp/education.dump --dbname=education --username=postgres && pg_restore --list /tmp/education.dump'
       - name: Tear down staging stack
         if: always()
         run: docker compose down -v
