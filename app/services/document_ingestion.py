@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -73,10 +73,13 @@ class DatabaseRetriever:
         terms = {term.casefold() for term in query.split() if term.strip()}
         if not terms or limit < 1:
             return []
+        filters = [SourceChunkModel.text.ilike(f"%{term}%") for term in terms]
         result = await self._session.scalars(
             select(SourceChunkModel)
             .options(joinedload(SourceChunkModel.document))
             .join(SourceDocument)
+            .where(or_(*filters))
+            .limit(limit * 5)
         )
         ranked = sorted(
             result.all(),

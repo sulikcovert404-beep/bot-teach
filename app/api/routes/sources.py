@@ -49,8 +49,9 @@ async def ingest_source(
 @router.get("/search", response_model=list[SourceChunkResponse])
 async def search_sources(
     query: str = Query(min_length=1, max_length=500),
+    limit: int = Query(default=5, ge=1, le=20),
     _subject: str = Depends(require_feature_access(FeatureCode.BOOK_QA)),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> list[SourceChunkResponse]:
-    chunks = await DatabaseRetriever(session).retrieve(query)
+    chunks = await DatabaseRetriever(session).retrieve(query, limit=limit)
     return [SourceChunkResponse(**chunk.__dict__) for chunk in chunks]
