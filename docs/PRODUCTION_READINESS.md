@@ -14,6 +14,7 @@
 - Learning Analytics و adaptive recommendation
 - Teacher Assistant و PDF worksheet
 - logging، request metrics، rate limiting و HTTP security headers
+- metrics سازگار با Prometheus در `/metrics/prometheus` و rate limit مشترک Redis
 - migration chain تا `b9c0d1e2f3a4` با upgrade و rollback یک‌مرحله‌ای
 - Docker compose با سرویس migration و اجرای API با کاربر غیرroot
 - تست‌های خودکار، Ruff، mypy و CI dependency audit

@@ -15,7 +15,8 @@ uvicorn app.main:app --reload
 برای شروع، `.env.example` را به `.env` کپی کنید و مقادیر secret را فقط در محیط
 محلی یا secret manager وارد کنید؛ `.env` در Git نادیده گرفته می‌شود.
 
-Health: `GET /health` و readiness: `GET /health/ready`
+Health: `GET /health` و readiness: `GET /health/ready`؛ metrics JSON: `GET /metrics` و
+Prometheus: `GET /metrics/prometheus`
 
 Telegram Mini App: `GET /mini-app/` (در محیط Telegram با `initData` معتبر اجرا شود).
 
@@ -41,6 +42,8 @@ Platform API: `GET /api/v1/platform`
 - domain modules مستقل از transport
 - configuration فقط از environment
 - providerهای AI پشت gateway و Model Router قرار دارند
+- در محیط چند replica، rate limit با `REDIS_URL` روی Redis مشترک اجرا می‌شود؛ بدون آن
+  فقط fallback توسعه‌ای تک‌پردازه فعال است.
 - secrets در `.env` محلی، نه در Git
 
 ## توسعه و اعتبارسنجی
