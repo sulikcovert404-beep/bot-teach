@@ -74,6 +74,27 @@ def test_production_payment_provider_requires_secure_configuration() -> None:
             payment_provider_url="https://gateway.test",
         )
 
+
+def test_production_cors_requires_explicit_https_origins() -> None:
+    base = {
+        "_env_file": None,
+        "app_env": "production",
+        "database_url": "postgresql+asyncpg://user:pass@db/education",
+        "jwt_secret": "x" * 32,
+        "telegram_bot_token": "telegram-token",
+        "telegram_webhook_secret": "webhook-secret",
+        "payment_webhook_secret": "payment-secret",
+        "gemini_api_key": "gemini-key",
+        "redis_url": "redis://redis:6379/0",
+    }
+    with pytest.raises(ValueError, match="CORS_ALLOWED_ORIGINS"):
+        Settings(**base, cors_allowed_origins="*")
+    with pytest.raises(ValueError, match="CORS_ALLOWED_ORIGINS"):
+        Settings(**base, cors_allowed_origins="http://frontend.test")
+
+    settings = Settings(**base, cors_allowed_origins="https://frontend.test")
+    assert settings.cors_allowed_origins == "https://frontend.test"
+
     with pytest.raises(ValueError, match="HTTPS"):
         Settings(
             _env_file=None,

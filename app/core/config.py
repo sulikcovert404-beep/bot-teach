@@ -1,5 +1,6 @@
 from functools import lru_cache
 from pathlib import Path
+from urllib.parse import urlparse
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -56,6 +57,16 @@ class Settings(BaseSettings):
                 raise ValueError("PAYMENT_PROVIDER_API_KEY is required when a payment provider is configured")
             if not self.payment_provider_url.startswith("https://"):
                 raise ValueError("PAYMENT_PROVIDER_URL must use HTTPS in production")
+        origins = [origin.strip() for origin in self.cors_allowed_origins.split(",") if origin.strip()]
+        if "*" in origins:
+            raise ValueError("CORS_ALLOWED_ORIGINS must not contain '*' in production")
+        invalid_origins = [
+            origin
+            for origin in origins
+            if urlparse(origin).scheme != "https" or not urlparse(origin).netloc
+        ]
+        if invalid_origins:
+            raise ValueError("CORS_ALLOWED_ORIGINS must contain HTTPS origins in production")
         return self
 
 
