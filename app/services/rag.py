@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from html import escape
 from typing import Protocol
 
 
@@ -30,9 +31,9 @@ class SourceGuardian:
                 "برای پاسخ مستند، منبع لازم است."
             )
         context = "\n\n".join(
-            f"<source id=\"{chunk.source_id}\"{f' page=\"{chunk.page}\"' if chunk.page else ''}>\n"
-            f"[منبع: {chunk.source_id}{f'، صفحه {chunk.page}' if chunk.page else ''}]\n"
-            f"{chunk.text}\n</source>"
+            f"<source id=\"{escape(chunk.source_id, quote=True)}\"{f' page=\"{chunk.page}\"' if chunk.page else ''}>\n"
+            f"[منبع: {escape(chunk.source_id)}{f'، صفحه {chunk.page}' if chunk.page else ''}]\n"
+            f"{escape(chunk.text)}\n</source>"
             for chunk in chunks
         )
         return (
