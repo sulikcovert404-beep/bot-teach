@@ -1,0 +1,154 @@
+from __future__ import annotations
+
+from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, String, UniqueConstraint, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.base import Base
+
+
+class User(Base):
+    __tablename__ = "users"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    telegram_user_id: Mapped[int | None] = mapped_column(unique=True, index=True)
+    username: Mapped[str | None] = mapped_column(String(255))
+    role: Mapped[str] = mapped_column(String(32), default="STUDENT")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    identities: Mapped[list[Identity]] = relationship(back_populates="user")
+
+
+class Identity(Base):
+    __tablename__ = "identities"
+    __table_args__ = (UniqueConstraint("provider", "subject"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    provider: Mapped[str] = mapped_column(String(32))
+    subject: Mapped[str] = mapped_column(String(255))
+    user: Mapped[User] = relationship(back_populates="identities")
+
+
+class Book(Base):
+    __tablename__ = "books"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    title: Mapped[str] = mapped_column(String(255))
+    grade: Mapped[str | None] = mapped_column(String(64), index=True)
+    subject: Mapped[str | None] = mapped_column(String(128), index=True)
+    chapters: Mapped[list[Chapter]] = relationship(back_populates="book", cascade="all, delete-orphan")
+
+
+class Chapter(Base):
+    __tablename__ = "chapters"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    book_id: Mapped[int] = mapped_column(ForeignKey("books.id"), index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    position: Mapped[int] = mapped_column(default=0)
+    book: Mapped[Book] = relationship(back_populates="chapters")
+    lessons: Mapped[list[Lesson]] = relationship(back_populates="chapter", cascade="all, delete-orphan")
+
+
+class Lesson(Base):
+    __tablename__ = "lessons"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    chapter_id: Mapped[int] = mapped_column(ForeignKey("chapters.id"), index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    position: Mapped[int] = mapped_column(default=0)
+    chapter: Mapped[Chapter] = relationship(back_populates="lessons")
+
+
+class Flashcard(Base):
+    __tablename__ = "flashcards"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    book_id: Mapped[int | None] = mapped_column(ForeignKey("books.id"), index=True)
+    front: Mapped[str] = mapped_column(String(2_000))
+    back: Mapped[str] = mapped_column(String(4_000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Subscription(Base):
+    __tablename__ = "subscriptions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True, index=True)
+    plan: Mapped[str] = mapped_column(String(32), default="FREE")
+    active_until: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class Exam(Base):
+    __tablename__ = "exams"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    questions: Mapped[list[ExamQuestion]] = relationship(
+        back_populates="exam", cascade="all, delete-orphan", order_by="ExamQuestion.position"
+    )
+
+
+class ExamQuestion(Base):
+    __tablename__ = "exam_questions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    exam_id: Mapped[int] = mapped_column(ForeignKey("exams.id"), index=True)
+    prompt: Mapped[str] = mapped_column(String(2_000))
+    options: Mapped[str] = mapped_column(String(4_000))
+    correct_option: Mapped[str] = mapped_column(String(255))
+    position: Mapped[int] = mapped_column(default=0)
+    exam: Mapped[Exam] = relationship(back_populates="questions")
+
+
+class LearningEvent(Base):
+    __tablename__ = "learning_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    event_type: Mapped[str] = mapped_column(String(64), index=True)
+    duration_seconds: Mapped[int] = mapped_column(default=0)
+    score: Mapped[float | None] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class PaymentTransaction(Base):
+    __tablename__ = "payment_transactions"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    provider: Mapped[str] = mapped_column(String(32))
+    provider_transaction_id: Mapped[str] = mapped_column(String(255), unique=True)
+    amount: Mapped[int] = mapped_column()
+    currency: Mapped[str] = mapped_column(String(8), default="IRR")
+    status: Mapped[str] = mapped_column(String(32), default="PENDING", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_logs"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    actor_user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True)
+    action: Mapped[str] = mapped_column(String(64), index=True)
+    resource_type: Mapped[str] = mapped_column(String(64))
+    resource_id: Mapped[str] = mapped_column(String(255))
+    metadata_json: Mapped[str] = mapped_column(String(4_000), default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class AIUsageEvent(Base):
+    __tablename__ = "ai_usage_events"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), index=True)
+    task_type: Mapped[str] = mapped_column(String(64), index=True)
+    model: Mapped[str] = mapped_column(String(128))
+    requested_tokens: Mapped[int] = mapped_column()
+    charged_tokens: Mapped[int] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
