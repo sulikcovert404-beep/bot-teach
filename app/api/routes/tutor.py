@@ -9,6 +9,7 @@ from app.security.entitlements import require_feature_access
 from app.services.ai_gateway import GeminiProvider, ModelRouter
 from app.services.ai_tutor import AITutor
 from app.services.document_ingestion import DatabaseRetriever
+from app.services.usage_repository import record_usage
 
 router = APIRouter(prefix="/tutor", tags=["ai-tutor"])
 
@@ -27,7 +28,7 @@ class TutorResponse(BaseModel):
 @router.post("/answer", response_model=TutorResponse)
 async def tutor_answer(
     request: TutorRequest,
-    _subject: str = Depends(require_feature_access(FeatureCode.BOOK_QA)),
+    subject: str = Depends(require_feature_access(FeatureCode.BOOK_QA)),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> TutorResponse:
     settings = get_settings()
@@ -41,4 +42,17 @@ async def tutor_answer(
         ).answer(request.query, max_tokens=request.max_tokens)
     except RuntimeError as exc:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable") from exc
+    try:
+        user_id = int(subject)
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user identity") from exc
+    await record_usage(
+        session,
+        user_id=user_id,
+        task_type="ai_tutor",
+        model=result.model,
+        requested_tokens=request.max_tokens,
+        charged_tokens=result.usage_tokens or request.max_tokens,
+    )
+    await session.commit()
     return TutorResponse(text=result.text, model=result.model)
