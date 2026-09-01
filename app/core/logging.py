@@ -45,6 +45,13 @@ class RequestLoggingMiddleware:
                 status_code = int(message["status"])
                 headers = list(message.get("headers", []))
                 headers.append((b"x-request-id", request_id.encode()))
+                headers.extend(
+                    [
+                        (b"x-content-type-options", b"nosniff"),
+                        (b"x-frame-options", b"DENY"),
+                        (b"referrer-policy", b"no-referrer"),
+                    ]
+                )
                 message["headers"] = headers
             await send(message)
 
