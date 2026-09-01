@@ -6,4 +6,6 @@ RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic-settings sqlal
 COPY app ./app
 COPY web ./web
 COPY tests ./tests
+RUN useradd --create-home --uid 10001 appuser
+USER appuser
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

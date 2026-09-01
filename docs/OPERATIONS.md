@@ -48,5 +48,6 @@ Invoke-WebRequest http://localhost:8000/health/ready
 
 healthcheck خود کانتینر API نیز readiness را هدف می‌گیرد؛ بنابراین کانتینر پیش از
 اتصال موفق دیتابیس و هم‌سطح بودن migrationها با head، healthy اعلام نمی‌شود.
+image سرویس API نیز با کاربر غیرroot (`appuser`, UID 10001) اجرا می‌شود.
 
 SQLite فقط برای development و test است و نباید محل دادهٔ production باشد.
