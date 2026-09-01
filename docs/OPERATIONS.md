@@ -11,6 +11,16 @@ pg_dump --format=custom --file=education-$(Get-Date -Format yyyyMMdd-HHmm).dump 
 
 فایل dump باید در object storage رمزنگاری‌شده با retention مناسب نگهداری شود.
 
+برای ایجاد و اعتبارسنجی non-destructive یک archive محلی، `DATABASE_URL` را فقط در
+محیط قرار دهید و اجرا کنید:
+
+```powershell
+.\scripts\backup-verify.ps1 -OutputDirectory .\backups
+```
+
+این ابزار `pg_dump` با فرمت custom، `pg_restore --list` و SHA-256 را اجرا می‌کند؛
+restore باید طبق بخش بعدی روی یک PostgreSQL جداگانه انجام شود.
+
 ## Restore drill
 
 Restore را ابتدا روی یک PostgreSQL جداگانه انجام دهید، نه روی دیتابیس اصلی:
