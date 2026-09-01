@@ -20,6 +20,12 @@ jobs:
         env:
           DATABASE_URL: sqlite:///ci-migrations.sqlite
         run: python -m alembic upgrade head
+      - name: Verify migration rollback and re-upgrade
+        env:
+          DATABASE_URL: sqlite:///ci-migrations.sqlite
+        run: |
+          python -m alembic downgrade -1
+          python -m alembic upgrade head
 
   docker:
     runs-on: ubuntu-latest

@@ -5,6 +5,7 @@ The application uses SQLAlchemy models as the domain schema source. Production m
 Rules:
 
 - every migration is forward-compatible and reviewed before production;
+- CI verifies one-step downgrade followed by a full re-upgrade on a temporary database;
 - destructive changes require an explicit commander decision;
 - foreign keys, unique constraints, indexes and rollback impact must be reviewed;
 - backups belong to the managed PostgreSQL provider and must be tested with a restore drill;
