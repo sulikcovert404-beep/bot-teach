@@ -1,13 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field, field_validator
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
 from app.db.models import LearningEvent
 from app.security.dependencies import require_user
 from app.services.adaptive_learning import PracticeLevel, recommend_practice_level
-from app.services.learning_analytics import LearningEventInput, LearningSummary, summarize_learning
+from app.services.learning_analytics import LearningSummary
 
 router = APIRouter(prefix="/analytics", tags=["analytics"])
 
@@ -46,14 +46,18 @@ async def learning_summary(
         user_id = int(subject)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail="Invalid user identity") from exc
-    result = await session.scalars(
-        select(LearningEvent)
-        .where(LearningEvent.user_id == user_id)
-        .order_by(LearningEvent.created_at)
+    result = await session.execute(
+        select(
+            func.count(LearningEvent.id),
+            func.coalesce(func.sum(LearningEvent.duration_seconds), 0),
+            func.avg(LearningEvent.score),
+        ).where(LearningEvent.user_id == user_id)
     )
-    summary = summarize_learning(
-        LearningEventInput(event.event_type, event.duration_seconds, event.score)
-        for event in result.all()
+    event_count, total_duration, average_score = result.one()
+    summary = LearningSummary(
+        event_count=int(event_count),
+        total_duration_seconds=int(total_duration),
+        average_score=float(average_score) if average_score is not None else None,
     )
     return LearningSummaryResponse(**summary.__dict__)
 
