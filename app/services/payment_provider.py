@@ -20,7 +20,11 @@ class HttpPaymentProvider:
     """Provider-neutral HTTP adapter; provider-specific gateways implement this contract."""
 
     def __init__(self, base_url: str, api_key: str, *, timeout_seconds: float = 10.0) -> None:
-        if not base_url.startswith(("https://", "http://")) or not api_key.strip():
+        if (
+            not base_url.startswith(("https://", "http://"))
+            or not api_key.strip()
+            or timeout_seconds <= 0
+        ):
             raise ValueError("Payment provider URL and API key are required")
         self._endpoint = base_url.rstrip("/") + "/v1/checkout"
         self._api_key = api_key

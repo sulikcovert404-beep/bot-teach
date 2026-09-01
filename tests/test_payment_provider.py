@@ -51,6 +51,9 @@ def test_http_payment_provider_rejects_missing_configuration() -> None:
     with pytest.raises(ValueError):
         HttpPaymentProvider("", "")
 
+    with pytest.raises(ValueError):
+        HttpPaymentProvider("https://gateway.test", "api-key", timeout_seconds=0)
+
 
 @pytest.mark.asyncio
 async def test_http_payment_provider_rejects_invalid_response(monkeypatch: pytest.MonkeyPatch) -> None:
