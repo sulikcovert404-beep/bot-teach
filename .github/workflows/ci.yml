@@ -18,6 +18,17 @@ jobs:
       - run: python -m pytest -q
       - name: Scan tracked files for credentials
         run: python scripts/secret_scan.py
+      - name: Validate production configuration contract
+        env:
+          APP_ENV: production
+          DATABASE_URL: sqlite+aiosqlite://
+          JWT_SECRET: ci-only-jwt-secret-with-at-least-32-chars
+          TELEGRAM_BOT_TOKEN: ci-only-telegram-token
+          TELEGRAM_WEBHOOK_SECRET: ci-only-webhook-secret
+          PAYMENT_WEBHOOK_SECRET: ci-only-payment-secret
+          GEMINI_API_KEY: ci-only-gemini-key
+          REDIS_URL: redis://localhost:6379/0
+        run: python -c "from app.core.config import Settings; Settings()"
       - name: Verify migration chain
         env:
           DATABASE_URL: sqlite:///ci-migrations.sqlite
