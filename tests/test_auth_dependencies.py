@@ -26,6 +26,11 @@ def test_production_settings_require_security_secrets() -> None:
         Settings(_env_file=None, app_env="production")
 
 
+def test_settings_use_supported_gemini_default_model() -> None:
+    settings = Settings(_env_file=None)
+    assert settings.ai_default_model == "gemini-3.6-flash"
+
+
 def test_production_settings_accept_valid_configuration() -> None:
     settings = Settings(
         app_env="production",
