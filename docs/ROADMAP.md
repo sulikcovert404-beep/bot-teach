@@ -12,16 +12,17 @@
 - احراز هویت Telegram، entitlement، پرداخت، audit، آزمون، analytics، teacher assistant،
   worksheet PDF، فلش‌کارت review، Study Planner پایدار و authoring نقش‌محور Curriculum
   نیز پیاده‌سازی و با تست‌های خودکار پوشش داده شده‌اند.
+- webhook متنی Telegram با entitlement و idempotency، migration async و rate limit مشترک
+  مبتنی بر Redis نیز در مخزن پیاده‌سازی و تست شده‌اند.
 
 ## شکاف‌های باقی‌مانده برای Production
 
 1. اجرای staging واقعی با PostgreSQL، migration و health smoke test.
-2. تکمیل چرخهٔ webhook Telegram و اتصال پیام متنی به جریان‌های آموزشی با entitlement.
-3. embedding store و retrieval مقیاس‌پذیر برای RAG.
-4. payment provider واقعی، پنل admin کامل و گزارش‌گیری production.
-5. rate limit مشترک بین replicaها، secret manager و observability متمرکز.
-6. backup/restore drill واقعی، deployment staging و تست‌های end-to-end روی محیط اجرا.
-7. audit requirement-by-requirement پیش از اعلام Production readiness.
+2. embedding store و retrieval مقیاس‌پذیر برای RAG.
+3. payment provider واقعی، پنل admin کامل و گزارش‌گیری production.
+4. secret manager و observability متمرکز.
+5. backup/restore drill واقعی، deployment staging و تست‌های end-to-end روی محیط اجرا.
+6. audit requirement-by-requirement پیش از اعلام Production readiness.
 
 هر مرحله باید با migration، تست رفتاری، lint، type-check، مستندات و health evidence
 تکمیل شود. وجود این فهرست به‌تنهایی به معنی پیاده‌سازی قابلیت‌های باقی‌مانده نیست.

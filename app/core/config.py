@@ -33,6 +33,7 @@ class Settings(BaseSettings):
             "TELEGRAM_WEBHOOK_SECRET": self.telegram_webhook_secret,
             "PAYMENT_WEBHOOK_SECRET": self.payment_webhook_secret,
             "GEMINI_API_KEY": self.gemini_api_key,
+            "REDIS_URL": self.redis_url,
         }
         missing = [
             name

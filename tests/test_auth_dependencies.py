@@ -35,6 +35,7 @@ def test_production_settings_accept_valid_configuration() -> None:
         telegram_webhook_secret="webhook-secret",
         payment_webhook_secret="payment-secret",
         gemini_api_key="gemini-key",
+        redis_url="redis://redis:6379/0",
     )
     assert settings.app_env == "production"
 
