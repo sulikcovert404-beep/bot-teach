@@ -46,4 +46,7 @@ Invoke-WebRequest http://localhost:8000/health/ready
 و تا موفقیت readiness و تأیید migration head منتظر می‌ماند. در صورت خطا با exit
 غیرصفر متوقف می‌شود.
 
+healthcheck خود کانتینر API نیز readiness را هدف می‌گیرد؛ بنابراین کانتینر پیش از
+اتصال موفق دیتابیس و هم‌سطح بودن migrationها با head، healthy اعلام نمی‌شود.
+
 SQLite فقط برای development و test است و نباید محل دادهٔ production باشد.
