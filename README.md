@@ -12,6 +12,9 @@ pip install -e ".[dev]"
 uvicorn app.main:app --reload
 ```
 
+برای شروع، `.env.example` را به `.env` کپی کنید و مقادیر secret را فقط در محیط
+محلی یا secret manager وارد کنید؛ `.env` در Git نادیده گرفته می‌شود.
+
 Health: `GET /health` و readiness: `GET /health/ready`
 
 Telegram Mini App: `GET /mini-app/` (در محیط Telegram با `initData` معتبر اجرا شود).
