@@ -1,12 +1,12 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.db.models import AuditLog, PaymentTransaction, Subscription
+from app.db.models import AuditLog, PaymentTransaction, Subscription, User
 from app.domain.entitlements.models import SubscriptionPlan
 from app.security.dependencies import require_roles
 from app.services.audit_repository import record_audit_log
@@ -125,6 +125,8 @@ async def update_subscription(
     subject: str = Depends(require_roles("ADMIN")),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> SubscriptionUpdateResponse:
+    if await session.get(User, user_id) is None:
+        raise HTTPException(status_code=404, detail="User not found")
     subscription = await session.scalar(
         select(Subscription).where(Subscription.user_id == user_id)
     )
