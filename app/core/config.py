@@ -13,6 +13,8 @@ class Settings(BaseSettings):
     telegram_bot_token: str = ""
     telegram_webhook_secret: str = ""
     payment_webhook_secret: str = ""
+    payment_provider_url: str = ""
+    payment_provider_api_key: str = ""
     gemini_api_key: str = ""
     ai_default_model: str = "gemini-2.0-flash"
     jwt_secret: str = ""

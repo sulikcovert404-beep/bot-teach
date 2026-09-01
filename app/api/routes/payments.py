@@ -1,6 +1,7 @@
 import hmac
 from typing import Literal
 
+import httpx
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +10,7 @@ from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.domain.entitlements.models import SubscriptionPlan
 from app.security.dependencies import require_user
+from app.services.payment_provider import HttpPaymentProvider
 from app.services.payments import apply_payment_callback, create_payment_intent
 
 router = APIRouter(prefix="/payments", tags=["payments"])
@@ -24,6 +26,7 @@ class PaymentIntentResponse(BaseModel):
     provider_transaction_id: str
     amount: int
     status: str
+    checkout_url: str | None = None
 
 
 class PaymentCallbackRequest(BaseModel):
@@ -40,11 +43,26 @@ async def payment_intent(
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> PaymentIntentResponse:
     try:
-        transaction = await create_payment_intent(
-            session, user_id=int(subject), provider=request.provider, amount=request.amount, plan=request.plan
-        )
+        user_id = int(subject)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail="Invalid user identity") from exc
+    try:
+        settings = get_settings()
+        payment_provider = (
+            HttpPaymentProvider(settings.payment_provider_url, settings.payment_provider_api_key)
+            if settings.payment_provider_url.strip()
+            else None
+        )
+        transaction = await create_payment_intent(
+            session,
+            user_id=user_id,
+            provider=request.provider,
+            amount=request.amount,
+            plan=request.plan,
+            payment_provider=payment_provider,
+        )
+    except (ValueError, TypeError, httpx.HTTPError, RuntimeError) as exc:
+        raise HTTPException(status_code=503, detail="Payment provider unavailable") from exc
     await session.commit()
     return PaymentIntentResponse(
         provider_transaction_id=transaction.provider_transaction_id,

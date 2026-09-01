@@ -6,17 +6,33 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import PaymentTransaction, Subscription
 from app.services.audit_repository import record_audit_log
+from app.services.payment_provider import PaymentProvider
 
 
 async def create_payment_intent(
-    session: AsyncSession, *, user_id: int, provider: str, amount: int, plan: str
+    session: AsyncSession,
+    *,
+    user_id: int,
+    provider: str,
+    amount: int,
+    plan: str,
+    payment_provider: PaymentProvider | None = None,
 ) -> PaymentTransaction:
     if amount < 1 or not provider.strip() or not plan.strip():
         raise ValueError("Payment intent fields are invalid")
+    merchant_transaction_id = f"intent-{uuid4().hex}"
+    provider_transaction_id = merchant_transaction_id
+    if payment_provider is not None:
+        checkout = await payment_provider.create_checkout(
+            amount=amount,
+            plan=plan,
+            merchant_transaction_id=merchant_transaction_id,
+        )
+        provider_transaction_id = checkout.provider_transaction_id
     transaction = PaymentTransaction(
         user_id=user_id,
         provider=provider,
-        provider_transaction_id=f"intent-{uuid4().hex}",
+        provider_transaction_id=provider_transaction_id,
         amount=amount,
         status="PENDING",
     )
