@@ -72,9 +72,14 @@ class GeminiProvider:
         self.max_retries = max_retries
 
     async def generate(self, request: AIRequest) -> AIResponse:
+        if not request.prompt.strip() or request.max_tokens < 1:
+            raise ValueError("AI request prompt and token limit are invalid")
         model = request.model or "gemini-2.0-flash"
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
-        payload = {"contents": [{"parts": [{"text": request.prompt}]}]}
+        payload = {
+            "contents": [{"parts": [{"text": request.prompt}]}],
+            "generationConfig": {"maxOutputTokens": request.max_tokens},
+        }
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             for attempt in range(self.max_retries + 1):
                 try:
