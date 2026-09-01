@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.db.models import SourceChunk as SourceChunkModel
 from app.db.models import SourceDocument
@@ -68,7 +69,11 @@ class DatabaseRetriever:
         terms = {term.casefold() for term in query.split() if term.strip()}
         if not terms or limit < 1:
             return []
-        result = await self._session.scalars(select(SourceChunkModel).join(SourceDocument))
+        result = await self._session.scalars(
+            select(SourceChunkModel)
+            .options(joinedload(SourceChunkModel.document))
+            .join(SourceDocument)
+        )
         ranked = sorted(
             result.all(),
             key=lambda chunk: sum(term in chunk.text.casefold() for term in terms),
