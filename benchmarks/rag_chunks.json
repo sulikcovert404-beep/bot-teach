@@ -1,0 +1,23 @@
+[
+  {
+    "source_id": "sample-science-grade7-page12",
+    "grade": "7",
+    "subject": "science",
+    "page": 12,
+    "text": "گیاهان با استفاده از نور، آب و دی‌اکسیدکربن فتوسنتز می‌کنند."
+  },
+  {
+    "source_id": "sample-math-grade7-page24",
+    "grade": "7",
+    "subject": "math",
+    "page": 24,
+    "text": "کسرهای مساوی مقدار یکسانی را با صورت و مخرج متفاوت نشان می‌دهند."
+  },
+  {
+    "source_id": "sample-science-grade7-page31",
+    "grade": "7",
+    "subject": "science",
+    "page": 31,
+    "text": "آب در چرخه‌ای پیوسته میان زمین، هوا و ابرها جابه‌جا می‌شود."
+  }
+]

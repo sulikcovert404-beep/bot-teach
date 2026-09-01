@@ -1,0 +1,17 @@
+[
+  {
+    "query_id": "science-photosynthesis-1",
+    "query": "فتوسنتز در گیاهان چگونه انجام می‌شود؟",
+    "expected_sources": ["sample-science-grade7-page12"]
+  },
+  {
+    "query_id": "math-fractions-1",
+    "query": "کسرهای مساوی چه هستند؟",
+    "expected_sources": ["sample-math-grade7-page24"]
+  },
+  {
+    "query_id": "scope-filter-1",
+    "query": "چرخه آب چیست؟",
+    "expected_sources": ["sample-science-grade7-page31"]
+  }
+]
