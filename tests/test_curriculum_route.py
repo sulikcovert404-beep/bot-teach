@@ -36,3 +36,11 @@ async def test_list_books_returns_nested_curriculum() -> None:
     finally:
         app.dependency_overrides.pop(get_session, None)
         await engine.dispose()
+
+
+def test_curriculum_write_routes_require_role_authentication() -> None:
+    from fastapi.testclient import TestClient
+
+    client = TestClient(app)
+    response = client.post("/api/v1/curriculum/books", json={"title": "ریاضی"})
+    assert response.status_code == 401
