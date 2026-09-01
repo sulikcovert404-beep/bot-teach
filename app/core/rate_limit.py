@@ -1,6 +1,7 @@
 import time
 from collections import defaultdict
 
+from redis.exceptions import RedisError
 from starlette.types import ASGIApp, Receive, Scope, Send
 
 
@@ -54,3 +55,33 @@ class InMemoryRateLimitMiddleware:
             }
         )
         await send({"type": "http.response.body", "body": body})
+
+
+class RedisRateLimitMiddleware(InMemoryRateLimitMiddleware):
+    """Shared fixed-window limiter with an in-memory fallback for local development."""
+
+    def __init__(self, app: ASGIApp, redis_url: str, requests: int = 60, window_seconds: int = 60) -> None:
+        super().__init__(app, requests, window_seconds)
+        from redis.asyncio import Redis
+
+        self._redis = Redis.from_url(redis_url, decode_responses=True)
+
+    async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+        client = scope.get("client")
+        key = f"rate-limit:{client[0] if client else 'unknown'}"
+        try:
+            count = int(await self._redis.incr(key))
+            if count == 1:
+                await self._redis.expire(key, self.window_seconds)
+            if count > self.requests:
+                ttl = int(await self._redis.ttl(key))
+                await self._reject(send, max(1, ttl))
+                return
+        except (RedisError, OSError, TimeoutError):
+            # Redis outages must not take the API down; local limiting remains active.
+            await super().__call__(scope, receive, send)
+            return
+        await self.app(scope, receive, send)

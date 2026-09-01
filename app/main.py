@@ -25,7 +25,7 @@ from app.api.routes.v1 import router as v1_router
 from app.api.routes.worksheets import router as worksheets_router
 from app.core.config import get_settings
 from app.core.logging import RequestLoggingMiddleware
-from app.core.rate_limit import InMemoryRateLimitMiddleware
+from app.core.rate_limit import InMemoryRateLimitMiddleware, RedisRateLimitMiddleware
 from app.db.base import build_session_factory, dispose_session_factory
 
 settings = get_settings()
@@ -52,11 +52,19 @@ if settings.cors_allowed_origins.strip():
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
         allow_headers=["Authorization", "Content-Type", "X-Telegram-Bot-Api-Secret-Token", "X-Payment-Webhook-Secret"],
     )
-app.add_middleware(
-    InMemoryRateLimitMiddleware,
-    requests=settings.rate_limit_requests,
-    window_seconds=settings.rate_limit_window_seconds,
-)
+if settings.redis_url.strip():
+    app.add_middleware(
+        RedisRateLimitMiddleware,
+        redis_url=settings.redis_url,
+        requests=settings.rate_limit_requests,
+        window_seconds=settings.rate_limit_window_seconds,
+    )
+else:
+    app.add_middleware(
+        InMemoryRateLimitMiddleware,
+        requests=settings.rate_limit_requests,
+        window_seconds=settings.rate_limit_window_seconds,
+    )
 app.include_router(health_router)
 app.include_router(metrics_router)
 app.include_router(v1_router, prefix="/api/v1")
