@@ -1,4 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
+from redis.asyncio import Redis
 from sqlalchemy import text
 
 from app.core.config import get_settings
@@ -27,6 +28,12 @@ async def readiness() -> dict[str, str]:
             migration_head = result.scalar_one_or_none()
             if migration_head != EXPECTED_MIGRATION_HEAD:
                 raise RuntimeError("Database migrations are not at the application head")
+        if settings.redis_url.strip():
+            redis = Redis.from_url(settings.redis_url)
+            try:
+                await redis.ping()
+            finally:
+                await redis.aclose()
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
