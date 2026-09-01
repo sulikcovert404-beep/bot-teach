@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 
+from app.api.routes.admin import router as admin_router
 from app.api.routes.ai import router as ai_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
@@ -27,6 +28,7 @@ app.include_router(v1_router, prefix="/api/v1")
 app.include_router(worksheets_router, prefix="/api/v1")
 app.include_router(ai_router, prefix="/api/v1")
 app.include_router(analytics_router, prefix="/api/v1")
+app.include_router(admin_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
 app.include_router(curriculum_router, prefix="/api/v1")
 app.include_router(flashcards_router, prefix="/api/v1")
