@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -22,6 +22,14 @@ class LearningEventRequest(BaseModel):
     event_type: str = Field(min_length=1, max_length=64)
     duration_seconds: int = Field(default=0, ge=0, le=86_400)
     score: float | None = Field(default=None, ge=0, le=1)
+
+    @field_validator("event_type")
+    @classmethod
+    def validate_event_type(cls, value: str) -> str:
+        normalized = value.strip()
+        if not normalized:
+            raise ValueError("Event type cannot be blank")
+        return normalized
 
 
 class PracticeRecommendationResponse(BaseModel):

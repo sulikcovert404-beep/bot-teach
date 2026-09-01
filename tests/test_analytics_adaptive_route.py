@@ -43,3 +43,10 @@ def test_record_event_and_get_adaptive_recommendation(monkeypatch) -> None:
             await engine.dispose()
 
     asyncio.run(run())
+
+
+def test_learning_event_rejects_blank_event_type() -> None:
+    response = TestClient(app).post(
+        "/api/v1/analytics/events", json={"event_type": "   "}
+    )
+    assert response.status_code == 401
