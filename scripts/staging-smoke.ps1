@@ -2,7 +2,8 @@
 param(
     [string]$BaseUrl = "http://localhost:8000",
     [int]$Attempts = 30,
-    [int]$DelaySeconds = 2
+    [int]$DelaySeconds = 2,
+    [string]$ExpectedMigrationHead = "a8b9c0d1e2f3"
 )
 
 $ErrorActionPreference = "Stop"
@@ -17,9 +18,12 @@ $readyUrl = "$BaseUrl/health/ready"
 for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
     try {
         $response = Invoke-RestMethod -Uri $readyUrl -Method Get
-        if ($response.status -eq "ready") {
+        if ($response.status -eq "ready" -and $response.migration_head -eq $ExpectedMigrationHead) {
             Write-Host "Readiness passed at migration head $($response.migration_head)."
             exit 0
+        }
+        if ($response.status -eq "ready") {
+            throw "Unexpected migration head: $($response.migration_head); expected $ExpectedMigrationHead"
         }
     } catch {
         if ($attempt -eq $Attempts) {
