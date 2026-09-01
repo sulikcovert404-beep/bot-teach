@@ -7,6 +7,7 @@ from sqlalchemy.orm import selectinload
 from app.api.routes.auth import get_session
 from app.db.models import Book, Chapter, Lesson
 from app.security.dependencies import require_roles
+from app.services.audit_repository import record_audit_log
 
 router = APIRouter(prefix="/curriculum", tags=["curriculum"])
 
@@ -73,13 +74,22 @@ async def list_books(
 @router.post("/books", response_model=BookResponse, status_code=status.HTTP_201_CREATED)
 async def create_book(
     request: BookCreate,
-    _subject: str = Depends(require_roles("ADMIN", "TEACHER")),
+    subject: str = Depends(require_roles("ADMIN", "TEACHER")),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> Book:
     book = Book(title=request.title, grade=request.grade, subject=request.subject)
     session.add(book)
-    await session.commit()
+    await session.flush()
     await session.refresh(book)
+    await record_audit_log(
+        session,
+        actor_user_id=int(subject),
+        action="curriculum_book_created",
+        resource_type="book",
+        resource_id=str(book.id),
+        metadata={"title": book.title},
+    )
+    await session.commit()
     return book
 
 
@@ -87,7 +97,7 @@ async def create_book(
 async def create_chapter(
     book_id: int,
     request: ChapterCreate,
-    _subject: str = Depends(require_roles("ADMIN", "TEACHER")),
+    subject: str = Depends(require_roles("ADMIN", "TEACHER")),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> Chapter:
     book = await session.get(Book, book_id)
@@ -95,8 +105,17 @@ async def create_chapter(
         raise HTTPException(status_code=404, detail="Book not found")
     chapter = Chapter(book_id=book_id, title=request.title, position=request.position)
     session.add(chapter)
-    await session.commit()
+    await session.flush()
     await session.refresh(chapter)
+    await record_audit_log(
+        session,
+        actor_user_id=int(subject),
+        action="curriculum_chapter_created",
+        resource_type="chapter",
+        resource_id=str(chapter.id),
+        metadata={"book_id": book_id, "title": chapter.title},
+    )
+    await session.commit()
     return chapter
 
 
@@ -104,7 +123,7 @@ async def create_chapter(
 async def create_lesson(
     chapter_id: int,
     request: LessonCreate,
-    _subject: str = Depends(require_roles("ADMIN", "TEACHER")),
+    subject: str = Depends(require_roles("ADMIN", "TEACHER")),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> Lesson:
     chapter = await session.get(Chapter, chapter_id)
@@ -112,6 +131,15 @@ async def create_lesson(
         raise HTTPException(status_code=404, detail="Chapter not found")
     lesson = Lesson(chapter_id=chapter_id, title=request.title, position=request.position)
     session.add(lesson)
-    await session.commit()
+    await session.flush()
     await session.refresh(lesson)
+    await record_audit_log(
+        session,
+        actor_user_id=int(subject),
+        action="curriculum_lesson_created",
+        resource_type="lesson",
+        resource_id=str(lesson.id),
+        metadata={"chapter_id": chapter_id, "title": lesson.title},
+    )
+    await session.commit()
     return lesson
