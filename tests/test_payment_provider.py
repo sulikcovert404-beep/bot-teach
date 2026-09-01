@@ -50,3 +50,34 @@ async def test_http_payment_provider_creates_checkout(monkeypatch: pytest.Monkey
 def test_http_payment_provider_rejects_missing_configuration() -> None:
     with pytest.raises(ValueError):
         HttpPaymentProvider("", "")
+
+
+@pytest.mark.asyncio
+async def test_http_payment_provider_rejects_invalid_response(monkeypatch: pytest.MonkeyPatch) -> None:
+    class Response:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, str]:
+            return {"checkout_url": "https://pay.test/missing-id"}
+
+    class Client:
+        def __init__(self, **_kwargs: object) -> None:
+            return None
+
+        async def __aenter__(self) -> Self:
+            return self
+
+        async def __aexit__(self, *_args: object) -> None:
+            return None
+
+        async def post(self, *_args: object, **_kwargs: object) -> Response:
+            return Response()
+
+    monkeypatch.setattr("httpx.AsyncClient", Client)
+    with pytest.raises(TypeError, match="invalid checkout"):
+        await HttpPaymentProvider("https://gateway.test", "api-key").create_checkout(
+            amount=10,
+            plan="FREE",
+            merchant_transaction_id="merchant-2",
+        )
