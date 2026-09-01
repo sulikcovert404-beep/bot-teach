@@ -152,3 +152,25 @@ class AIUsageEvent(Base):
     requested_tokens: Mapped[int] = mapped_column()
     charged_tokens: Mapped[int] = mapped_column()
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class SourceDocument(Base):
+    __tablename__ = "source_documents"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_id: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    title: Mapped[str] = mapped_column(String(255))
+    uri: Mapped[str | None] = mapped_column(String(2_000))
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    chunks: Mapped[list[SourceChunk]] = relationship(back_populates="document", cascade="all, delete-orphan")
+
+
+class SourceChunk(Base):
+    __tablename__ = "source_chunks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    document_id: Mapped[int] = mapped_column(ForeignKey("source_documents.id"), index=True)
+    chunk_index: Mapped[int] = mapped_column()
+    text: Mapped[str] = mapped_column(String(8_000))
+    page: Mapped[int | None] = mapped_column()
+    document: Mapped[SourceDocument] = relationship(back_populates="chunks")
