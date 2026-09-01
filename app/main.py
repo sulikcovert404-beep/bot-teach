@@ -11,6 +11,7 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.curriculum import router as curriculum_router
 from app.api.routes.flashcards import router as flashcards_router
 from app.api.routes.health import router as health_router
+from app.api.routes.metrics import router as metrics_router
 from app.api.routes.payments import router as payments_router
 from app.api.routes.sources import router as sources_router
 from app.api.routes.study_plan import router as study_plan_router
@@ -46,6 +47,7 @@ app.add_middleware(
     window_seconds=settings.rate_limit_window_seconds,
 )
 app.include_router(health_router)
+app.include_router(metrics_router)
 app.include_router(v1_router, prefix="/api/v1")
 app.include_router(worksheets_router, prefix="/api/v1")
 app.include_router(ai_router, prefix="/api/v1")
