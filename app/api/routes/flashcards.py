@@ -1,3 +1,5 @@
+from datetime import UTC, datetime
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy import select
@@ -6,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.routes.auth import get_session
 from app.db.models import Flashcard
 from app.security.dependencies import require_user
+from app.services.spaced_repetition import schedule_review
 
 router = APIRouter(prefix="/flashcards", tags=["flashcards"])
 
@@ -21,6 +24,14 @@ class FlashcardResponse(BaseModel):
     front: str
     back: str
     book_id: int | None
+    review_count: int
+    interval_days: int
+    ease_factor: float
+    next_review_at: datetime | None
+
+
+class FlashcardReviewRequest(BaseModel):
+    quality: int = Field(ge=0, le=5)
 
 
 @router.post("", response_model=FlashcardResponse, status_code=status.HTTP_201_CREATED)
@@ -53,3 +64,33 @@ async def list_flashcards(
         select(Flashcard).where(Flashcard.user_id == user_id).order_by(Flashcard.id)
     )
     return list(result.all())
+
+
+@router.post("/{card_id}/review", response_model=FlashcardResponse)
+async def review_flashcard(
+    card_id: int,
+    request: FlashcardReviewRequest,
+    subject: str = Depends(require_user),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> Flashcard:
+    try:
+        user_id = int(subject)
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail="Invalid user identity") from exc
+    card = await session.scalar(select(Flashcard).where(Flashcard.id == card_id, Flashcard.user_id == user_id))
+    if card is None:
+        raise HTTPException(status_code=404, detail="Flashcard not found")
+    schedule = schedule_review(
+        quality=request.quality,
+        review_count=card.review_count,
+        interval_days=card.interval_days,
+        ease_factor=card.ease_factor,
+        now=datetime.now(UTC),
+    )
+    card.review_count = schedule.review_count
+    card.interval_days = schedule.interval_days
+    card.ease_factor = schedule.ease_factor
+    card.next_review_at = schedule.next_review_at
+    await session.commit()
+    await session.refresh(card)
+    return card
