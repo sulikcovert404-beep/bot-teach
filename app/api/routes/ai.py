@@ -69,7 +69,7 @@ async def _record_ai_usage(
         task_type=task_type,
         model=model,
         requested_tokens=requested_tokens,
-        charged_tokens=usage_tokens if usage_tokens is not None else requested_tokens,
+        charged_tokens=min(usage_tokens, requested_tokens) if usage_tokens is not None else requested_tokens,
     )
     await session.commit()
 

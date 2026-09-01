@@ -52,7 +52,11 @@ async def tutor_answer(
         task_type="ai_tutor",
         model=result.model,
         requested_tokens=request.max_tokens,
-        charged_tokens=result.usage_tokens or request.max_tokens,
+        charged_tokens=(
+            min(result.usage_tokens, request.max_tokens)
+            if result.usage_tokens is not None
+            else request.max_tokens
+        ),
     )
     await session.commit()
     return TutorResponse(text=result.text, model=result.model)

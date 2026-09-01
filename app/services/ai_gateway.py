@@ -97,7 +97,7 @@ class GeminiProvider:
         except (KeyError, IndexError, TypeError) as exc:
             raise RuntimeError("Gemini returned an invalid response") from exc
         usage = data.get("usageMetadata", {})
-        usage_tokens = usage.get("totalTokenCount", usage.get("candidatesTokenCount"))
+        usage_tokens = usage.get("candidatesTokenCount", usage.get("totalTokenCount"))
         if not isinstance(usage_tokens, int) or usage_tokens < 0:
             usage_tokens = None
         return AIResponse(text=text, model=model, usage_tokens=usage_tokens)
