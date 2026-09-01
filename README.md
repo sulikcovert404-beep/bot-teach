@@ -22,7 +22,10 @@ Platform API: `GET /api/v1/platform`
 
 - `POST /api/v1/auth/telegram` — اعتبارسنجی Telegram Web App و صدور JWT
 - `GET /api/v1/curriculum/books` — کتاب‌ها، فصل‌ها و درس‌ها
-- `GET|POST /api/v1/flashcards` — کارت‌های متعلق به کاربر
+- `POST /api/v1/curriculum/books` و مسیرهای `/chapters` و `/lessons` — authoring برای مدرس/ادمین
+- `GET|POST /api/v1/flashcards` و `POST /api/v1/flashcards/{id}/review` — کارت و مرور فاصله‌دار
+- `GET|POST /api/v1/study-plan` — ساخت و بازیابی آخرین برنامهٔ مطالعه
+- `PATCH /api/v1/study-plan/tasks/{id}` — ثبت تکمیل وظیفه
 - `GET /api/v1/subscription` — پلن مؤثر و قابلیت‌های فعال
 - `POST /api/v1/ai/generate` — gateway عمومی Gemini
 - `POST /api/v1/ai/summarize` — خلاصه‌سازی هوشمند
@@ -45,6 +48,7 @@ Platform API: `GET /api/v1/platform`
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-CI علاوه بر quality gates، ساخت Docker image را نیز بررسی می‌کند.
+CI علاوه بر quality gates، ساخت Docker image را نیز بررسی می‌کند. Readiness علاوه بر
+اتصال دیتابیس، migration head مورد انتظار را نیز کنترل می‌کند.
 
 نقشه‌ی راه و تفکیک وضعیت واقعی قابلیت‌ها در [`docs/ROADMAP.md`](docs/ROADMAP.md) است.
