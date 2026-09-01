@@ -91,9 +91,13 @@ async def list_payments(
     _subject: str = Depends(require_roles("ADMIN")),
     session: AsyncSession = Depends(get_session),  # noqa: B008
     limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
 ) -> list[PaymentTransaction]:
     result = await session.scalars(
-        select(PaymentTransaction).order_by(PaymentTransaction.created_at.desc()).limit(limit)
+        select(PaymentTransaction)
+        .order_by(PaymentTransaction.created_at.desc(), PaymentTransaction.id.desc())
+        .offset(offset)
+        .limit(limit)
     )
     return list(result.all())
 
@@ -103,9 +107,13 @@ async def list_subscriptions(
     _subject: str = Depends(require_roles("ADMIN")),
     session: AsyncSession = Depends(get_session),  # noqa: B008
     limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
 ) -> list[Subscription]:
     result = await session.scalars(
-        select(Subscription).order_by(Subscription.created_at.desc()).limit(limit)
+        select(Subscription)
+        .order_by(Subscription.created_at.desc(), Subscription.id.desc())
+        .offset(offset)
+        .limit(limit)
     )
     return list(result.all())
 

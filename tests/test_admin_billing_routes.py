@@ -10,3 +10,4 @@ def test_admin_billing_routes_require_admin() -> None:
     assert client.put(
         "/api/v1/admin/subscriptions/1", json={"plan": "FREE"}
     ).status_code == 401
+    assert client.get("/api/v1/admin/payments?limit=10&offset=20").status_code == 401
