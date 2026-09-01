@@ -17,13 +17,18 @@
 - endpoint metrics سازگار با Prometheus برای اتصال به observability متمرکز موجود است.
 - payment provider contract و adapter HTTP قابل‌تنظیم، شامل checkout URL و مدیریت خطا،
   در مخزن موجود و تست شده است.
+- ثبت مصرف AI با usage metadata واقعی Gemini در مسیرهای Tutor، Telegram، Teacher،
+  آزمون و endpointهای آموزشی انجام می‌شود و خلاصهٔ Admin نیز موجود است.
+- کلید Gemini در header امن ارسال می‌شود، Source Guardian دادهٔ منبع را escape می‌کند
+  و secret scan برای فایل‌های tracked در CI فعال است.
 
 ## شکاف‌های باقی‌مانده برای Production
 
 1. اجرای staging واقعی با PostgreSQL، migration و health smoke test.
 2. embedding store و retrieval مقیاس‌پذیر برای RAG.
 3. اتصال adapter پرداخت به provider واقعی/sandbox، پنل admin کامل و گزارش‌گیری production.
-4. secret manager و اتصال واقعی endpoint metrics به observability متمرکز.
+4. secret manager و اتصال واقعی endpoint metrics به observability متمرکز؛ همچنین
+   revoke/rotate credential افشاشده و پاک‌سازی history طبق runbook.
 5. backup/restore drill واقعی، deployment staging و تست‌های end-to-end روی محیط اجرا.
 6. audit requirement-by-requirement پیش از اعلام Production readiness.
 
