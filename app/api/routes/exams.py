@@ -27,6 +27,13 @@ class ExamRequest(BaseModel):
     questions: list[ExamQuestionRequest] = Field(min_length=1, max_length=100)
 
 
+class ExamGenerationRequest(BaseModel):
+    title: str = Field(min_length=1, max_length=255)
+    text: str = Field(min_length=1, max_length=20_000)
+    count: int = Field(default=10, ge=1, le=50)
+    max_tokens: int = Field(default=2_400, ge=1, le=4_000)
+
+
 class ExamQuestionResponse(BaseModel):
     id: int
     prompt: str
@@ -108,7 +115,7 @@ async def list_exams(
 
 @router.post("/generate", response_model=ExamResponse, status_code=201)
 async def generate_and_save_exam(
-    request: ExamRequest,
+    request: ExamGenerationRequest,
     subject: str = Depends(require_feature_access(FeatureCode.EXAM_GENERATOR)),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> ExamResponse:
@@ -118,8 +125,9 @@ async def generate_and_save_exam(
     result = await EducationalAI(
         GeminiProvider(settings.gemini_api_key), ModelRouter(settings.ai_default_model)
     ).generate_exam(
-        "\n".join(question.prompt for question in request.questions),
-        count=len(request.questions),
+        request.text,
+        count=request.count,
+        max_tokens=request.max_tokens,
     )
     exam = Exam(user_id=int(subject), title=request.title, generated_content=result.text)
     session.add(exam)
