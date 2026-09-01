@@ -85,3 +85,29 @@ async def test_gemini_provider_uses_current_default_model(monkeypatch: pytest.Mo
         "https://generativelanguage.googleapis.com/v1beta/models/"
         "gemini-3.6-flash:generateContent"
     )
+
+
+@pytest.mark.asyncio
+async def test_gemini_provider_reports_textless_success_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    class Response:
+        def raise_for_status(self) -> None:
+            return None
+
+        def json(self) -> dict[str, object]:
+            return {"candidates": [{"content": {}, "finishReason": "MAX_TOKENS"}]}
+
+    class Client:
+        async def __aenter__(self) -> Self:
+            return self
+
+        async def __aexit__(self, *_args: object) -> None:
+            return None
+
+        async def post(self, *_args: object, **_kwargs: object) -> Response:
+            return Response()
+
+    monkeypatch.setattr("httpx.AsyncClient", lambda **_kwargs: Client())
+    with pytest.raises(RuntimeError, match="no text response"):
+        await GeminiProvider("x" * 32).generate(AIRequest(prompt="hello", max_tokens=64))

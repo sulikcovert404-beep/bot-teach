@@ -99,7 +99,7 @@ class GeminiProvider:
         try:
             text = data["candidates"][0]["content"]["parts"][0]["text"]
         except (KeyError, IndexError, TypeError) as exc:
-            raise RuntimeError("Gemini returned an invalid response") from exc
+            raise RuntimeError("Gemini returned no text response") from exc
         usage = data.get("usageMetadata", {})
         usage_tokens = usage.get("candidatesTokenCount", usage.get("totalTokenCount"))
         if not isinstance(usage_tokens, int) or usage_tokens < 0:
