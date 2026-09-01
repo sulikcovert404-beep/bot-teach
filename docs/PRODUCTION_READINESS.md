@@ -18,6 +18,7 @@
 - پشتیبانی تنظیمات از secret fileهای mounted در `/run/secrets` با اولویت environment
 - migration chain تا `d1e2f3a4b5c6` با upgrade و rollback یک‌مرحله‌ای
 - Docker compose با سرویس migration و اجرای API با کاربر غیرroot
+- رمز PostgreSQL در compose از `POSTGRES_PASSWORD` اجباری محیطی خوانده می‌شود و hardcode نیست
 - تست‌های خودکار، Ruff، mypy و CI dependency audit
 
 ## نیازمند اجرای محیطی قبل از اعلام Production
