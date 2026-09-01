@@ -52,14 +52,17 @@ async def generate(request: GenerateRequest, _subject: str = Depends(require_use
     settings = get_settings()
     if not settings.gemini_api_key:
         raise HTTPException(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="AI provider unavailable")
-    routed = ModelRouter(settings.ai_default_model).route(
-        AIRequest(
-            prompt=request.prompt,
-            model=request.model,
-            max_tokens=request.max_tokens,
-            task_type=request.task_type,
+    try:
+        routed = ModelRouter(settings.ai_default_model).route(
+            AIRequest(
+                prompt=request.prompt,
+                model=request.model,
+                max_tokens=request.max_tokens,
+                task_type=request.task_type,
+            )
         )
-    )
+    except ValueError as exc:
+        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail=str(exc)) from exc
     try:
         result = await GeminiProvider(settings.gemini_api_key).generate(routed)
     except RuntimeError as exc:
