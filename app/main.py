@@ -9,6 +9,7 @@ from app.api.routes.ai import router as ai_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
 from app.api.routes.curriculum import router as curriculum_router
+from app.api.routes.exams import router as exams_router
 from app.api.routes.flashcards import router as flashcards_router
 from app.api.routes.health import router as health_router
 from app.api.routes.metrics import router as metrics_router
@@ -52,6 +53,7 @@ app.include_router(metrics_router)
 app.include_router(v1_router, prefix="/api/v1")
 app.include_router(worksheets_router, prefix="/api/v1")
 app.include_router(ai_router, prefix="/api/v1")
+app.include_router(exams_router, prefix="/api/v1")
 app.include_router(analytics_router, prefix="/api/v1")
 app.include_router(admin_router, prefix="/api/v1")
 app.include_router(auth_router, prefix="/api/v1")
