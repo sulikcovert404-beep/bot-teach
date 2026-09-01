@@ -74,9 +74,11 @@ class RequestLoggingMiddleware:
                         (b"referrer-policy", b"no-referrer"),
                         (
                             b"content-security-policy",
-                            b"default-src 'self'; script-src 'self' https://telegram.org; "
-                            b"style-src 'self'; connect-src 'self'; img-src 'self' data:; "
-                            b"base-uri 'none'; frame-ancestors 'none'",
+                            (
+                                b"default-src 'self'; script-src 'self' https://telegram.org; "
+                                b"style-src 'self'; connect-src 'self'; img-src 'self' data:; "
+                                b"base-uri 'none'; frame-ancestors 'none'"
+                            ),
                         ),
                         (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
                     ]
