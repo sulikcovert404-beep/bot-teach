@@ -14,6 +14,11 @@ def test_model_router_rejects_invalid_settings() -> None:
         ModelRouter("", max_tokens=1000)
 
 
+def test_model_router_rejects_invalid_model_name() -> None:
+    with pytest.raises(ValueError, match="model name is invalid"):
+        ModelRouter("gemini-2.0-flash").route(AIRequest("hello", model="../secret"))
+
+
 def test_gemini_provider_rejects_negative_retries() -> None:
     from app.services.ai_gateway import GeminiProvider
 

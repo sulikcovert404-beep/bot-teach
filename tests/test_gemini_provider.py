@@ -7,3 +7,7 @@ def test_gemini_provider_requires_key() -> None:
     with pytest.raises(ValueError):
         GeminiProvider("")
 
+
+def test_gemini_provider_rejects_non_positive_timeout() -> None:
+    with pytest.raises(ValueError):
+        GeminiProvider("x" * 32, timeout_seconds=0)

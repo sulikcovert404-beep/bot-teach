@@ -1,3 +1,4 @@
+import re
 from dataclasses import dataclass
 from typing import Protocol
 
@@ -39,9 +40,12 @@ class ModelRouter:
         self.max_tokens = max_tokens
 
     def route(self, request: AIRequest) -> AIRequest:
+        model = request.model or self.default_model
+        if not re.fullmatch(r"[A-Za-z0-9._-]{1,128}", model):
+            raise ValueError("AI model name is invalid")
         return AIRequest(
             prompt=request.prompt,
-            model=request.model or self.default_model,
+            model=model,
             max_tokens=min(request.max_tokens, self.max_tokens),
             task_type=request.task_type,
         )
@@ -61,7 +65,7 @@ class GeminiProvider:
     """Minimal provider adapter; credentials never enter request logs or error messages."""
 
     def __init__(self, api_key: str, timeout_seconds: float = 20.0, max_retries: int = 2) -> None:
-        if not api_key or max_retries < 0:
+        if not api_key or timeout_seconds <= 0 or max_retries < 0:
             raise ValueError("Gemini API key is required")
         self.api_key = api_key
         self.timeout = httpx.Timeout(timeout_seconds)
