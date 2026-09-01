@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from sqlalchemy import or_, select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -73,6 +73,21 @@ class DatabaseRetriever:
         terms = {term.casefold() for term in query.split() if term.strip()}
         if not terms or limit < 1:
             return []
+        dialect = self._session.bind.dialect.name if self._session.bind is not None else ""
+        if dialect == "postgresql":
+            ranked_result = await self._session.execute(
+                select(SourceChunkModel)
+                .options(joinedload(SourceChunkModel.document))
+                .join(SourceDocument)
+                .where(func.similarity(SourceChunkModel.text, query) >= 0.05)
+                .order_by(func.similarity(SourceChunkModel.text, query).desc())
+                .limit(limit)
+            )
+            ranked_chunks = list(ranked_result.scalars().all())
+            return [
+                SourceChunk(text=chunk.text, source_id=chunk.document.source_id, page=chunk.page)
+                for chunk in ranked_chunks
+            ]
         filters = [SourceChunkModel.text.ilike(f"%{term}%") for term in terms]
         result = await self._session.scalars(
             select(SourceChunkModel)

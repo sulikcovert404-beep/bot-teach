@@ -14,7 +14,7 @@
 - Learning Analytics و adaptive recommendation
 - Teacher Assistant و PDF worksheet
 - logging، request metrics، rate limiting و HTTP security headers
-- migration chain تا `a8b9c0d1e2f3` با upgrade و rollback یک‌مرحله‌ای
+- migration chain تا `b9c0d1e2f3a4` با upgrade و rollback یک‌مرحله‌ای
 - Docker compose با سرویس migration و اجرای API با کاربر غیرroot
 - تست‌های خودکار، Ruff، mypy و CI dependency audit
 
