@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
+from app.domain.entitlements.models import SubscriptionPlan
 from app.security.dependencies import require_user
 from app.services.payments import apply_payment_callback, create_payment_intent
 
@@ -16,7 +17,7 @@ router = APIRouter(prefix="/payments", tags=["payments"])
 class PaymentIntentRequest(BaseModel):
     provider: str = Field(min_length=1, max_length=32)
     amount: int = Field(ge=1)
-    plan: str = Field(min_length=1, max_length=32)
+    plan: SubscriptionPlan
 
 
 class PaymentIntentResponse(BaseModel):
@@ -28,7 +29,7 @@ class PaymentIntentResponse(BaseModel):
 class PaymentCallbackRequest(BaseModel):
     provider_transaction_id: str = Field(min_length=1, max_length=255)
     status: Literal["SUCCEEDED", "FAILED"]
-    plan: str = Field(min_length=1, max_length=32)
+    plan: SubscriptionPlan
     active_days: int = Field(default=30, ge=1, le=730)
 
 
