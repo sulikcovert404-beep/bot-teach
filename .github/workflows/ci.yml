@@ -16,6 +16,8 @@ jobs:
       - run: python -m ruff check app tests
       - run: python -m mypy app
       - run: python -m pytest -q
+      - name: Scan tracked files for credentials
+        run: python scripts/secret_scan.py
       - name: Verify migration chain
         env:
           DATABASE_URL: sqlite:///ci-migrations.sqlite
