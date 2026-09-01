@@ -1,4 +1,5 @@
 import hmac
+from typing import Literal
 
 from fastapi import APIRouter, Depends, Header, HTTPException, status
 from pydantic import BaseModel, Field
@@ -26,7 +27,7 @@ class PaymentIntentResponse(BaseModel):
 
 class PaymentCallbackRequest(BaseModel):
     provider_transaction_id: str = Field(min_length=1, max_length=255)
-    status: str
+    status: Literal["SUCCEEDED", "FAILED"]
     plan: str = Field(min_length=1, max_length=32)
     active_days: int = Field(default=30, ge=1, le=730)
 
