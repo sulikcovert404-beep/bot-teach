@@ -25,4 +25,5 @@ async def test_tutor_includes_citation_context() -> None:
     result = await AITutor(provider, ModelRouter("fake"), FakeRetriever()).answer("سلول چیست؟")
     assert result.text == "پاسخ مستند"
     assert "book-1" in provider.request.prompt
+    assert "دادهٔ غیرقابل‌اعتماد" in provider.request.prompt
     assert provider.request.task_type == "ai_tutor"
