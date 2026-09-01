@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -55,11 +55,17 @@ class LessonCreate(BaseModel):
 
 
 @router.get("/books", response_model=list[BookResponse])
-async def list_books(session: AsyncSession = Depends(get_session)) -> list[Book]:  # noqa: B008
+async def list_books(
+    limit: int = Query(default=50, ge=1, le=100),
+    offset: int = Query(default=0, ge=0),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> list[Book]:
     result = await session.scalars(
         select(Book)
         .options(selectinload(Book.chapters).selectinload(Chapter.lessons))
         .order_by(Book.id)
+        .offset(offset)
+        .limit(limit)
     )
     return list(result.all())
 

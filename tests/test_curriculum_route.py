@@ -30,7 +30,7 @@ async def test_list_books_returns_nested_curriculum() -> None:
     app.dependency_overrides[get_session] = override_session
     try:
         async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as client:
-            response = await client.get("/api/v1/curriculum/books")
+            response = await client.get("/api/v1/curriculum/books?limit=10&offset=0")
         assert response.status_code == 200
         assert response.json()[0]["chapters"][0]["lessons"][0]["title"] == "عددهای صحیح"
     finally:
