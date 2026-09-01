@@ -27,6 +27,7 @@ class PlannedTaskResponse(BaseModel):
     lesson_id: int
     title: str
     minutes: int
+    completed: bool = False
 
 
 class StudyPlanTaskUpdate(BaseModel):
@@ -125,7 +126,12 @@ async def list_latest_study_plan(
     grouped: dict[int, list[PlannedTaskResponse]] = {}
     for task in tasks:
         grouped.setdefault(task.day_number, []).append(
-            PlannedTaskResponse(lesson_id=task.lesson_id, title=task.title, minutes=task.minutes)
+            PlannedTaskResponse(
+                lesson_id=task.lesson_id,
+                title=task.title,
+                minutes=task.minutes,
+                completed=task.completed,
+            )
         )
     return [
         PlannedDayResponse(day_number=day, tasks=items, total_minutes=sum(item.minutes for item in items))
