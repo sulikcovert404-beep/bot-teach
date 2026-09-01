@@ -65,3 +65,4 @@ CI علاوه بر quality gates، migration chain، audit آسیب‌پذیری
 برنامه‌ی observability در [`docs/OBSERVABILITY_PLAN.md`](docs/OBSERVABILITY_PLAN.md)،
 طراحی RAG در [`docs/RAG_ARCHITECTURE_PROPOSAL.md`](docs/RAG_ARCHITECTURE_PROPOSAL.md)،
 و بررسی Secret Manager در [`docs/SECRET_MANAGER_REVIEW.md`](docs/SECRET_MANAGER_REVIEW.md) است.
+قرارداد پرداخت نیز در [`docs/PAYMENT_PROVIDER_CONTRACT.md`](docs/PAYMENT_PROVIDER_CONTRACT.md) مستند شده است.
