@@ -76,6 +76,32 @@ class Flashcard(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class StudyPlan(Base):
+    __tablename__ = "study_plans"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    daily_minutes: Mapped[int] = mapped_column()
+    max_days: Mapped[int] = mapped_column()
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    tasks: Mapped[list[StudyPlanTask]] = relationship(
+        back_populates="plan", cascade="all, delete-orphan", order_by="StudyPlanTask.day_number"
+    )
+
+
+class StudyPlanTask(Base):
+    __tablename__ = "study_plan_tasks"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    plan_id: Mapped[int] = mapped_column(ForeignKey("study_plans.id"), index=True)
+    lesson_id: Mapped[int] = mapped_column(ForeignKey("lessons.id"), index=True)
+    day_number: Mapped[int] = mapped_column()
+    title: Mapped[str] = mapped_column(String(255))
+    minutes: Mapped[int] = mapped_column()
+    completed: Mapped[bool] = mapped_column(default=False)
+    plan: Mapped[StudyPlan] = relationship(back_populates="tasks")
+
+
 class Subscription(Base):
     __tablename__ = "subscriptions"
 

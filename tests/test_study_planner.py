@@ -1,5 +1,7 @@
 import pytest
+from fastapi.testclient import TestClient
 
+from app.main import app
 from app.services.study_planner import StudyTask, build_study_plan
 
 
@@ -22,3 +24,8 @@ def test_build_study_plan_rejects_invalid_limits_and_tasks() -> None:
         build_study_plan([StudyTask(1, "درس", 0)], daily_minutes=30)
     with pytest.raises(ValueError):
         build_study_plan([StudyTask(1, "درس", 60)], daily_minutes=30, max_days=1)
+
+
+def test_study_plan_routes_require_authentication() -> None:
+    client = TestClient(app)
+    assert client.get("/api/v1/study-plan").status_code == 401
