@@ -61,3 +61,6 @@ CI علاوه بر quality gates، migration chain، audit آسیب‌پذیری
 
 نقشه‌ی راه و تفکیک وضعیت واقعی قابلیت‌ها در [`docs/ROADMAP.md`](docs/ROADMAP.md) است.
 ممیزی صریح آمادگی Production در [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md) نگهداری می‌شود.
+راهنمای اجرای staging در [`docs/STAGING_CHECKLIST.md`](docs/STAGING_CHECKLIST.md)،
+برنامه‌ی observability در [`docs/OBSERVABILITY_PLAN.md`](docs/OBSERVABILITY_PLAN.md)،
+و طراحی RAG در [`docs/RAG_ARCHITECTURE_PROPOSAL.md`](docs/RAG_ARCHITECTURE_PROPOSAL.md) است.
