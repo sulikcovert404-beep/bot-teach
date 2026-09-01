@@ -47,6 +47,7 @@ async def test_gemini_provider_sends_output_token_cap(monkeypatch: pytest.Monkey
 
     assert result.text == "ok"
     assert result.usage_tokens == 17
+    assert captured["headers"] == {"x-goog-api-key": "x" * 32}
     assert captured["json"] == {
         "contents": [{"parts": [{"text": "Explain photosynthesis"}]}],
         "generationConfig": {"maxOutputTokens": 321},

@@ -83,7 +83,11 @@ class GeminiProvider:
         async with httpx.AsyncClient(timeout=self.timeout) as client:
             for attempt in range(self.max_retries + 1):
                 try:
-                    response = await client.post(url, params={"key": self.api_key}, json=payload)
+                    response = await client.post(
+                        url,
+                        headers={"x-goog-api-key": self.api_key},
+                        json=payload,
+                    )
                     response.raise_for_status()
                     data = response.json()
                     break
