@@ -1,8 +1,9 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from pydantic import BaseModel, Field
 
 from app.security.dependencies import require_user
 from app.services.worksheet import WorksheetQuestion, render_worksheet
+from app.services.worksheet_pdf import render_worksheet_pdf
 
 router = APIRouter(prefix="/worksheets", tags=["worksheets"])
 
@@ -33,3 +34,15 @@ async def create_worksheet(
         [WorksheetQuestion(question.prompt, question.points) for question in request.questions],
     )
     return WorksheetResponse(content=content)
+
+
+@router.post("/pdf", response_class=Response)
+async def create_worksheet_pdf(
+    request: WorksheetRequest, _subject: str = Depends(require_user)
+) -> Response:
+    content = render_worksheet_pdf(
+        request.title,
+        request.instructions,
+        [WorksheetQuestion(question.prompt, question.points) for question in request.questions],
+    )
+    return Response(content=content, media_type="application/pdf")
