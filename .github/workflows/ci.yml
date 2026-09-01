@@ -44,6 +44,8 @@ jobs:
     needs: quality
     steps:
       - uses: actions/checkout@v4
+      - name: Prepare non-secret staging configuration
+        run: cp .env.example .env
       - name: Start staging stack
         run: docker compose up -d --build db redis migrate api
       - name: Wait for readiness and migration head
