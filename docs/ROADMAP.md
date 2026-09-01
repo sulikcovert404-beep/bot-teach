@@ -15,12 +15,14 @@
 - webhook متنی Telegram با entitlement و idempotency، migration async و rate limit مشترک
   مبتنی بر Redis نیز در مخزن پیاده‌سازی و تست شده‌اند.
 - endpoint metrics سازگار با Prometheus برای اتصال به observability متمرکز موجود است.
+- payment provider contract و adapter HTTP قابل‌تنظیم، شامل checkout URL و مدیریت خطا،
+  در مخزن موجود و تست شده است.
 
 ## شکاف‌های باقی‌مانده برای Production
 
 1. اجرای staging واقعی با PostgreSQL، migration و health smoke test.
 2. embedding store و retrieval مقیاس‌پذیر برای RAG.
-3. payment provider واقعی، پنل admin کامل و گزارش‌گیری production.
+3. اتصال adapter پرداخت به provider واقعی/sandbox، پنل admin کامل و گزارش‌گیری production.
 4. secret manager و اتصال واقعی endpoint metrics به observability متمرکز.
 5. backup/restore drill واقعی، deployment staging و تست‌های end-to-end روی محیط اجرا.
 6. audit requirement-by-requirement پیش از اعلام Production readiness.
