@@ -25,6 +25,15 @@ def get_bot_client() -> TelegramBotClient | None:
     return TelegramBotClient(token) if token else None
 
 
+def reply_for_text(text: str | None) -> str:
+    command = (text or "").strip().split(maxsplit=1)[0].casefold()
+    if command == "/start":
+        return "به یارِ یادگیری خوش آمدید. برای پرسش آموزشی از Mini App استفاده کنید."
+    if command == "/help":
+        return "راهنما: Mini App را باز کنید و پرسش آموزشی خود را ارسال کنید."
+    return "پیام شما دریافت شد."
+
+
 @router.get("/mini-app/config", response_model=MiniAppConfigResponse)
 async def mini_app_config() -> MiniAppConfigResponse:
     return MiniAppConfigResponse()
@@ -50,5 +59,5 @@ async def telegram_webhook(
         if isinstance(chat, dict) and isinstance(chat.get("id"), int):
             if bot is None:
                 raise HTTPException(status_code=503, detail="Telegram integration unavailable")
-            await bot.send_text(chat["id"], "پیام شما دریافت شد.")
+            await bot.send_text(chat["id"], reply_for_text(message.get("text")))
     return TelegramWebhookResponse()

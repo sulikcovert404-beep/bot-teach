@@ -1,6 +1,6 @@
 from fastapi.testclient import TestClient
 
-from app.api.routes.telegram import get_bot_client
+from app.api.routes.telegram import get_bot_client, reply_for_text
 from app.core.config import get_settings
 from app.main import app
 
@@ -9,6 +9,12 @@ def test_mini_app_config_contract() -> None:
     response = TestClient(app).get("/api/v1/telegram/mini-app/config")
     assert response.status_code == 200
     assert response.json()["auth_endpoint"] == "/api/v1/auth/telegram"
+
+
+def test_telegram_basic_commands_have_dedicated_replies() -> None:
+    assert "خوش آمدید" in reply_for_text("/start")
+    assert "راهنما" in reply_for_text("/help extra")
+    assert reply_for_text("سلام") == "پیام شما دریافت شد."
 
 
 def test_webhook_rejects_missing_secret(monkeypatch) -> None:
