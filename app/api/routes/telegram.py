@@ -4,11 +4,12 @@ from typing import Any
 from fastapi import APIRouter, Body, Depends, Header, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
-from app.db.models import Subscription, User
+from app.db.models import Subscription, TelegramUpdate, User
 from app.domain.entitlements.models import FeatureCode
 from app.domain.entitlements.service import entitlement_for_subscription
 from app.services.ai_gateway import GeminiProvider, ModelRouter
@@ -70,6 +71,14 @@ async def telegram_webhook(
         if isinstance(chat, dict) and isinstance(chat.get("id"), int):
             if bot is None:
                 raise HTTPException(status_code=503, detail="Telegram integration unavailable")
+            update_id = update.get("update_id")
+            if isinstance(update_id, int):
+                session.add(TelegramUpdate(update_id=update_id))
+                try:
+                    await session.flush()
+                except IntegrityError:
+                    await session.rollback()
+                    return TelegramWebhookResponse()
             reply = reply_for_text(text if isinstance(text, str) else None)
             sender = message.get("from")
             if (
@@ -87,10 +96,12 @@ async def telegram_webhook(
             try:
                 await bot.send_text(chat["id"], reply)
             except (RuntimeError, OSError) as exc:
+                await session.rollback()
                 raise HTTPException(
                     status_code=status.HTTP_502_BAD_GATEWAY,
                     detail="Telegram provider unavailable",
                 ) from exc
+            await session.commit()
     return TelegramWebhookResponse()
 
 

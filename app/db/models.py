@@ -30,6 +30,14 @@ class Identity(Base):
     user: Mapped[User] = relationship(back_populates="identities")
 
 
+class TelegramUpdate(Base):
+    __tablename__ = "telegram_updates"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    update_id: Mapped[int] = mapped_column(Integer, unique=True, index=True)
+    received_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class Book(Base):
     __tablename__ = "books"
 
