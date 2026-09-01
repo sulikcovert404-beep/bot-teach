@@ -1,5 +1,6 @@
 from functools import lru_cache
 
+from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -18,6 +19,23 @@ class Settings(BaseSettings):
     rate_limit_window_seconds: int = 60
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+
+    @model_validator(mode="after")
+    def validate_production_requirements(self) -> "Settings":
+        if self.app_env.lower() != "production":
+            return self
+        required = {
+            "DATABASE_URL": self.database_url,
+            "JWT_SECRET": self.jwt_secret,
+            "TELEGRAM_BOT_TOKEN": self.telegram_bot_token,
+            "TELEGRAM_WEBHOOK_SECRET": self.telegram_webhook_secret,
+        }
+        missing = [name for name, value in required.items() if not value.strip()]
+        if missing:
+            raise ValueError(f"Production configuration missing: {', '.join(missing)}")
+        if len(self.jwt_secret) < 32:
+            raise ValueError("JWT_SECRET must be at least 32 characters in production")
+        return self
 
 
 @lru_cache

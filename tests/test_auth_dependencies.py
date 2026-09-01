@@ -1,7 +1,7 @@
 import pytest
 from fastapi import HTTPException
 
-from app.core.config import get_settings
+from app.core.config import Settings, get_settings
 from app.security.dependencies import authorize_role, require_roles, require_user
 from app.security.tokens import create_access_token
 
@@ -19,6 +19,22 @@ def test_require_user_accepts_valid_token(monkeypatch: pytest.MonkeyPatch) -> No
 
     credentials = HTTPAuthorizationCredentials(scheme="Bearer", credentials=token)
     assert require_user(credentials) == "user-1"
+
+
+def test_production_settings_require_security_secrets() -> None:
+    with pytest.raises(ValueError, match="Production configuration missing"):
+        Settings(_env_file=None, app_env="production")
+
+
+def test_production_settings_accept_valid_configuration() -> None:
+    settings = Settings(
+        app_env="production",
+        database_url="postgresql+asyncpg://user:pass@db/education",
+        jwt_secret="x" * 32,
+        telegram_bot_token="telegram-token",
+        telegram_webhook_secret="webhook-secret",
+    )
+    assert settings.app_env == "production"
 
 
 def test_authorize_role_rejects_disallowed_role() -> None:
