@@ -5,6 +5,11 @@
 `DATABASE_URL` را فقط از secret manager یا محیط اجرای production بخوانید و
 هرگز در فایل backup، log یا issue ثبت نکنید. نمونهٔ backup فشرده:
 
+تنظیمات از environment و secretهای mounted (مسیر پیش‌فرض `/run/secrets`) خوانده
+می‌شوند؛ environment بر secret file اولویت دارد. در production secret fileها را
+با نام فیلدهای تنظیمات مانند `jwt_secret`، `telegram_bot_token` و `gemini_api_key`
+از secret manager نصب کنید و `.env` را استفاده نکنید.
+
 ```powershell
 pg_dump --format=custom --file=education-$(Get-Date -Format yyyyMMdd-HHmm).dump $env:DATABASE_URL
 ```

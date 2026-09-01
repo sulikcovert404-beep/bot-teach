@@ -20,7 +20,11 @@ class Settings(BaseSettings):
     redis_url: str = ""
     cors_allowed_origins: str = ""
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        secrets_dir="/run/secrets",
+        extra="ignore",
+    )
 
     @model_validator(mode="after")
     def validate_production_requirements(self) -> "Settings":
