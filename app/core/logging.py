@@ -1,4 +1,5 @@
 import logging
+import re
 import uuid
 from collections import Counter
 from threading import Lock
@@ -6,6 +7,7 @@ from threading import Lock
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
 logger = logging.getLogger("education.api")
+_REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 
 
 class RequestMetrics:
@@ -36,7 +38,12 @@ class RequestLoggingMiddleware:
             await self.app(scope, receive, send)
             return
 
-        request_id = str(uuid.uuid4())
+        incoming_headers = {
+            key.decode("latin-1"): value.decode("latin-1")
+            for key, value in scope.get("headers", [])
+        }
+        candidate = incoming_headers.get("x-request-id", "")
+        request_id = candidate if _REQUEST_ID_PATTERN.fullmatch(candidate) else str(uuid.uuid4())
         status_code = 500
 
         async def send_with_status(message: Message) -> None:
