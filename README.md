@@ -45,4 +45,6 @@ Platform API: `GET /api/v1/platform`
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
+CI علاوه بر quality gates، ساخت Docker image را نیز بررسی می‌کند.
+
 نقشه‌ی راه و تفکیک وضعیت واقعی قابلیت‌ها در [`docs/ROADMAP.md`](docs/ROADMAP.md) است.
