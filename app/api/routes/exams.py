@@ -12,6 +12,7 @@ from app.security.dependencies import require_user
 from app.security.entitlements import require_feature_access
 from app.services.ai_gateway import GeminiProvider, ModelRouter
 from app.services.educational_ai import EducationalAI
+from app.services.usage_repository import record_usage
 
 router = APIRouter(prefix="/exams", tags=["exams"])
 
@@ -133,6 +134,18 @@ async def generate_and_save_exam(
     )
     exam = Exam(user_id=int(subject), title=request.title, generated_content=result.text)
     session.add(exam)
+    await record_usage(
+        session,
+        user_id=int(subject),
+        task_type="exam_generator",
+        model=result.model,
+        requested_tokens=request.max_tokens,
+        charged_tokens=(
+            min(result.usage_tokens, request.max_tokens)
+            if result.usage_tokens is not None
+            else request.max_tokens
+        ),
+    )
     await session.commit()
     await session.refresh(exam)
     return _response(exam)
@@ -165,5 +178,17 @@ async def correct_saved_exam(
         GeminiProvider(settings.gemini_api_key), ModelRouter(settings.ai_default_model)
     ).correct_exam(request.answer_key, request.answers, max_tokens=request.max_tokens)
     exam.correction_content = result.text
+    await record_usage(
+        session,
+        user_id=int(subject),
+        task_type="exam_corrector",
+        model=result.model,
+        requested_tokens=request.max_tokens,
+        charged_tokens=(
+            min(result.usage_tokens, request.max_tokens)
+            if result.usage_tokens is not None
+            else request.max_tokens
+        ),
+    )
     await session.commit()
     return _response(exam)
