@@ -5,7 +5,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.domain.entitlements.models import FeatureCode
-from app.security.dependencies import require_user
 from app.security.entitlements import require_feature_access
 from app.services.ai_gateway import AIRequest, GeminiProvider, ModelRouter
 from app.services.educational_ai import EducationalAI
@@ -77,7 +76,7 @@ async def _record_ai_usage(
 @router.post("/generate", response_model=GenerateResponse)
 async def generate(
     request: GenerateRequest,
-    subject: str = Depends(require_user),
+    subject: str = Depends(require_feature_access(FeatureCode.AI_CHAT)),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> GenerateResponse:
     settings = get_settings()

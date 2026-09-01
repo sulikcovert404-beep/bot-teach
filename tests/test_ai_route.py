@@ -15,6 +15,11 @@ def test_ai_route_rejects_invalid_model_without_authentication_leak() -> None:
     assert response.status_code == 401
 
 
+def test_ai_generate_requires_ai_chat_entitlement() -> None:
+    response = TestClient(app).post("/api/v1/ai/generate", json={"prompt": "hello"})
+    assert response.status_code == 401
+
+
 def test_educational_ai_routes_require_authentication() -> None:
     client = TestClient(app)
     summary = client.post("/api/v1/ai/summarize", json={"text": "درس"})
