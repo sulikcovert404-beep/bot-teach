@@ -1,3 +1,6 @@
+from contextlib import asynccontextmanager
+from collections.abc import AsyncIterator
+
 from fastapi import FastAPI
 
 from app.api.routes.admin import router as admin_router
@@ -14,9 +17,22 @@ from app.api.routes.worksheets import router as worksheets_router
 from app.core.config import get_settings
 from app.core.logging import RequestLoggingMiddleware
 from app.core.rate_limit import InMemoryRateLimitMiddleware
+from app.db.base import build_session_factory, dispose_session_factory
 
 settings = get_settings()
-app = FastAPI(title=settings.app_name, version="0.1.0")
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
+    factory = build_session_factory(settings.database_url) if settings.database_url else None
+    try:
+        yield
+    finally:
+        if factory is not None:
+            await dispose_session_factory(factory)
+
+
+app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(
     InMemoryRateLimitMiddleware,

@@ -17,6 +17,12 @@ def build_session_factory(database_url: str) -> async_sessionmaker[AsyncSession]
     return async_sessionmaker(engine, expire_on_commit=False)
 
 
+async def dispose_session_factory(factory: async_sessionmaker[AsyncSession]) -> None:
+    bind = factory.kw.get("bind")
+    if bind is not None and hasattr(bind, "dispose"):
+        await bind.dispose()
+
+
 async def session_dependency(
     factory: async_sessionmaker[AsyncSession],
 ) -> AsyncGenerator[AsyncSession, None]:
