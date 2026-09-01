@@ -24,7 +24,10 @@ async def test_gemini_provider_sends_output_token_cap(monkeypatch: pytest.Monkey
             return None
 
         def json(self) -> dict[str, object]:
-            return {"candidates": [{"content": {"parts": [{"text": "ok"}]}}]}
+            return {
+                "candidates": [{"content": {"parts": [{"text": "ok"}]}}],
+                "usageMetadata": {"totalTokenCount": 42},
+            }
 
     class Client:
         async def __aenter__(self) -> Self:
@@ -43,6 +46,7 @@ async def test_gemini_provider_sends_output_token_cap(monkeypatch: pytest.Monkey
     )
 
     assert result.text == "ok"
+    assert result.usage_tokens == 42
     assert captured["json"] == {
         "contents": [{"parts": [{"text": "Explain photosynthesis"}]}],
         "generationConfig": {"maxOutputTokens": 321},
