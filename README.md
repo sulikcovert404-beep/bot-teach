@@ -48,7 +48,7 @@ Platform API: `GET /api/v1/platform`
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
-CI علاوه بر quality gates، ساخت Docker image را نیز بررسی می‌کند. Readiness علاوه بر
+CI علاوه بر quality gates، audit آسیب‌پذیری dependency و ساخت Docker image را نیز بررسی می‌کند. Readiness علاوه بر
 اتصال دیتابیس، migration head مورد انتظار را نیز کنترل می‌کند.
 
 نقشه‌ی راه و تفکیک وضعیت واقعی قابلیت‌ها در [`docs/ROADMAP.md`](docs/ROADMAP.md) است.
