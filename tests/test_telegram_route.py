@@ -54,3 +54,22 @@ def test_webhook_sends_ack_for_text_update(monkeypatch) -> None:
         assert sent == [(42, "پیام شما دریافت شد.")]
     finally:
         app.dependency_overrides.pop(get_bot_client, None)
+
+
+def test_webhook_maps_telegram_provider_failure(monkeypatch) -> None:
+    monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
+
+    class FailingBot:
+        async def send_text(self, chat_id: int, text: str) -> None:
+            raise RuntimeError("provider down")
+
+    app.dependency_overrides[get_bot_client] = lambda: FailingBot()
+    try:
+        response = TestClient(app).post(
+            "/api/v1/telegram/webhook",
+            headers={"X-Telegram-Bot-Api-Secret-Token": "secret"},
+            json={"message": {"chat": {"id": 42}, "text": "سلام"}},
+        )
+        assert response.status_code == 502
+    finally:
+        app.dependency_overrides.pop(get_bot_client, None)

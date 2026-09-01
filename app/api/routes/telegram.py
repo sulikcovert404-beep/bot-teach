@@ -59,5 +59,11 @@ async def telegram_webhook(
         if isinstance(chat, dict) and isinstance(chat.get("id"), int):
             if bot is None:
                 raise HTTPException(status_code=503, detail="Telegram integration unavailable")
-            await bot.send_text(chat["id"], reply_for_text(message.get("text")))
+            try:
+                await bot.send_text(chat["id"], reply_for_text(message.get("text")))
+            except (RuntimeError, OSError) as exc:
+                raise HTTPException(
+                    status_code=status.HTTP_502_BAD_GATEWAY,
+                    detail="Telegram provider unavailable",
+                ) from exc
     return TelegramWebhookResponse()
