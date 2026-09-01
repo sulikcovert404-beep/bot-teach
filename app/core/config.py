@@ -16,7 +16,7 @@ class Settings(BaseSettings):
     payment_provider_url: str = ""
     payment_provider_api_key: str = ""
     gemini_api_key: str = ""
-    ai_default_model: str = "gemini-2.0-flash"
+    ai_default_model: str = "gemini-3.6-flash"
     jwt_secret: str = ""
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60

@@ -41,6 +41,20 @@ Invoke-WebRequest http://localhost:8000/health/ready
 موفقیت restore زمانی تأیید می‌شود که migration head، readiness و یک query نمونهٔ
 خواندنی همگی موفق باشند. نتیجه و زمان آخرین restore drill باید ثبت شود.
 
+برای اجرای قابل‌تکرار این فرآیند از اسکریپت زیر استفاده کنید. مقدار
+`RestoreDatabaseUrl` باید به یک دیتابیس اختصاصی restore اشاره کند؛ مقصد اصلی عمداً
+باید جدا باشد:
+
+```powershell
+.\scripts\restore-drill.ps1 `
+  -DumpPath .\backups\education-20260901-220000.dump `
+  -RestoreDatabaseUrl $env:RESTORE_DATABASE_URL `
+  -ReadinessUrl http://localhost:8000/health/ready
+```
+
+اسکریپت archive را بررسی می‌کند، با `pg_restore --clean --if-exists` روی مقصد جداگانه
+restore می‌کند، migrationها را تا head ارتقا می‌دهد و readiness را بررسی می‌کند.
+
 ## Release sequence
 
 1. backup موفق و قابل‌خواندن تهیه کنید؛
