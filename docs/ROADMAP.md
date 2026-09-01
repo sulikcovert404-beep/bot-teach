@@ -21,6 +21,8 @@
   آزمون و endpointهای آموزشی انجام می‌شود و خلاصهٔ Admin نیز موجود است.
 - کلید Gemini در header امن ارسال می‌شود، Source Guardian دادهٔ منبع را escape می‌کند
   و secret scan برای فایل‌های tracked در CI فعال است.
+- provider مستقل Gemini Embedding برای foundation اضافه شده است؛ انتخاب و پیاده‌سازی
+  vector store عمداً تا تصویب معماری RAG انجام نشده است.
 
 ## شکاف‌های باقی‌مانده برای Production
 
@@ -34,3 +36,6 @@
 
 هر مرحله باید با migration، تست رفتاری، lint، type-check، مستندات و health evidence
 تکمیل شود. وجود این فهرست به‌تنهایی به معنی پیاده‌سازی قابلیت‌های باقی‌مانده نیست.
+
+راهنماهای staging، observability، secret manager و قرارداد پرداخت در اسناد مرتبط
+README نگهداری می‌شوند؛ این اسناد جایگزین اجرای واقعی محیطی نیستند.

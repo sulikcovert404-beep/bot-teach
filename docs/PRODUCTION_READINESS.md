@@ -20,6 +20,8 @@
 - Docker compose با سرویس migration و اجرای API با کاربر غیرroot
 - رمز PostgreSQL در compose از `POSTGRES_PASSWORD` اجباری محیطی خوانده می‌شود و hardcode نیست
 - تست‌های خودکار، Ruff، mypy و CI dependency audit
+- طراحی RAG، برنامه observability، checklist staging و بررسی Secret Manager مستند شده‌اند؛
+  این اسناد جایگزین اجرای واقعی محیطی نیستند.
 
 ## نیازمند اجرای محیطی قبل از اعلام Production
 
@@ -32,5 +34,9 @@
 - اجرای runbook چرخش secret و پاک‌سازی history طبق `docs/SECURITY_ROTATION.md`
 - بررسی rate limit مشترک بین replicaها و observability متمرکز
 - تست end-to-end روی staging و audit نهایی requirement-by-requirement
+
+راهنمای اجرای staging در [`STAGING_CHECKLIST.md`](STAGING_CHECKLIST.md)، برنامه‌ی
+observability در [`OBSERVABILITY_PLAN.md`](OBSERVABILITY_PLAN.md)، و طراحی RAG در
+[`RAG_ARCHITECTURE_PROPOSAL.md`](RAG_ARCHITECTURE_PROPOSAL.md) نگهداری می‌شوند.
 
 تا زمانی که موارد بخش دوم اجرا و ثبت نشده‌اند، پروژه را Production-ready اعلام نکنید.
