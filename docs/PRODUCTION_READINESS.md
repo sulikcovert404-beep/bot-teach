@@ -29,6 +29,7 @@
 - اتصال payment provider واقعی و آزمون callback در محیط sandbox
 - تنظیم `PAYMENT_PROVIDER_URL` و `PAYMENT_PROVIDER_API_KEY` و تطبیق قرارداد `/v1/checkout`
 - backup/restore drill روی PostgreSQL جداگانه
+- اجرای runbook چرخش secret و پاک‌سازی history طبق `docs/SECURITY_ROTATION.md`
 - بررسی rate limit مشترک بین replicaها و observability متمرکز
 - تست end-to-end روی staging و audit نهایی requirement-by-requirement
 
