@@ -89,6 +89,7 @@ class Exam(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     title: Mapped[str] = mapped_column(String(255))
     generated_content: Mapped[str | None] = mapped_column(String(20_000))
+    correction_content: Mapped[str | None] = mapped_column(String(20_000))
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     questions: Mapped[list[ExamQuestion]] = relationship(
         back_populates="exam", cascade="all, delete-orphan", order_by="ExamQuestion.position"

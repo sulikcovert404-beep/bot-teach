@@ -47,6 +47,7 @@ class ExamResponse(BaseModel):
     title: str
     questions: list[ExamQuestionResponse]
     generated_content: str | None = None
+    correction_content: str | None = None
 
 
 def _response(exam: Exam) -> ExamResponse:
@@ -64,6 +65,7 @@ def _response(exam: Exam) -> ExamResponse:
             for question in exam.questions
         ],
         generated_content=exam.generated_content,
+        correction_content=exam.correction_content,
     )
 
 
@@ -133,4 +135,35 @@ async def generate_and_save_exam(
     session.add(exam)
     await session.commit()
     await session.refresh(exam)
+    return _response(exam)
+
+
+class ExamCorrectionRequest(BaseModel):
+    answer_key: str = Field(min_length=1, max_length=10_000)
+    answers: str = Field(min_length=1, max_length=10_000)
+    max_tokens: int = Field(default=1_200, ge=1, le=4_000)
+
+
+@router.post("/{exam_id}/correct", response_model=ExamResponse)
+async def correct_saved_exam(
+    exam_id: int,
+    request: ExamCorrectionRequest,
+    subject: str = Depends(require_feature_access(FeatureCode.EXAM_CORRECTOR)),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> ExamResponse:
+    exam = await session.scalar(
+        select(Exam)
+        .options(selectinload(Exam.questions))
+        .where(Exam.id == exam_id, Exam.user_id == int(subject))
+    )
+    if exam is None:
+        raise HTTPException(status_code=404, detail="Exam not found")
+    settings = get_settings()
+    if not settings.gemini_api_key:
+        raise HTTPException(status_code=503, detail="AI provider unavailable")
+    result = await EducationalAI(
+        GeminiProvider(settings.gemini_api_key), ModelRouter(settings.ai_default_model)
+    ).correct_exam(request.answer_key, request.answers, max_tokens=request.max_tokens)
+    exam.correction_content = result.text
+    await session.commit()
     return _response(exam)
