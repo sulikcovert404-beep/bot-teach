@@ -92,13 +92,15 @@ class RequestLoggingMiddleware:
                 message["headers"] = headers
             await send(message)
 
-        await self.app(scope, receive, send_with_status)
-        request_metrics.observe(status_code)
-        logger.info(
-            "request method=%s path=%s status=%s request_id=%s duration_ms=%.2f",
-            scope.get("method"),
-            scope.get("path"),
-            status_code,
-            request_id,
-            (time.perf_counter() - started_at) * 1000,
-        )
+        try:
+            await self.app(scope, receive, send_with_status)
+        finally:
+            request_metrics.observe(status_code)
+            logger.info(
+                "request method=%s path=%s status=%s request_id=%s duration_ms=%.2f",
+                scope.get("method"),
+                scope.get("path"),
+                status_code,
+                request_id,
+                (time.perf_counter() - started_at) * 1000,
+            )
