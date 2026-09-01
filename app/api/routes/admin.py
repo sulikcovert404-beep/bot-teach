@@ -2,11 +2,11 @@ from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, ConfigDict
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.db.models import AuditLog, PaymentTransaction, Subscription, User
+from app.db.models import AIUsageEvent, AuditLog, PaymentTransaction, Subscription, User
 from app.domain.entitlements.models import SubscriptionPlan
 from app.security.dependencies import require_roles
 from app.services.audit_repository import record_audit_log
@@ -66,6 +66,12 @@ class SubscriptionUpdateResponse(BaseModel):
     active_until: datetime | None
 
 
+class AIUsageSummaryResponse(BaseModel):
+    event_count: int
+    requested_tokens: int
+    charged_tokens: int
+
+
 @router.get("/audit-logs", response_model=AuditLogListResponse)
 async def list_audit_logs(
     _subject: str = Depends(require_roles("ADMIN", "TEACHER")),
@@ -116,6 +122,26 @@ async def list_subscriptions(
         .limit(limit)
     )
     return list(result.all())
+
+
+@router.get("/ai-usage/summary", response_model=AIUsageSummaryResponse)
+async def ai_usage_summary(
+    _subject: str = Depends(require_roles("ADMIN")),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> AIUsageSummaryResponse:
+    result = await session.execute(
+        select(
+            func.count(AIUsageEvent.id),
+            func.coalesce(func.sum(AIUsageEvent.requested_tokens), 0),
+            func.coalesce(func.sum(AIUsageEvent.charged_tokens), 0),
+        )
+    )
+    event_count, requested_tokens, charged_tokens = result.one()
+    return AIUsageSummaryResponse(
+        event_count=int(event_count),
+        requested_tokens=int(requested_tokens),
+        charged_tokens=int(charged_tokens),
+    )
 
 
 @router.put("/subscriptions/{user_id}", response_model=SubscriptionUpdateResponse)
