@@ -21,7 +21,9 @@ docker compose run --rm api alembic upgrade head
 ```
 
 The FastAPI lifespan disposes the cached SQLAlchemy engine on shutdown. Readiness
-(`GET /health/ready`) performs a live `SELECT 1` against the configured database.
+(`GET /health/ready`) performs a live `SELECT 1` against the configured database and
+verifies that `alembic_version` matches the application migration head. A database
+with pending or missing migrations is intentionally reported as not ready.
 
 جزئیات backup، restore drill و ترتیب انتشار در [`OPERATIONS.md`](OPERATIONS.md)
 ثبت شده است.
