@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.db.models import StudyPlan, StudyPlanTask
+from app.db.models import Lesson, StudyPlan, StudyPlanTask
 from app.security.dependencies import require_user
 from app.services.study_planner import StudyTask, build_study_plan
 
@@ -64,6 +64,14 @@ async def create_study_plan(
         daily_minutes=request.daily_minutes,
         max_days=request.max_days,
     )
+    lesson_ids = {task.lesson_id for task in request.tasks}
+    if lesson_ids:
+        existing_ids = set(
+            await session.scalars(select(Lesson.id).where(Lesson.id.in_(lesson_ids)))
+        )
+        missing_ids = lesson_ids - existing_ids
+        if missing_ids:
+            raise HTTPException(status_code=404, detail="One or more lessons were not found")
     stored_plan = StudyPlan(user_id=user_id, daily_minutes=request.daily_minutes, max_days=request.max_days)
     stored_plan.tasks = [
         StudyPlanTask(
