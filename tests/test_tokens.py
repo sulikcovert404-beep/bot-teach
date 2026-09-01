@@ -13,3 +13,8 @@ def test_access_token_rejects_wrong_secret() -> None:
     token = create_access_token("user-1", "x" * 32)
     with pytest.raises(InvalidTokenError):
         decode_access_token(token, "y" * 32)
+
+
+def test_access_token_rejects_non_positive_expiration() -> None:
+    with pytest.raises(ValueError, match="expiration must be positive"):
+        create_access_token("user-1", "x" * 32, expires_minutes=0)

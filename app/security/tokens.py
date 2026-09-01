@@ -8,6 +8,8 @@ def create_access_token(
 ) -> str:
     if not secret:
         raise ValueError("JWT secret is required")
+    if expires_minutes < 1:
+        raise ValueError("Token expiration must be positive")
     now = datetime.now(UTC)
     payload = {"sub": subject, "iat": now, "exp": now + timedelta(minutes=expires_minutes)}
     if role is not None:
