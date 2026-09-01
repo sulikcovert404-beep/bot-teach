@@ -32,3 +32,8 @@ def test_validate_web_app_init_data_rejects_bad_signature() -> None:
 def test_validate_web_app_init_data_rejects_expired_data() -> None:
     with pytest.raises(ValueError, match="Expired"):
         validate_web_app_init_data(signed_init_data("token", 1_000), "token", now=90_000)
+
+
+def test_validate_web_app_init_data_rejects_invalid_age_window() -> None:
+    with pytest.raises(ValueError):
+        validate_web_app_init_data(signed_init_data("token", 1_000), "token", max_age_seconds=0, now=1_100)

@@ -25,7 +25,7 @@ def validate_web_app_init_data(
     now: int | None = None,
 ) -> TelegramIdentity:
     """Validate Telegram Web App initData and return the signed user identity."""
-    if not init_data or not bot_token:
+    if not init_data or not bot_token or max_age_seconds < 1:
         raise ValueError("Telegram initData and bot token are required")
     values = parse_qs(init_data, strict_parsing=True)
     received_hash = values.pop("hash", [None])[0]
@@ -50,6 +50,8 @@ def validate_web_app_init_data(
     try:
         user = json.loads(user_raw) if user_raw else {}
         telegram_user_id = int(user["id"])
+        if telegram_user_id < 1:
+            raise ValueError("Telegram user identity is invalid")
     except (TypeError, ValueError, KeyError, json.JSONDecodeError) as exc:
         raise ValueError("Telegram user identity is invalid") from exc
     return TelegramIdentity(telegram_user_id=telegram_user_id, username=user.get("username"))
