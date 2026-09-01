@@ -30,6 +30,8 @@ class Settings(BaseSettings):
             "JWT_SECRET": self.jwt_secret,
             "TELEGRAM_BOT_TOKEN": self.telegram_bot_token,
             "TELEGRAM_WEBHOOK_SECRET": self.telegram_webhook_secret,
+            "PAYMENT_WEBHOOK_SECRET": self.payment_webhook_secret,
+            "GEMINI_API_KEY": self.gemini_api_key,
         }
         missing = [name for name, value in required.items() if not value.strip()]
         if missing:

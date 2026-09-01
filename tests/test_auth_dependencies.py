@@ -33,6 +33,8 @@ def test_production_settings_accept_valid_configuration() -> None:
         jwt_secret="x" * 32,
         telegram_bot_token="telegram-token",
         telegram_webhook_secret="webhook-secret",
+        payment_webhook_secret="payment-secret",
+        gemini_api_key="gemini-key",
     )
     assert settings.app_env == "production"
 
