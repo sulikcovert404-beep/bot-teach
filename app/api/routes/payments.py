@@ -68,6 +68,7 @@ async def payment_intent(
         provider_transaction_id=transaction.provider_transaction_id,
         amount=transaction.amount,
         status=transaction.status,
+        checkout_url=transaction.checkout_url,
     )
 
 

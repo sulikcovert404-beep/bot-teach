@@ -164,6 +164,7 @@ class PaymentTransaction(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     provider: Mapped[str] = mapped_column(String(32))
     provider_transaction_id: Mapped[str] = mapped_column(String(255), unique=True)
+    checkout_url: Mapped[str | None] = mapped_column(String(2_000), nullable=True)
     amount: Mapped[int] = mapped_column()
     currency: Mapped[str] = mapped_column(String(8), default="IRR")
     status: Mapped[str] = mapped_column(String(32), default="PENDING", index=True)

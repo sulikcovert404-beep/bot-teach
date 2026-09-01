@@ -22,6 +22,7 @@ async def create_payment_intent(
         raise ValueError("Payment intent fields are invalid")
     merchant_transaction_id = f"intent-{uuid4().hex}"
     provider_transaction_id = merchant_transaction_id
+    checkout_url: str | None = None
     if payment_provider is not None:
         checkout = await payment_provider.create_checkout(
             amount=amount,
@@ -29,10 +30,12 @@ async def create_payment_intent(
             merchant_transaction_id=merchant_transaction_id,
         )
         provider_transaction_id = checkout.provider_transaction_id
+        checkout_url = checkout.checkout_url
     transaction = PaymentTransaction(
         user_id=user_id,
         provider=provider,
         provider_transaction_id=provider_transaction_id,
+        checkout_url=checkout_url,
         amount=amount,
         status="PENDING",
     )
