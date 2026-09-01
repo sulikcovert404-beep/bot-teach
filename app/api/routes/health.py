@@ -6,7 +6,7 @@ from app.db.base import build_session_factory
 
 router = APIRouter(tags=["health"])
 
-EXPECTED_MIGRATION_HEAD = "f2a3b4c5d6e7"
+EXPECTED_MIGRATION_HEAD = "a8b9c0d1e2f3"
 
 
 @router.get("/health", summary="Liveness check")
