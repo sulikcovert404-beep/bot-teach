@@ -14,6 +14,8 @@ uvicorn app.main:app --reload
 
 Health: `GET /health` و readiness: `GET /health/ready`
 
+Telegram Mini App: `GET /mini-app/` (در محیط Telegram با `initData` معتبر اجرا شود).
+
 Platform API: `GET /api/v1/platform`
 
 مسیرهای اصلی فعلی:

@@ -2,6 +2,7 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 
 from app.api.routes.admin import router as admin_router
 from app.api.routes.ai import router as ai_router
@@ -36,6 +37,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(title=settings.app_name, version="0.1.0", lifespan=lifespan)
+app.mount("/mini-app", StaticFiles(directory="web/mini-app", html=True), name="mini-app")
 app.add_middleware(RequestLoggingMiddleware)
 app.add_middleware(
     InMemoryRateLimitMiddleware,

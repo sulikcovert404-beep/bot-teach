@@ -1,0 +1,8 @@
+:root { color-scheme: light dark; font-family: system-ui, sans-serif; }
+body { margin: 0; background: var(--tg-theme-bg-color, #f4f6f8); color: var(--tg-theme-text-color, #17202a); }
+.shell { max-width: 680px; margin: auto; padding: 24px 16px; }
+h1 { margin-top: 0; }
+label, textarea, button { display: block; width: 100%; box-sizing: border-box; }
+textarea { min-height: 130px; margin: 8px 0 12px; padding: 12px; border: 1px solid #9aa4ad; border-radius: 10px; background: var(--tg-theme-secondary-bg-color, #fff); color: inherit; }
+button { padding: 12px; border: 0; border-radius: 10px; background: var(--tg-theme-button-color, #2481cc); color: var(--tg-theme-button-text-color, #fff); cursor: pointer; }
+article { white-space: pre-wrap; margin-top: 20px; padding: 16px; border-radius: 10px; background: var(--tg-theme-secondary-bg-color, #fff); }
