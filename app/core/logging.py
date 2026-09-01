@@ -25,6 +25,21 @@ class RequestMetrics:
         with self._lock:
             return {"requests_total": self._total, "responses_by_status": dict(self._statuses)}
 
+    def prometheus(self) -> str:
+        with self._lock:
+            lines = [
+                "# HELP education_http_requests_total Total HTTP requests observed.",
+                "# TYPE education_http_requests_total counter",
+                f"education_http_requests_total {self._total}",
+                "# HELP education_http_responses_total HTTP responses by status code.",
+                "# TYPE education_http_responses_total counter",
+            ]
+            lines.extend(
+                f'education_http_responses_total{{status_code="{status}"}} {count}'
+                for status, count in sorted(self._statuses.items())
+            )
+            return "\n".join(lines) + "\n"
+
 
 request_metrics = RequestMetrics()
 

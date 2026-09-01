@@ -15,3 +15,11 @@ def test_metrics_exposes_request_counters() -> None:
 def test_request_id_is_propagated_when_valid() -> None:
     response = TestClient(app).get("/health", headers={"X-Request-ID": "trace-123"})
     assert response.headers["x-request-id"] == "trace-123"
+
+
+def test_prometheus_metrics_contract() -> None:
+    response = TestClient(app).get("/metrics/prometheus")
+    assert response.status_code == 200
+    assert response.headers["content-type"].startswith("text/plain; version=0.0.4")
+    assert "education_http_requests_total" in response.text
+    assert "education_http_responses_total" in response.text
