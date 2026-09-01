@@ -55,3 +55,4 @@ CI علاوه بر quality gates، migration chain، audit آسیب‌پذیری
 اتصال دیتابیس، migration head مورد انتظار را نیز کنترل می‌کند.
 
 نقشه‌ی راه و تفکیک وضعیت واقعی قابلیت‌ها در [`docs/ROADMAP.md`](docs/ROADMAP.md) است.
+ممیزی صریح آمادگی Production در [`docs/PRODUCTION_READINESS.md`](docs/PRODUCTION_READINESS.md) نگهداری می‌شود.
