@@ -25,6 +25,7 @@ class EmbeddingVector(TypeDecorator[Any]):
 
     impl = JSON
     cache_ok = True
+    comparator_factory = Vector.comparator_factory
 
     def __init__(self, dimensions: int = 768) -> None:
         super().__init__()
@@ -255,3 +256,73 @@ class SourceChunk(Base):
     embedding_model: Mapped[str | None] = mapped_column(String(128), index=True)
     embedding: Mapped[list[float] | None] = mapped_column(EmbeddingVector(768), nullable=True)
     document: Mapped[SourceDocument] = relationship(back_populates="chunks")
+
+
+class ContentVersion(Base):
+    """Immutable processing snapshot for a logical source document."""
+
+    __tablename__ = "content_versions"
+    __table_args__ = (UniqueConstraint("source_document_id", "version_number"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_document_id: Mapped[int] = mapped_column(ForeignKey("source_documents.id"), index=True)
+    version_number: Mapped[int] = mapped_column(Integer, default=1)
+    processing_state: Mapped[str] = mapped_column(String(32), default="UPLOADED", index=True)
+    review_state: Mapped[str] = mapped_column(String(32), default="DRAFT", index=True)
+    vector_sync_state: Mapped[str] = mapped_column(String(32), default="VECTOR_PENDING", index=True)
+    source_hash: Mapped[str | None] = mapped_column(String(64), index=True)
+    extracted_hash: Mapped[str | None] = mapped_column(String(64))
+    pipeline_digest: Mapped[str | None] = mapped_column(String(64), index=True)
+    parser_version: Mapped[str | None] = mapped_column(String(128))
+    ocr_config_version: Mapped[str | None] = mapped_column(String(128))
+    normalizer_version: Mapped[str | None] = mapped_column(String(128))
+    chunker_version: Mapped[str | None] = mapped_column(String(128))
+    provenance_json: Mapped[str] = mapped_column(String(8000), default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    source_document: Mapped[SourceDocument] = relationship()
+
+
+class PublicationPointer(Base):
+    """Single atomically replaceable published version per logical document."""
+
+    __tablename__ = "publication_pointers"
+    __table_args__ = (UniqueConstraint("source_document_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    source_document_id: Mapped[int] = mapped_column(ForeignKey("source_documents.id"), index=True)
+    content_version_id: Mapped[int] = mapped_column(ForeignKey("content_versions.id"), index=True)
+    version: Mapped[int] = mapped_column(Integer, default=1)
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class TransactionalOutboxEvent(Base):
+    """Retry-safe event emitted in the same transaction as publication changes."""
+
+    __tablename__ = "transactional_outbox_events"
+    __table_args__ = (UniqueConstraint("event_id"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    event_id: Mapped[str] = mapped_column(String(64), unique=True, index=True)
+    event_type: Mapped[str] = mapped_column(String(64), index=True)
+    aggregate_type: Mapped[str] = mapped_column(String(64))
+    aggregate_id: Mapped[str] = mapped_column(String(255), index=True)
+    payload_json: Mapped[str] = mapped_column(String(12000), default="{}")
+    status: Mapped[str] = mapped_column(String(32), default="PENDING", index=True)
+    attempts: Mapped[int] = mapped_column(Integer, default=0)
+    available_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class IngestionIdempotencyKey(Base):
+    """Deduplicates retried ingestion jobs without mutating existing content."""
+
+    __tablename__ = "ingestion_idempotency_keys"
+    __table_args__ = (UniqueConstraint("idempotency_key"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    idempotency_key: Mapped[str] = mapped_column(String(255), unique=True, index=True)
+    source_document_id: Mapped[int | None] = mapped_column(ForeignKey("source_documents.id"), index=True)
+    request_hash: Mapped[str | None] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="ACCEPTED", index=True)
+    response_json: Mapped[str] = mapped_column(String(8000), default="{}")
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
