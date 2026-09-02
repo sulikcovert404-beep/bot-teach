@@ -16,3 +16,8 @@ def test_controlled_benchmark_runs_lexical_fixture() -> None:
     result = run_benchmark(cases[:1], {"lexical": retriever}, k=2)[0]
     assert result.provider == "lexical"
     assert result.evaluations[0].recall_at_k == 1.0
+    report = result.to_report()
+    raw = report["raw_cases"][0]
+    assert raw["query_id"] == "physics10_ch1_001"
+    assert raw["retrieved_source_ids"]
+    assert "latency_ms" in raw and "metrics" in raw

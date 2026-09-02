@@ -1,6 +1,6 @@
 {
-  "dataset_version": "rag-eval-v1-synthetic",
-  "description": "Synthetic Persian fixtures for contract validation; not a production corpus.",
+  "dataset_version": "rag-eval-v1.1-synthetic",
+  "description": "Synthetic Persian fixtures for reproducibility and contract validation; not a production corpus.",
   "cases": [
     {
       "case_id": "physics10_ch1_001",
@@ -9,11 +9,15 @@
       "subject": "فیزیک",
       "chapter": "۱",
       "difficulty": "easy",
-      "expected_sources": ["physics10:v1:p12:c1"],
+      "expected_sources": [
+        "physics10:v1:p12:c1"
+      ],
       "relevance_type": "exact",
       "expected_state": "sufficient",
       "expected_answer": "نیرو برهم‌کنش میان اجسام است.",
-      "paraphrase_variants": ["تعریف نیرو را بنویسید"],
+      "paraphrase_variants": [
+        "تعریف نیرو را بنویسید"
+      ],
       "relevance_grade": 3,
       "provenance": "synthetic:curriculum-fixture"
     },
@@ -24,11 +28,16 @@
       "subject": "فیزیک",
       "chapter": "۳",
       "difficulty": "medium",
-      "expected_sources": ["physics10:v1:p44:c2", "physics10:v1:p45:c1"],
+      "expected_sources": [
+        "physics10:v1:p44:c2",
+        "physics10:v1:p45:c1"
+      ],
       "relevance_type": "related",
       "expected_state": "sufficient",
       "expected_answer": "انرژی جنبشی با مجذور سرعت متناسب است.",
-      "paraphrase_variants": ["سرعت چه اثری بر انرژی جنبشی دارد؟"],
+      "paraphrase_variants": [
+        "سرعت چه اثری بر انرژی جنبشی دارد؟"
+      ],
       "multi_hop": true,
       "relevance_grade": 2,
       "provenance": "synthetic:curriculum-fixture"
@@ -54,13 +63,89 @@
       "subject": "شیمی",
       "chapter": "۴",
       "difficulty": "hard",
-      "expected_sources": ["chem10:v1:p61:c1", "chem10:v2:p61:c1"],
+      "expected_sources": [
+        "chem10:v1:p61:c1",
+        "chem10:v2:p61:c1"
+      ],
       "relevance_type": "related",
       "expected_state": "conflict",
       "expected_answer": "منابع اختلاف دارند و باید نسخهٔ کتاب مشخص شود.",
-      "paraphrase_variants": ["اگر دو کتاب دماهای متفاوت بدهند چه کنیم؟"],
+      "paraphrase_variants": [
+        "اگر دو کتاب دماهای متفاوت بدهند چه کنیم؟"
+      ],
       "relevance_grade": 2,
       "provenance": "synthetic:conflict-fixture"
+    },
+    {
+      "case_id": "physics10_ch1_005",
+      "query": "قانون دوم نیوتن را با اعداد فارسی توضیح بده",
+      "grade": "دهم",
+      "subject": "فیزیک",
+      "chapter": "۱",
+      "difficulty": "medium",
+      "expected_sources": [
+        "physics10:v1:p18:c2"
+      ],
+      "relevance_type": "exact",
+      "expected_state": "sufficient",
+      "expected_answer": "شتاب با نیرو نسبت مستقیم و با جرم نسبت معکوس دارد.",
+      "paraphrase_variants": [
+        "قانون دوم نیوتن چیست؟"
+      ],
+      "relevance_grade": 3,
+      "provenance": "synthetic:persian-numeral-fixture"
+    },
+    {
+      "case_id": "biology10_ch2_006",
+      "query": "یاخته‌ها چه وظیفه‌ای دارند؟",
+      "grade": "دهم",
+      "subject": "زیست‌شناسی",
+      "chapter": "۲",
+      "difficulty": "easy",
+      "expected_sources": [
+        "biology10:v1:p30:c1"
+      ],
+      "relevance_type": "exact",
+      "expected_state": "sufficient",
+      "expected_answer": "یاخته واحد بنیادی ساختار و کارکرد جانداران است.",
+      "paraphrase_variants": [
+        "وظیفهٔ سلول چیست؟"
+      ],
+      "relevance_grade": 3,
+      "provenance": "synthetic:zwnj-fixture"
+    },
+    {
+      "case_id": "chemistry10_ch1_007",
+      "query": "واکنش اکسایش کاهش را از روی متن اسکن‌شده پیدا کن",
+      "grade": "دهم",
+      "subject": "شیمی",
+      "chapter": "۱",
+      "difficulty": "hard",
+      "expected_sources": [
+        "chem10:v1:p9:c2"
+      ],
+      "relevance_type": "related",
+      "expected_state": "sufficient",
+      "expected_answer": "در واکنش اکسایش کاهش انتقال الکترون رخ می‌دهد.",
+      "paraphrase_variants": [
+        "واکنش اکسایش-کاهش چیست؟"
+      ],
+      "relevance_grade": 2,
+      "provenance": "synthetic:ocr-fixture"
+    },
+    {
+      "case_id": "math10_none_008",
+      "query": "پاسخ آزمون سال آینده چیست؟",
+      "grade": "دهم",
+      "subject": "ریاضی",
+      "chapter": "۱",
+      "difficulty": "hard",
+      "expected_sources": [],
+      "relevance_type": "none",
+      "expected_state": "no_source",
+      "paraphrase_variants": [],
+      "relevance_grade": 0,
+      "provenance": "synthetic:adversarial-out-of-corpus"
     }
   ]
 }
