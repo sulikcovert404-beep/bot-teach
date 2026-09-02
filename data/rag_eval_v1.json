@@ -1,0 +1,66 @@
+{
+  "dataset_version": "rag-eval-v1-synthetic",
+  "description": "Synthetic Persian fixtures for contract validation; not a production corpus.",
+  "cases": [
+    {
+      "case_id": "physics10_ch1_001",
+      "query": "نیرو چیست؟",
+      "grade": "دهم",
+      "subject": "فیزیک",
+      "chapter": "۱",
+      "difficulty": "easy",
+      "expected_sources": ["physics10:v1:p12:c1"],
+      "relevance_type": "exact",
+      "expected_state": "sufficient",
+      "expected_answer": "نیرو برهم‌کنش میان اجسام است.",
+      "paraphrase_variants": ["تعریف نیرو را بنویسید"],
+      "relevance_grade": 3,
+      "provenance": "synthetic:curriculum-fixture"
+    },
+    {
+      "case_id": "physics10_ch3_002",
+      "query": "رابطهٔ انرژی جنبشی و سرعت را توضیح بده.",
+      "grade": "دهم",
+      "subject": "فیزیک",
+      "chapter": "۳",
+      "difficulty": "medium",
+      "expected_sources": ["physics10:v1:p44:c2", "physics10:v1:p45:c1"],
+      "relevance_type": "related",
+      "expected_state": "sufficient",
+      "expected_answer": "انرژی جنبشی با مجذور سرعت متناسب است.",
+      "paraphrase_variants": ["سرعت چه اثری بر انرژی جنبشی دارد؟"],
+      "multi_hop": true,
+      "relevance_grade": 2,
+      "provenance": "synthetic:curriculum-fixture"
+    },
+    {
+      "case_id": "biology10_none_003",
+      "query": "نتیجهٔ آزمایش فردا در مدرسه چیست؟",
+      "grade": "دهم",
+      "subject": "زیست‌شناسی",
+      "chapter": "۲",
+      "difficulty": "hard",
+      "expected_sources": [],
+      "relevance_type": "none",
+      "expected_state": "no_source",
+      "paraphrase_variants": [],
+      "relevance_grade": 0,
+      "provenance": "synthetic:out-of-corpus"
+    },
+    {
+      "case_id": "chemistry10_conflict_004",
+      "query": "دمای جوش نمونه طبق دو منبع چقدر است؟",
+      "grade": "دهم",
+      "subject": "شیمی",
+      "chapter": "۴",
+      "difficulty": "hard",
+      "expected_sources": ["chem10:v1:p61:c1", "chem10:v2:p61:c1"],
+      "relevance_type": "related",
+      "expected_state": "conflict",
+      "expected_answer": "منابع اختلاف دارند و باید نسخهٔ کتاب مشخص شود.",
+      "paraphrase_variants": ["اگر دو کتاب دماهای متفاوت بدهند چه کنیم؟"],
+      "relevance_grade": 2,
+      "provenance": "synthetic:conflict-fixture"
+    }
+  ]
+}
