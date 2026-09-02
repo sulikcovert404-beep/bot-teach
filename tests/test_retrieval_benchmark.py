@@ -43,3 +43,15 @@ def test_controlled_benchmark_runs_lexical_fixture() -> None:
     comparison = compare_artifacts(artifact, artifact)
     assert comparison.comparable is True
     assert comparison.metric_deltas["lexical"]["recall_at_k"] == 0.0
+
+    second = persist_run_artifact(
+        (result,),
+        dataset_version="rag-eval-v1.2-synthetic",
+        retriever_version="lexical-baseline-v1",
+        timestamp="2026-09-02T00:00:00+00:00",
+    )
+    assert second.run_id != artifact.run_id
+    assert second.artifact_hash != artifact.artifact_hash
+    incompatible = compare_artifacts(artifact, second)
+    assert incompatible.comparable is False
+    assert incompatible.reason == "Dataset versions differ"
