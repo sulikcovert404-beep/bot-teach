@@ -39,3 +39,11 @@ def test_split_text_rejects_invalid_input() -> None:
         split_text("", chunk_size=10)
     with pytest.raises(ValueError):
         split_text("text", chunk_size=0)
+
+
+def test_split_text_is_deterministic_for_persian_zwnj_text() -> None:
+    text = "می‌روم به مدرسه.  درسِ علوم را می‌خوانم."
+    expected = split_text(text, chunk_size=18)
+    assert expected == split_text(text, chunk_size=18)
+    assert any("می‌روم" in chunk for chunk in expected)
+    assert all(chunk.strip() for chunk in expected)
