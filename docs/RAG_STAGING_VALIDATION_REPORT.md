@@ -76,3 +76,19 @@ Foundation فعلی بدون تغییر معماری حفظ شود. پس از ف
 با وجود موفقیت smoke validation، benchmark کیفیت روی dataset واقعی فارسی، latency
 در مقیاس بالاتر، memory impact و index behavior production هنوز انجام نشده‌اند؛ هیچ
 optimization index یا feature جدیدی در این checkpoint پیشنهاد نمی‌شود.
+
+## Controlled pgvector benchmark execution
+
+در یک کانتینر موقت و ایزوله `pgvector/pgvector:pg16`، با fixture سه‌منبعی
+(`exact`، `related` و `noise`) و query «نیرو چیست»، runner مصوب lexical و
+`PgVectorStore` هرکدام پنج بار اجرا شدند. زمان seed و cleanup از اندازه‌گیری حذف شد.
+
+| Retriever | Recall@2 | Precision@2 | MRR | Citation Accuracy | P50 (ms) | P95 (ms) |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Lexical | 1.0 | 0.5 | 1.0 | 1.0 | 2.157 | 7.048 |
+| Vector | 1.0 | 0.5 | 1.0 | 1.0 | 2.542 | 5.861 |
+
+Rollback پس از اجرا انجام شد و شمارش منابع با prefix benchmark صفر بود؛ کانتینر
+موقت نیز حذف شد. این fixture کوچک و synthetic است و نتیجه production یا gate نیست.
+تفکیک warm/cold، رفتار mismatch فیلتر، ZWNJ/OCR و ارزیابی روی corpus واقعی فارسی
+در این checkpoint پوشش داده نشده‌اند.
