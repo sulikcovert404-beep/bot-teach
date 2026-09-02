@@ -34,6 +34,10 @@ class CASConflictError(PipelineError):
     retryable = True
 
 
+class IdempotencyConflictError(PipelineError):
+    code = "IDEMPOTENCY_CONFLICT"
+
+
 class RetryableProcessingError(PipelineError):
     code = "PROCESSING_RETRYABLE"
     retryable = True
