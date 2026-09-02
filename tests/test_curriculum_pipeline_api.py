@@ -9,6 +9,7 @@ from app.services.curriculum_pipeline_api import (
     DigestMismatchError,
     InvalidStateError,
     JobState,
+    PipelineError,
 )
 
 
@@ -58,6 +59,18 @@ def test_idempotency_returns_original_receipt() -> None:
     assert second.result.content_version_id == first.result.content_version_id
 
 
+def test_idempotency_key_reuse_with_different_request_is_rejected() -> None:
+    service = CurriculumPipelineService()
+    first = service.create_content_version(
+        CommandContext(Actor(7, "CONTENT_ADMIN"), "same", request_hash="h1"), 1, "d"
+    )
+    assert first.status == "COMMITTED"
+    with pytest.raises(PipelineError, match="different request"):
+        service.create_content_version(
+            CommandContext(Actor(7, "CONTENT_ADMIN"), "same", request_hash="h2"), 2, "d2"
+        )
+
+
 def test_cas_conflict_and_async_job_contract() -> None:
     service = CurriculumPipelineService()
     version_id = service.create_content_version(ctx("CONTENT_ADMIN", "c"), 1, "d").result.content_version_id
@@ -66,4 +79,3 @@ def test_cas_conflict_and_async_job_contract() -> None:
     job = service.submit_processing_job(ctx("CONTENT_ADMIN", "job"), version_id)
     assert job.result.status is JobState.ACCEPTED
     assert service.get_job(job.result.job_id).job_id == job.result.job_id
-

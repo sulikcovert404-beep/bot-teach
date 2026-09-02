@@ -70,6 +70,7 @@ class CommandContext:
     idempotency_key: str
     expected_version: int | None = None
     reason: str | None = None
+    request_hash: str | None = None
 
 
 @dataclass(frozen=True)
@@ -123,14 +124,18 @@ class CurriculumPipelineService:
         self._versions: dict[int, ContentVersionSnapshot] = {}
         self._jobs: dict[str, JobReceipt] = {}
         self._receipts: dict[str, CommandReceipt] = {}
+        self._request_hashes: dict[str, str | None] = {}
         self._next_id = 1
 
     def _receipt(self, ctx: CommandContext, result: Any) -> CommandReceipt:
         existing = self._receipts.get(ctx.idempotency_key)
         if existing is not None:
+            if self._request_hashes[ctx.idempotency_key] != ctx.request_hash:
+                raise PipelineError("idempotency key was reused for a different request")
             return existing
         receipt = CommandReceipt(str(uuid4()), "COMMITTED", result)
         self._receipts[ctx.idempotency_key] = receipt
+        self._request_hashes[ctx.idempotency_key] = ctx.request_hash
         return receipt
 
     def create_content_version(self, ctx: CommandContext, source_document_id: int, digest: str) -> CommandReceipt:
