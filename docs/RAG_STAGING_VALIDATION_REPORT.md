@@ -48,14 +48,12 @@ impact، query plan یا رفتار index قابل‌استفاده نیست.
 - Planning Time: `0.118 ms`؛ Execution Time: `0.083 ms`؛ shared buffers hit: `44`.
 - این اعداد فقط smoke benchmark کوچک هستند و برای production یا مقایسه index کافی نیستند.
 
-### موارد اندازه‌گیری‌نشده
+### موارد خارج از این checkpoint
 
-- latency واقعی vector similarity و P50/P95؛
-- top-K روی embedding واقعی؛
-- metadata filtering در PostgreSQL؛
-- مصرف RAM/CPU و حجم index؛
-- رفتار index و زمان reindex؛
-- migration/rollback روی PostgreSQL.
+- warm/cold latency تفکیک نشده است؛
+- رفتار mismatch فیلتر به‌صورت مستقل اندازه‌گیری نشده است؛
+- مصرف RAM/CPU، حجم index و reindex بررسی نشده‌اند؛
+- fixture شامل تنوع ZWNJ/OCR و املای فارسی نیست.
 
 ## Issues
 
@@ -92,3 +90,4 @@ Rollback پس از اجرا انجام شد و شمارش منابع با prefix
 موقت نیز حذف شد. این fixture کوچک و synthetic است و نتیجه production یا gate نیست.
 تفکیک warm/cold، رفتار mismatch فیلتر، ZWNJ/OCR و ارزیابی روی corpus واقعی فارسی
 در این checkpoint پوشش داده نشده‌اند.
+
