@@ -21,8 +21,7 @@
   آزمون و endpointهای آموزشی انجام می‌شود و خلاصهٔ Admin نیز موجود است.
 - کلید Gemini در header امن ارسال می‌شود، Source Guardian دادهٔ منبع را escape می‌کند
   و secret scan برای فایل‌های tracked در CI فعال است.
-- provider مستقل Gemini Embedding برای foundation اضافه شده است؛ انتخاب و پیاده‌سازی
-  vector store عمداً تا تصویب معماری RAG انجام نشده است.
+- provider مستقل Gemini Embedding و PgVectorStore برای foundation اضافه شده‌اند؛`r`n  benchmark کنترل‌شده lexical/vector در محیط Docker ایزوله اجرا شده است، اما نتیجهٔ`r`n  production یا corpus واقعی فارسی محسوب نمی‌شود.
 
 ## شکاف‌های باقی‌مانده برای Production
 
@@ -39,3 +38,4 @@
 
 راهنماهای staging، observability، secret manager و قرارداد پرداخت در اسناد مرتبط
 README نگهداری می‌شوند؛ این اسناد جایگزین اجرای واقعی محیطی نیستند.
+
