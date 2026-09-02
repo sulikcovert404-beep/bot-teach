@@ -17,6 +17,8 @@
 - per-provider `metric_snapshot`
 - complete provider reports, including raw per-case evidence
 
+The run identity is generated with UUID4; caller-provided identifiers are not trusted. `artifact_hash` is a SHA-256 digest of the canonical artifact payload. `compare_artifacts()` returns metric deltas for shared providers and refuses comparison when dataset versions differ.
+
 `persist_run_artifact()` creates the envelope without choosing a database, filesystem, or vendor-specific persistence layer. Callers can serialize `to_report()` to their approved artifact store.
 
 ## Validation
