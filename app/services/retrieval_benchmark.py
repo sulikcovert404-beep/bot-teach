@@ -2,6 +2,7 @@
 
 from collections.abc import Callable, Sequence
 from dataclasses import asdict, dataclass
+from datetime import UTC, datetime
 from time import perf_counter
 from typing import Any
 
@@ -35,6 +36,53 @@ class BenchmarkResult:
             "evaluations": [asdict(item) for item in self.evaluations],
             "raw_cases": list(self.raw_cases),
         }
+
+
+@dataclass(frozen=True)
+class BenchmarkRunArtifact:
+    """Portable metadata envelope for comparing benchmark executions."""
+
+    run_id: str
+    dataset_version: str
+    retriever_version: str
+    timestamp: str
+    execution_metadata: dict[str, Any]
+    metric_snapshot: dict[str, dict[str, float]]
+    results: tuple[dict[str, Any], ...]
+
+    def to_report(self) -> dict[str, Any]:
+        return asdict(self)
+
+
+def persist_run_artifact(
+    results: Sequence[BenchmarkResult],
+    *,
+    dataset_version: str,
+    retriever_version: str,
+    execution_metadata: dict[str, Any] | None = None,
+    run_id: str | None = None,
+    timestamp: str | None = None,
+) -> BenchmarkRunArtifact:
+    """Build a JSON-serializable artifact without writing to a provider-specific store."""
+    if not dataset_version.strip() or not retriever_version.strip():
+        raise ValueError("Dataset and retriever versions are required")
+    generated_at = timestamp or datetime.now(UTC).isoformat()
+    stable_run_id = run_id or f"{dataset_version}-{generated_at.replace(':', '').replace('+00:00', 'Z')}"
+    snapshots: dict[str, dict[str, float]] = {}
+    reports: list[dict[str, Any]] = []
+    for result in results:
+        report = result.to_report()
+        snapshots[result.provider] = report["aggregate"]
+        reports.append(report)
+    return BenchmarkRunArtifact(
+        run_id=stable_run_id,
+        dataset_version=dataset_version,
+        retriever_version=retriever_version,
+        timestamp=generated_at,
+        execution_metadata=dict(execution_metadata or {}),
+        metric_snapshot=snapshots,
+        results=tuple(reports),
+    )
 
 
 def _mean(values: Any) -> float:
