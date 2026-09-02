@@ -58,9 +58,11 @@ def test_evaluation_reports_mrr_and_no_source_accuracy() -> None:
 def test_evaluation_case_validates_dataset_contract() -> None:
     case = EvaluationCase(
         query_id="q1", question="فصل اول چیست؟", expected_sources=frozenset({"book:p1"}),
-        subject="فیزیک", grade="دهم", chapter="۱", difficulty="easy"
+        subject="فیزیک", grade="دهم", chapter="۱", difficulty="easy",
+        expected_answer="پاسخ نمونه", paraphrase_variants=("صورت دیگر",), provenance="book-v1"
     )
     assert case.expected_sources == frozenset({"book:p1"})
+    assert case.expected_answer == "پاسخ نمونه"
     with pytest.raises(ValueError):
         EvaluationCase(query_id="q2", question="نامشخص", expected_sources=frozenset())
 
@@ -73,6 +75,15 @@ def test_ndcg_and_r_precision_support_graded_relevance() -> None:
     )
     assert 0 < result.ndcg_at_k <= 1
     assert result.r_precision == 1.0
+
+
+def test_citation_accuracy_is_separate_from_retrieval_match() -> None:
+    result = evaluate_ranked_sources(
+        query_id="q1", expected_sources={"a"}, ranked_sources=["a"], k=1,
+        cited_sources=["wrong"],
+    )
+    assert result.recall_at_k == 1.0
+    assert result.citation_match == 0.0
 
 
 def test_persian_normalization_and_faithfulness_contract() -> None:

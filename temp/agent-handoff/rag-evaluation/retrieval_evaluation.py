@@ -21,6 +21,11 @@ class EvaluationCase:
     dataset_version: str = "v1"
     relevance_type: Literal["exact", "related", "none"] = "exact"
     expected_state: Literal["sufficient", "no_source", "conflict"] = "sufficient"
+    expected_answer: str | None = None
+    paraphrase_variants: tuple[str, ...] = ()
+    multi_hop_sources: bool = False
+    relevance_grade: int = 1
+    provenance: str | None = None
 
     def __post_init__(self) -> None:
         if not self.dataset_version.strip() or not self.query_id.strip() or not self.question.strip():
@@ -57,11 +62,13 @@ def evaluate_ranked_sources(
     expects_conflict: bool = False,
     conflict_detected: bool | None = None,
     relevance_grades: Mapping[str, int] | None = None,
+    cited_sources: Sequence[str] | None = None,
 ) -> RetrievalEvaluation:
     if not query_id.strip() or (not expected_sources and not expects_no_source) or not 1 <= k <= 100:
         raise ValueError("Evaluation query, expected sources and k are required")
     top_k = list(ranked_sources[:k])
-    hits = sum(source in expected_sources for source in top_k)
+    unique_top_k = set(top_k)
+    hits = len(unique_top_k.intersection(expected_sources))
     unique_hits = len(set(top_k).intersection(expected_sources))
     first_hit = next((index + 1 for index, source in enumerate(top_k) if source in expected_sources), None)
     reciprocal_rank = 1 / first_hit if first_hit else 0.0
@@ -80,8 +87,12 @@ def evaluate_ranked_sources(
     return RetrievalEvaluation(
         query_id=query_id,
         recall_at_k=unique_hits / len(expected_sources) if expected_sources else 0.0,
-        precision_at_k=hits / len(top_k) if top_k else 0.0,
-        citation_match=unique_hits / len(expected_sources) if expected_sources else 0.0,
+        precision_at_k=hits / len(unique_top_k) if unique_top_k else 0.0,
+        citation_match=(
+            len(set(cited_sources).intersection(expected_sources)) / len(expected_sources)
+            if cited_sources is not None and expected_sources
+            else (unique_hits / len(expected_sources) if expected_sources else 0.0)
+        ),
         source_coverage=(
             len(set(ranked_sources).intersection(expected_sources)) / len(expected_sources)
             if expected_sources
@@ -104,6 +115,15 @@ class FaithfulnessEvaluation:
     supported_claim_ids: frozenset[str]
     citation_source_ids: frozenset[str]
     scoring_status: Literal["not_scored"] = "not_scored"
+
+
+PERSIAN_NORMALIZATION_FIXTURES: tuple[tuple[str, str], ...] = (
+    ("ي", "ی"),
+    ("ك", "ک"),
+    ("فیزیک  دهم", "فیزیک دهم"),
+    ("می‌رود", "می‌رود"),
+    ("١۰", "١۰"),
+)
 
 
 def normalize_persian_text(text: str) -> str:
