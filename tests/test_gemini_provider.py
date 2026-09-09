@@ -163,7 +163,10 @@ async def test_provider_emits_success_event_without_sensitive_payload(monkeypatc
             return None
 
         def json(self) -> dict[str, object]:
-            return {"candidates": [{"content": {"parts": [{"text": "answer"}]}}]}
+            return {
+                "candidates": [{"content": {"parts": [{"text": "answer"}]}}],
+                "usageMetadata": {"candidatesTokenCount": 7},
+            }
 
     class Client:
         async def __aenter__(self) -> Self:
@@ -195,10 +198,15 @@ async def test_provider_emits_success_event_without_sensitive_payload(monkeypatc
     assert event.retry_count == 0
     assert event.fallback_attempts == 0
     assert event.latency_ms is not None and event.latency_ms >= 0
+    assert event.prompt_chars == len("private prompt")
+    assert event.context_chars is None
+    assert event.requested_tokens == 1000
+    assert event.usage_tokens == 7
     assert "private prompt" not in event.serialize()
     assert "answer" not in event.serialize()
     assert "secret-key" not in event.serialize()
-    assert "token" not in event.serialize().casefold()
+    assert '"requested_tokens":1000' in event.serialize()
+    assert '"usage_tokens":7' in event.serialize()
 
 
 @pytest.mark.asyncio
@@ -231,6 +239,10 @@ async def test_provider_emits_quota_event_with_retry_after(monkeypatch: pytest.M
     assert event.retry_count == 0
     assert event.fallback_attempts == 0
     assert event.latency_ms is not None and event.latency_ms >= 0
+    assert event.prompt_chars == len("hello")
+    assert event.context_chars is None
+    assert event.requested_tokens == 1000
+    assert event.usage_tokens is None
     assert "hello" not in event.serialize()
 
 

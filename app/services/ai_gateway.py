@@ -15,6 +15,7 @@ class AIRequest:
     model: str | None = None
     max_tokens: int = 1000
     task_type: str = "general"
+    context_chars: int | None = None
 
 
 @dataclass(frozen=True)
@@ -57,6 +58,10 @@ class AIProviderEvent:
     retry_count: int = 0
     fallback_attempts: int = 0
     latency_ms: float | None = None
+    prompt_chars: int | None = None
+    context_chars: int | None = None
+    requested_tokens: int | None = None
+    usage_tokens: int | None = None
 
     def serialize(self) -> str:
         return json.dumps(self.__dict__, sort_keys=True, separators=(",", ":"))
@@ -119,6 +124,7 @@ class ModelRouter:
             model=model,
             max_tokens=min(request.max_tokens, self.max_tokens),
             task_type=request.task_type,
+            context_chars=request.context_chars,
         )
 
 
@@ -157,6 +163,9 @@ class GeminiProvider:
         model = models[0]
         self._emit(AIProviderEvent(
             "ai_request_started", "gemini", model, request.task_type, "started", 0.0,
+            prompt_chars=len(request.prompt),
+            context_chars=request.context_chars,
+            requested_tokens=request.max_tokens,
         ))
         payload = {
             "contents": [{"parts": [{"text": request.prompt}]}],
@@ -221,6 +230,10 @@ class GeminiProvider:
             attempts=attempt + 1,
             retry_count=attempt,
             latency_ms=self._duration_ms(started),
+            prompt_chars=len(request.prompt),
+            context_chars=request.context_chars,
+            requested_tokens=request.max_tokens,
+            usage_tokens=usage_tokens,
         ))
         return result
 
@@ -256,6 +269,9 @@ class GeminiProvider:
             attempts=attempt + 1,
             retry_count=attempt,
             latency_ms=self._duration_ms(started),
+            prompt_chars=len(request.prompt),
+            context_chars=request.context_chars,
+            requested_tokens=request.max_tokens,
         ))
 
 
