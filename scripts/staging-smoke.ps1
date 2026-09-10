@@ -3,15 +3,20 @@ param(
     [string]$BaseUrl = "http://localhost:8000",
     [int]$Attempts = 30,
     [int]$DelaySeconds = 2,
-    [string]$ExpectedMigrationHead = $(if ($env:EXPECTED_MIGRATION_HEAD) { $env:EXPECTED_MIGRATION_HEAD } else { "20260909_0015" })
+    [string]$ExpectedMigrationHead = $(if ($env:EXPECTED_MIGRATION_HEAD) { $env:EXPECTED_MIGRATION_HEAD } else { "20260909_0015" }),
+    [switch]$UseExistingRuntime
 )
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "Starting staging services..."
-docker compose up -d db migrate api
-if ($LASTEXITCODE -ne 0) {
-    throw "Compose startup failed with exit code $LASTEXITCODE"
+if (-not $UseExistingRuntime) {
+    docker compose up -d db migrate api
+    if ($LASTEXITCODE -ne 0) {
+        throw "Compose startup failed with exit code $LASTEXITCODE"
+    }
+} else {
+    Write-Host "Using existing runtime at $BaseUrl"
 }
 
 $readyUrl = "$BaseUrl/health/ready"
