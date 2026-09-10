@@ -91,3 +91,8 @@ UNCHANGED
 - `pg_restore --list` completed successfully with 429 archive entries.
 - Temporary dump and listing were removed after validation; no database schema or data mutation was performed.
 - Archive SHA-256 (ephemeral verification artifact): `1aa0eb7e705187c071eb3284cd624d95d50e16a7eba569512cb348db56432f56`.
+
+## Load smoke attempt (2026-09-10)
+- Direct staging probe `curl http://localhost:8000/health/ready` succeeded with HTTP 200 in 0.228s.
+- A 20-request PowerShell background-job harness returned connection failures because jobs could not reach the host-published port; this is a test-harness/environment limitation, not evidence of an API failure.
+- A sequential PowerShell attempt exceeded its command timeout, so load qualification remains **NOT QUALIFIED** and no success is claimed.
