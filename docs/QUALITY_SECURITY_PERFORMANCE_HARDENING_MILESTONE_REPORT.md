@@ -134,3 +134,9 @@ UNCHANGED
 - Auth/assignment/tenant/retrieval/Telegram focused adversarial regression: **29 passed, 1 warning**.
 - Ruff executable is unavailable in the current host environment; lint qualification remains pending (no success claimed).
 - Security Council remains decision-gated for RLS classification; no RLS/schema change performed.
+
+## Disposable RLS synthetic qualification (2026-09-10)
+- A disposable `pgvector/pgvector:pg16` container was created and removed after testing; live staging and production were untouched.
+- Nine candidate tenant tables were modeled with `tenant_id`, `NOBYPASSRLS` runtime role, `FORCE ROW LEVEL SECURITY`, and fail-closed `current_setting('app.tenant_id', true)` policies.
+- Tenant A saw only its own row (1), could insert its own row, saw zero Tenant B rows, and foreign UPDATE/DELETE affected zero rows. Missing tenant context returned zero rows.
+- This qualifies policy mechanics only. It does not yet qualify full application schema relationships, pooler interleaving, admin/background workflows, or Alembic upgrade/downgrade because no selected-table migration has been created or applied.
