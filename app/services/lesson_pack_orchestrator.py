@@ -4,6 +4,10 @@ from __future__ import annotations
 from dataclasses import dataclass
 from typing import Protocol
 import asyncio
+import json
+from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
+from app.db.models import GeneratedAsset
 
 from app.services.lesson_pack import LessonPack, LessonPackRequest, LessonPackService, SchoolStage
 
@@ -28,6 +32,56 @@ class InMemoryAssetStore:
 
     async def put(self, pack: LessonPack, *, asset_type: str) -> None:
         self._items.setdefault((pack.lesson_id, pack.content_version, asset_type, pack.stage), pack)
+
+
+class SqlAlchemyAssetStore:
+    """Persistent adapter using the qualified GeneratedAsset identity index."""
+
+    def __init__(self, session) -> None:
+        self.session = session
+
+    async def get(self, *, lesson_id: int, content_version: str, asset_type: str, stage: SchoolStage) -> LessonPack | None:
+        del lesson_id, content_version  # DB identity is the immutable numeric version id.
+        raise ValueError("use get_for_request so content_version_id is explicit")
+
+    async def get_for_request(self, request: LessonPackRequest, *, asset_type: str = "PACK") -> LessonPack | None:
+        if request.content_version_id is None:
+            raise ValueError("content_version_id is required for SQL persistence")
+        row = (await self.session.execute(select(GeneratedAsset).where(
+            GeneratedAsset.content_version_id == request.content_version_id,
+            GeneratedAsset.asset_type == asset_type,
+            GeneratedAsset.school_stage == request.stage.value,
+            GeneratedAsset.language == request.language,
+            GeneratedAsset.profile_version == "lesson-pack-v1",
+            GeneratedAsset.review_state == "APPROVED",
+        ))).scalar_one_or_none()
+        if row is None:
+            return None
+        data = json.loads(row.content_json)
+        return LessonPack(**data)
+
+    async def put_for_request(self, request: LessonPackRequest, pack: LessonPack, *, job_id: int, asset_type: str = "PACK") -> LessonPack:
+        if request.content_version_id is None:
+            raise ValueError("content_version_id is required for SQL persistence")
+        payload = json.dumps({"lesson_id": pack.lesson_id, "content_version": pack.content_version,
+            "stage": pack.stage, "language": pack.language, "script": pack.script,
+            "podcast_script": pack.podcast_script, "pdf_markdown": pack.pdf_markdown,
+            "mcq": pack.mcq, "descriptive": pack.descriptive, "answers": pack.answers,
+            "content_hash": pack.content_hash, "content_version_id": request.content_version_id}, ensure_ascii=False)
+        row = GeneratedAsset(job_id=job_id, content_version_id=request.content_version_id,
+            asset_type=asset_type, content_json=payload, content_hash=pack.content_hash,
+            school_stage=request.stage.value, language=request.language, profile_version="lesson-pack-v1",
+            review_state="APPROVED")
+        self.session.add(row)
+        try:
+            await self.session.flush()
+        except IntegrityError:
+            await self.session.rollback()
+            existing = await self.get_for_request(request, asset_type=asset_type)
+            if existing is None:
+                raise
+            return existing
+        return pack
 
 
 @dataclass(frozen=True, slots=True)
@@ -74,6 +128,16 @@ class LessonPackOrchestrator:
         if self.store is not None:
             await self.store.put(pack, asset_type="PACK")
         return pack
+
+    async def generate_or_reuse_persisted(self, request: LessonPackRequest, *, job_id: int) -> LessonPack:
+        """Persisted path; caller supplies the existing generation job/trace id."""
+        if not isinstance(self.store, SqlAlchemyAssetStore):
+            return await self.generate_or_reuse(request)
+        existing = await self.store.get_for_request(request)
+        if existing is not None:
+            return existing
+        pack = self.generator.build_or_reuse(request)
+        return await self.store.put_for_request(request, pack, job_id=job_id)
 
     async def delivery_assets(self, request: LessonPackRequest, *, review_state: str) -> tuple[DeliveryAsset, ...]:
         if review_state != "APPROVED":
