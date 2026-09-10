@@ -53,3 +53,9 @@ UNCHANGED
 - Targeted focused suite rerun: 11 passed in 0.15s.
 - Ruff could not be executed in the current Windows environment (`python -m ruff`: module unavailable); no lint pass is claimed.
 
+## Retrieval scope audit (2026-09-10)
+- `ScopedDatabaseRetriever` does apply tenant, classroom, grade, publication, approval, processing, and vector-sync predicates before lexical ranking.
+- `PgVectorStore.search` still accepts no tenant/classroom/scope fields and filters only source metadata; it cannot independently prove tenant isolation or publication eligibility.
+- `SourceChunk` has no persisted `scope` column, while the provider-neutral RAG contract exposes `scope`; this remains an adapter/schema integration gap.
+- No code fix was applied pending Commander selection of the RLS and canonical retrieval boundary.
+
