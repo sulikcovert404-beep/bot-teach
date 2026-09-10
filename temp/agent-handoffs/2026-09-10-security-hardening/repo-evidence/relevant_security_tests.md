@@ -1,0 +1,11 @@
+D:\project\bot telegram teacher\tests\test_auth_dependencies.py
+D:\project\bot telegram teacher\tests\test_auth_subscription_e2e.py
+D:\project\bot telegram teacher\tests\test_authorization_production_wiring_design_package.py
+D:\project\bot telegram teacher\tests\test_authorization_production_wiring_scope_definition.py
+D:\project\bot telegram teacher\tests\test_authorization_wiring_validation.py
+D:\project\bot telegram teacher\tests\test_authorization_wiring.py
+D:\project\bot telegram teacher\tests\test_rag_confidence_conflict_decision_wave.py
+D:\project\bot telegram teacher\tests\test_rag_contracts.py
+D:\project\bot telegram teacher\tests\test_rag_integration_impact_review_wave.py
+D:\project\bot telegram teacher\tests\test_rag_quality_enhancement_wave.py
+D:\project\bot telegram teacher\tests\test_rag_regression_validation_suite.py

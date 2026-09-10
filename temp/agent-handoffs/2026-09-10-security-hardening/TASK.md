@@ -1,0 +1,2 @@
+# Task
+Review the supplied sanitized evidence for security and correctness risks. For each finding provide severity, evidence or exact verification needed, exploit/failure scenario, remediation, trade-offs, RLS relevance, and FIX NOW/DEFER/COMMANDER DECISION. Classify RLS_NOT_REQUIRED_NOW, RLS_SELECTED_TABLES, or RLS_BROADLY_REQUIRED. Do not implement or add side effects. Clearly label unverified claims.
