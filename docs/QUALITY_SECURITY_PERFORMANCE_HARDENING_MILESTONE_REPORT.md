@@ -65,3 +65,6 @@ UNCHANGED
 - Before the Docker daemon became unavailable, `stagingwave-api-pub` was observed `unhealthy`; repeated `/health/ready` probes returned HTTP 503 with `Migration drift / Not ready`.
 - A follow-up `docker exec`/`docker version` could not reconnect because the Docker Desktop Linux engine named pipe was absent. Revision and expected-head comparison therefore remains unverified in this recheck.
 
+- Docker was subsequently available; staging services were started with the existing compose definition. `stagingwave-db-1` and `stagingwave-redis-1` are healthy, migration exited 0, and `GET http://localhost:8000/health/ready` returned HTTP 200 with migration head `20260909_0015`.
+- The orphan `stagingwave-api-pub` container remains stopped; it was not removed or modified.
+
