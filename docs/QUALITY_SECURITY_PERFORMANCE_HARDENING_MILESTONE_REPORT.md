@@ -100,3 +100,6 @@ UNCHANGED
 ## Docker-network load smoke (2026-09-10)
 - 20 sequential requests to `/health/ready` from inside `stagingwave-api-1`: **20/20 HTTP 200**, 0 failures, 223.9 ms total.
 - This qualifies basic readiness load smoke only; it is not a production capacity benchmark.
+
+## Failure-path regression validation (2026-09-10)
+- Gemini provider failure mapping/retry behavior, health dependency checks, Redis rate limiting, Telegram route error mapping, client error normalization, and unit-of-work cleanup: **37 passed, 2 warnings**.
