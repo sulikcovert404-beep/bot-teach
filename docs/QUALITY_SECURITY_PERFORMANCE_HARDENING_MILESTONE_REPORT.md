@@ -72,4 +72,5 @@ UNCHANGED
 - Direct readiness probe against the already-running staging API passed: `{"status":"ready","migration_head":"20260909_0015"}`. The script default still expects `20260907_0008`, so its expectation is stale relative to the running staging lineage.
 - Read-only endpoint smoke: `/health` returned HTTP 200 and `/openapi.json` returned HTTP 200. The expected liveness route is `/health` (not `/health/live`); `/health/live` returned 404.
 - Health/database contract tests: 6 passed in 15.31s; two existing deprecation warnings were emitted (Starlette/httpx and Alembic `path_separator`).
+- Follow-up runtime check: all three `stagingwave` services healthy; container environment and readiness both report `EXPECTED_MIGRATION_HEAD=20260909_0015`.
 
