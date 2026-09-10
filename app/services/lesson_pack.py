@@ -75,7 +75,7 @@ class LessonPackService:
         )
         descriptive = ({"question": f"یک توضیح کوتاه درباره «{request.title}» بنویسید."},)
         answers = ({"question": descriptive[0]["question"], "answer": "پاسخ باید بر اساس متن منبع و با ذکر دلیل باشد."},)
-        canonical = json.dumps({"script": script, "podcast": podcast, "pdf": pdf, "mcq": mcq, "descriptive": descriptive, "answers": answers}, ensure_ascii=False, sort_keys=True)
+        canonical = json.dumps({"lesson_id": request.lesson_id, "content_version": request.content_version, "language": request.language, "stage": request.stage.value, "script": script, "podcast": podcast, "pdf": pdf, "mcq": mcq, "descriptive": descriptive, "answers": answers}, ensure_ascii=False, sort_keys=True)
         return LessonPack(request.lesson_id, request.content_version, request.stage, request.language, script, podcast, pdf, mcq, descriptive, answers, sha256(canonical.encode()).hexdigest())
 
     def build_or_reuse(self, request: LessonPackRequest) -> LessonPack:
