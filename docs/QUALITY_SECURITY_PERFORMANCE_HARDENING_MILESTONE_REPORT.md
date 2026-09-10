@@ -119,3 +119,12 @@ UNCHANGED
 - `pip-audit .` identified **77 advisories affecting pypdf 5.9.0**.
 - Remediation requires upgrading pypdf to a version at least 6.16.1 (latest listed fix floor), which is a dependency/runtime change and was not applied without Commander review.
 - No dependency, source, image, or production changes were made in this scan.
+
+## PDF Parser Security Hardening (2026-09-10)
+- Runtime dependency pinned to `pypdf==6.16.1` in `pyproject.toml` and `Dockerfile`; rebuilt staging image verified the same version inside `stagingwave-api-1`.
+- PDF parsing now uses explicit `strict=False`, configurable page and extraction-time limits (defaults: 500 pages / 30 seconds), preserves typed guard errors, and isolates/logs page-level extraction failures.
+- Extracted text is persisted in 8,000-character `SourceChunk` rows, preventing truncation of documents exceeding the column limit without a schema migration.
+- Focused upload/ingestion tests: **6 passed**. Full regression: **868 passed, 2 warnings**. `pip-audit .`: **No known vulnerabilities found**.
+- `/health/ready`: **HTTP 200** after image recreation; container pypdf version: **6.16.1**.
+- `scripts/staging-smoke.ps1` reached healthy services but failed its stale consumer assertion (`expected 20260907_0008`, actual `20260909_0015`). This is validation-artifact drift; no migration was run or changed.
+- Production unchanged.
