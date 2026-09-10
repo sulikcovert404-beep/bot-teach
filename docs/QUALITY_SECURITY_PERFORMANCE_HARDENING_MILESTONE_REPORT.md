@@ -85,3 +85,9 @@ UNCHANGED
 - Authorization wiring, admin authorization, publication access, knowledge runtime, RAG contracts, AI gateway, and rate-limit suites: **22 passed, 1 warning**.
 - No production, schema, migration, webhook, or deployment mutation performed in this validation step.
 - Dependency scanners `pip-audit` and `trivy` remain unavailable on the workstation and require tool provisioning before a vulnerability verdict.
+
+## Backup/restore rehearsal evidence (2026-09-10)
+- A PostgreSQL custom-format dump was created from the running staging database inside the DB container.
+- `pg_restore --list` completed successfully with 429 archive entries.
+- Temporary dump and listing were removed after validation; no database schema or data mutation was performed.
+- Archive SHA-256 (ephemeral verification artifact): `1aa0eb7e705187c071eb3284cd624d95d50e16a7eba569512cb348db56432f56`.
