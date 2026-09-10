@@ -42,3 +42,8 @@ Codex should isolate and validate the retrieval scope path and auth/tenant autho
 
 ## Production
 UNCHANGED
+
+## Additional focused validation (2026-09-10)
+- 	ests/test_admin_authorization.py, 	ests/test_authorization_wiring.py, 	ests/test_assignment_contract.py: 11 passed.
+- This validates pure role/ownership contracts only; it does not prove database-level tenant isolation or RLS.
+
