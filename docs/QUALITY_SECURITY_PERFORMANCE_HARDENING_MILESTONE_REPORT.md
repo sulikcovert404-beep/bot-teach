@@ -103,3 +103,7 @@ UNCHANGED
 
 ## Failure-path regression validation (2026-09-10)
 - Gemini provider failure mapping/retry behavior, health dependency checks, Redis rate limiting, Telegram route error mapping, client error normalization, and unit-of-work cleanup: **37 passed, 2 warnings**.
+
+## Runtime log/restart audit (2026-09-10)
+- Last 30 minutes of API, PostgreSQL, and Redis logs contained no ERROR, FATAL, PANIC, traceback, or CRITICAL entries.
+- API, PostgreSQL, and Redis each report `restart=0` and health `healthy`.
