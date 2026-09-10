@@ -26,6 +26,17 @@ class LessonPackOrchestrator:
         self.generator = generator or LessonPackService()
         self.store = store
 
+    @staticmethod
+    def generation_parameters(request: LessonPackRequest) -> dict[str, object]:
+        """Stable parameters for the existing ContentGenerationJob idempotency key."""
+        return {
+            "content_version": request.content_version,
+            "language": request.language,
+            "lesson_id": request.lesson_id,
+            "school_stage": request.stage.value,
+            "script_version": "lesson-pack-v1",
+        }
+
     async def generate_or_reuse(self, request: LessonPackRequest) -> LessonPack:
         if self.store is not None:
             existing = await self.store.get(lesson_id=request.lesson_id, content_version=request.content_version, asset_type="PACK", stage=request.stage)
