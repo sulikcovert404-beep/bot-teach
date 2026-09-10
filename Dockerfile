@@ -2,7 +2,7 @@ FROM python:3.12-slim
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 COPY pyproject.toml .
-RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic-settings sqlalchemy asyncpg aiosqlite redis PyJWT alembic httpx pytest pytest-asyncio ruff mypy pgvector reportlab
+RUN pip install --no-cache-dir fastapi uvicorn[standard] pydantic-settings sqlalchemy asyncpg aiosqlite redis PyJWT alembic httpx pytest pytest-asyncio ruff "mypy>=1.13,<2.0" pgvector reportlab "pypdf==6.16.1" python-multipart "types-reportlab>=4.2,<5.0"
 COPY alembic.ini .
 COPY migrations ./migrations
 COPY app ./app
