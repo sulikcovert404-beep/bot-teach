@@ -114,3 +114,8 @@ UNCHANGED
 ## Full regression revalidation (2026-09-10)
 - Complete repository suite: **868 passed, 2 warnings** in 215.39 seconds.
 - No test failures or unexpected runtime exceptions observed.
+
+## Dependency vulnerability scan (2026-09-10)
+- `pip-audit .` identified **77 advisories affecting pypdf 5.9.0**.
+- Remediation requires upgrading pypdf to a version at least 6.16.1 (latest listed fix floor), which is a dependency/runtime change and was not applied without Commander review.
+- No dependency, source, image, or production changes were made in this scan.
