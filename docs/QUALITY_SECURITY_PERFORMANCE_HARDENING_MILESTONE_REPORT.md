@@ -128,3 +128,9 @@ UNCHANGED
 - `/health/ready`: **HTTP 200** after image recreation; container pypdf version: **6.16.1**.
 - `scripts/staging-smoke.ps1` reached healthy services but failed its stale consumer assertion (`expected 20260907_0008`, actual `20260909_0015`). This is validation-artifact drift; no migration was run or changed.
 - Production unchanged.
+
+## Milestone 3 initial hardening status (2026-09-10)
+- Migration consumer alignment and existing-runtime smoke: **PASS** (`20260909_0015`, HTTP 200).
+- Auth/assignment/tenant/retrieval/Telegram focused adversarial regression: **29 passed, 1 warning**.
+- Ruff executable is unavailable in the current host environment; lint qualification remains pending (no success claimed).
+- Security Council remains decision-gated for RLS classification; no RLS/schema change performed.
