@@ -96,3 +96,7 @@ UNCHANGED
 - Direct staging probe `curl http://localhost:8000/health/ready` succeeded with HTTP 200 in 0.228s.
 - A 20-request PowerShell background-job harness returned connection failures because jobs could not reach the host-published port; this is a test-harness/environment limitation, not evidence of an API failure.
 - A sequential PowerShell attempt exceeded its command timeout, so load qualification remains **NOT QUALIFIED** and no success is claimed.
+
+## Docker-network load smoke (2026-09-10)
+- 20 sequential requests to `/health/ready` from inside `stagingwave-api-1`: **20/20 HTTP 200**, 0 failures, 223.9 ms total.
+- This qualifies basic readiness load smoke only; it is not a production capacity benchmark.
