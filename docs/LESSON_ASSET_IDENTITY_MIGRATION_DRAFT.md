@@ -36,3 +36,12 @@ request idempotency key.
 
 Current verdict: `SCHEMA MIGRATION REQUIRED`, `LIVE STAGING UNCHANGED`,
 `PRODUCTION UNCHANGED`.
+
+## Disposable rehearsal evidence
+
+The upgrade SQL was applied to a fresh PostgreSQL disposable, the index and
+foreign key were removed using the migration's inverse operations, and the
+same upgrade SQL was applied again successfully. This validates the DDL
+reversibility and re-upgrade behavior. The Alembic command-level downgrade
+harness previously exceeded its timeout while traversing the larger lineage;
+that harness result remains `NOT QUALIFIED` until rerun with controlled locks.
