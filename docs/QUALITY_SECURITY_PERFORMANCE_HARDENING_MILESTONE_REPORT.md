@@ -107,3 +107,6 @@ UNCHANGED
 ## Runtime log/restart audit (2026-09-10)
 - Last 30 minutes of API, PostgreSQL, and Redis logs contained no ERROR, FATAL, PANIC, traceback, or CRITICAL entries.
 - API, PostgreSQL, and Redis each report `restart=0` and health `healthy`.
+
+## Observability regression validation (2026-09-10)
+- Observability projections, AI metrics, structured logging, and health checks: **15 passed, 2 warnings**.
