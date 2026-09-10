@@ -61,3 +61,7 @@ UNCHANGED
 - Existing `tests/test_vector_store.py` covers PostgreSQL gating, invalid-input rejection, and pgvector DDL compilation only; it contains no query-level tenant/publication/scope isolation assertion.
 - Combined security/retrieval contract suite: 24 passed in 1.33s (`vector_store`, `knowledge_runtime`, `rag_contracts`, `publication_access`, assignment, admin authorization, and authorization wiring). These remain unit/contract checks and do not replace a real PostgreSQL isolation test.
 
+## Staging runtime recheck (2026-09-10)
+- Before the Docker daemon became unavailable, `stagingwave-api-pub` was observed `unhealthy`; repeated `/health/ready` probes returned HTTP 503 with `Migration drift / Not ready`.
+- A follow-up `docker exec`/`docker version` could not reconnect because the Docker Desktop Linux engine named pipe was absent. Revision and expected-head comparison therefore remains unverified in this recheck.
+
