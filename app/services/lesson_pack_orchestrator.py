@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Protocol
+import asyncio
 
 from app.services.lesson_pack import LessonPack, LessonPackRequest, LessonPackService, SchoolStage
 
@@ -17,6 +18,10 @@ class InMemoryAssetStore:
 
     def __init__(self) -> None:
         self._items: dict[tuple[int, str, str, SchoolStage], LessonPack] = {}
+        self._locks: dict[tuple[int, str, str, SchoolStage], asyncio.Lock] = {}
+
+    def lock_for(self, key: tuple[int, str, str, SchoolStage]) -> asyncio.Lock:
+        return self._locks.setdefault(key, asyncio.Lock())
 
     async def get(self, *, lesson_id: int, content_version: str, asset_type: str, stage: SchoolStage) -> LessonPack | None:
         return self._items.get((lesson_id, content_version, asset_type, stage))
@@ -51,7 +56,17 @@ class LessonPackOrchestrator:
         }
 
     async def generate_or_reuse(self, request: LessonPackRequest) -> LessonPack:
+        key = (request.lesson_id, request.content_version, "PACK", request.stage)
         if self.store is not None:
+            lock = self.store.lock_for(key) if isinstance(self.store, InMemoryAssetStore) else None
+            if lock is not None:
+                async with lock:
+                    existing = await self.store.get(lesson_id=request.lesson_id, content_version=request.content_version, asset_type="PACK", stage=request.stage)
+                    if existing is not None:
+                        return existing
+                    pack = self.generator.build_or_reuse(request)
+                    await self.store.put(pack, asset_type="PACK")
+                    return pack
             existing = await self.store.get(lesson_id=request.lesson_id, content_version=request.content_version, asset_type="PACK", stage=request.stage)
             if existing is not None:
                 return existing

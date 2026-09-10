@@ -29,5 +29,14 @@ Define immutable provider-neutral lesson-pack contracts and a service orchestrat
 ## Follow-up
 
 - Added build_or_reuse cache keyed by lesson, content version, stage, and language; repeated requests return the same immutable pack instance.
-- Focused tests: tests/test_lesson_pack.py => 3 passed.
+- Focused tests: lesson pack and orchestration suite => 8 passed.
+
+## Qualification update
+
+- Persisted asset reuse: PASS on disposable `InMemoryAssetStore`; retries and concurrent identical requests share one immutable pack.
+- Version isolation: PASS; content versions use distinct persistence keys and hashes.
+- Approval gating: PASS; unapproved packs are denied before delivery.
+- Static delivery contract: PASS for podcast script, PDF markdown, MCQ, and descriptive assets.
+- Real SQL `GeneratedAsset` adapter: BLOCKED / schema mapping required. Current models have no direct lesson/stage columns; no migration or staging writes were made.
+- Real Telegram and Gemini TTS delivery: BLOCKED_EXTERNAL / BLOCKED_CREDENTIAL until external runtime and credentials are available.
 
