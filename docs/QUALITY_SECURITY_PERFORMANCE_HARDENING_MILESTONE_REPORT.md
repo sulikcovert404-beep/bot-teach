@@ -74,5 +74,6 @@ UNCHANGED
 - Health/database contract tests: 6 passed in 15.31s; two existing deprecation warnings were emitted (Starlette/httpx and Alembic `path_separator`).
 - Follow-up runtime check: all three `stagingwave` services healthy; container environment and readiness both report `EXPECTED_MIGRATION_HEAD=20260909_0015`.
 - Local Alembic source audit reports two heads (`20260909_0009` and `20260909_0015`) and a branchpoint at `f7a8b9c0d1e2`; this is a migration-lineage risk requiring Commander review. `alembic current` could not run locally because the local database URL is not configured. No merge migration or schema change was created.
+- Head ancestry confirms `20260909_0009` descends from `2e0b56730806`, while `20260909_0015` descends through `20260909_0014`; the parallel heads are genuine lineage divergence, not a display artifact.
 - Official smoke script passed when run against the active `stagingwave` compose project with explicit `-ExpectedMigrationHead 20260909_0015` and `-BaseUrl http://localhost:8000`. Database/Redis health, migration completion, and readiness all passed; the orphan container warning remains informational.
 
