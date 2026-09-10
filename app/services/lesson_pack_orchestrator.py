@@ -58,6 +58,10 @@ class SqlAlchemyAssetStore:
         if row is None:
             return None
         data = json.loads(row.content_json)
+        data["stage"] = SchoolStage(data["stage"])
+        data["mcq"] = tuple(data.get("mcq", ()))
+        data["descriptive"] = tuple(data.get("descriptive", ()))
+        data["answers"] = tuple(data.get("answers", ()))
         return LessonPack(**data)
 
     async def put_for_request(self, request: LessonPackRequest, pack: LessonPack, *, job_id: int, asset_type: str = "PACK") -> LessonPack:
@@ -76,11 +80,16 @@ class SqlAlchemyAssetStore:
         try:
             await self.session.flush()
         except IntegrityError:
+            # A concurrent producer may win the canonical identity race.  Its
+            # transaction can still be committing when this loser rolls back,
+            # so retry the read briefly before surfacing the conflict.
             await self.session.rollback()
-            existing = await self.get_for_request(request, asset_type=asset_type)
-            if existing is None:
-                raise
-            return existing
+            for _ in range(3):
+                existing = await self.get_for_request(request, asset_type=asset_type)
+                if existing is not None:
+                    return existing
+                await asyncio.sleep(0.05)
+            raise
         return pack
 
 
