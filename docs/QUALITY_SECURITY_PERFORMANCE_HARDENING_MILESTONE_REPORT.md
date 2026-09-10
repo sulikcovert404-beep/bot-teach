@@ -80,3 +80,8 @@ UNCHANGED
 - File-level check confirms workspace contains `migrations/versions/20260909_0015_assignment_persistence.py`, while the running image has no matching `*0015*` migration file.
 - Official smoke script passed when run against the active `stagingwave` compose project with explicit `-ExpectedMigrationHead 20260909_0015` and `-BaseUrl http://localhost:8000`. Database/Redis health, migration completion, and readiness all passed; the orphan container warning remains informational.
 
+
+## Milestone 3 security/reliability validation (2026-09-10)
+- Authorization wiring, admin authorization, publication access, knowledge runtime, RAG contracts, AI gateway, and rate-limit suites: **22 passed, 1 warning**.
+- No production, schema, migration, webhook, or deployment mutation performed in this validation step.
+- Dependency scanners `pip-audit` and `trivy` remain unavailable on the workstation and require tool provisioning before a vulnerability verdict.
