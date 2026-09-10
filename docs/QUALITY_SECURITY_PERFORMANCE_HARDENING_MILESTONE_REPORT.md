@@ -59,4 +59,5 @@ UNCHANGED
 - `SourceChunk` has no persisted `scope` column, while the provider-neutral RAG contract exposes `scope`; this remains an adapter/schema integration gap.
 - No code fix was applied pending Commander selection of the RLS and canonical retrieval boundary.
 - Existing `tests/test_vector_store.py` covers PostgreSQL gating, invalid-input rejection, and pgvector DDL compilation only; it contains no query-level tenant/publication/scope isolation assertion.
+- Combined security/retrieval contract suite: 24 passed in 1.33s (`vector_store`, `knowledge_runtime`, `rag_contracts`, `publication_access`, assignment, admin authorization, and authorization wiring). These remain unit/contract checks and do not replace a real PostgreSQL isolation test.
 
