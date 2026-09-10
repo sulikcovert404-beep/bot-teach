@@ -47,3 +47,6 @@ UNCHANGED
 - 	ests/test_admin_authorization.py, 	ests/test_authorization_wiring.py, 	ests/test_assignment_contract.py: 11 passed.
 - This validates pure role/ownership contracts only; it does not prove database-level tenant isolation or RLS.
 
+
+- Persistence/content/admin/Telegram route suite: 19 passed (one dependency deprecation warning). This confirms route behavior under test fixtures, not cross-tenant isolation against real PostgreSQL.
+
