@@ -20,3 +20,12 @@ Date: 2026-09-10
 
 ## Notes
 The orphan stagingwave-api-pub container was not removed. No schema, migration, webhook, or production changes were performed.
+
+## Follow-up verification (2026-09-10)
+- API container contains migration `20260909_0015_assignment_persistence.py`.
+- Read-only Alembic current inside the running API container: `20260909_0015`.
+- Read-only Alembic heads inside the running API container: `20260909_0009` and `20260909_0015`; `20260909_0014` is not a head.
+- `/health/ready`: HTTP 200 with `migration_head=20260909_0015`.
+- `docker compose -p stagingwave ps`: API, PostgreSQL, and Redis healthy.
+- Focused authorization/assignment/health regression: 16 passed, 2 warnings.
+- `git rev-list --left-right --count origin/master...HEAD`: `0 0` (no remote divergence).
