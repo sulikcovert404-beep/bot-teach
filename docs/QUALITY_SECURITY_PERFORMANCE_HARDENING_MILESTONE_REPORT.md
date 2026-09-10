@@ -50,3 +50,6 @@ UNCHANGED
 
 - Persistence/content/admin/Telegram route suite: 19 passed (one dependency deprecation warning). This confirms route behavior under test fixtures, not cross-tenant isolation against real PostgreSQL.
 
+- Targeted focused suite rerun: 11 passed in 0.15s.
+- Ruff could not be executed in the current Windows environment (`python -m ruff`: module unavailable); no lint pass is claimed.
+
