@@ -7,6 +7,8 @@ from __future__ import annotations
 
 import hashlib
 import io
+import logging
+import os
 import re
 import time
 import zipfile
@@ -22,10 +24,11 @@ from app.security.dependencies import require_roles
 
 router = APIRouter(prefix="/admin/content", tags=["admin-content"])
 MAX_UPLOAD_BYTES = 25 * 1024 * 1024
-MAX_PDF_PAGES = 500
-PDF_EXTRACTION_TIMEOUT_SECONDS = 30.0
+MAX_PDF_PAGES = int(os.getenv("PDF_MAX_PAGES", "500"))
+PDF_EXTRACTION_TIMEOUT_SECONDS = float(os.getenv("PDF_EXTRACTION_TIMEOUT_SECONDS", "30"))
 PDF_CHUNK_CHARS = 8_000
 _SAFE_NAME = re.compile(r"[^A-Za-z0-9._-]+")
+logger = logging.getLogger(__name__)
 
 
 def _extract_pdf(data: bytes) -> str:
@@ -39,10 +42,16 @@ def _extract_pdf(data: bytes) -> str:
             raise HTTPException(422, "PDF exceeds the page limit")
         pages = []
         started = time.monotonic()
-        for page in reader.pages:
+        for page_number, page in enumerate(reader.pages, start=1):
             if time.monotonic() - started > PDF_EXTRACTION_TIMEOUT_SECONDS:
                 raise HTTPException(422, "PDF extraction timed out")
-            pages.append(page.extract_text() or "")
+            try:
+                pages.append(page.extract_text() or "")
+            except Exception:
+                logger.warning("PDF page extraction failed", extra={"page": page_number})
+                pages.append("")
+    except HTTPException:
+        raise
     except Exception as exc:
         raise HTTPException(422, "Invalid PDF document") from exc
     return "\n\n".join(pages).strip()
