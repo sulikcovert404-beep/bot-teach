@@ -58,4 +58,5 @@ UNCHANGED
 - `PgVectorStore.search` still accepts no tenant/classroom/scope fields and filters only source metadata; it cannot independently prove tenant isolation or publication eligibility.
 - `SourceChunk` has no persisted `scope` column, while the provider-neutral RAG contract exposes `scope`; this remains an adapter/schema integration gap.
 - No code fix was applied pending Commander selection of the RLS and canonical retrieval boundary.
+- Existing `tests/test_vector_store.py` covers PostgreSQL gating, invalid-input rejection, and pgvector DDL compilation only; it contains no query-level tenant/publication/scope isolation assertion.
 
