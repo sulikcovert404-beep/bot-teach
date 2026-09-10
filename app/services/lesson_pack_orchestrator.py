@@ -12,6 +12,19 @@ class AssetStore(Protocol):
     async def put(self, pack: LessonPack, *, asset_type: str) -> None: ...
 
 
+class InMemoryAssetStore:
+    """Disposable store used by staging qualification until a DB adapter is wired."""
+
+    def __init__(self) -> None:
+        self._items: dict[tuple[int, str, str, SchoolStage], LessonPack] = {}
+
+    async def get(self, *, lesson_id: int, content_version: str, asset_type: str, stage: SchoolStage) -> LessonPack | None:
+        return self._items.get((lesson_id, content_version, asset_type, stage))
+
+    async def put(self, pack: LessonPack, *, asset_type: str) -> None:
+        self._items.setdefault((pack.lesson_id, pack.content_version, asset_type, pack.stage), pack)
+
+
 @dataclass(frozen=True, slots=True)
 class DeliveryAsset:
     asset_type: str
