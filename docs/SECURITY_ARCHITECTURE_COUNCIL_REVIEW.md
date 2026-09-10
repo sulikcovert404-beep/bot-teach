@@ -35,3 +35,8 @@ Direct repository search confirms `RetrievalRequest.scope` exists and the curren
 
 ## Commander decision required
 No RLS or schema change has been implemented. Commander approval is required for any such change.
+
+## Additional Codex validation
+- pp/api/routes/teacher.py creates assignments after joining Classroom to TeacherProfile by teacher_id/classroom_id, but the route has no server-derived tenant claim and list/publish/close queries constrain primarily by teacher_id or assignment_id. This proves role/ownership checks exist, but does not prove tenant isolation for multi-tenant identities; classify as COMMANDER DECISION / focused integration test required.
+- pp/api/routes/student.py scopes assignment reads through ClassMembership and published state, but the query does not explicitly compare Assignment.tenant_id to a server-derived student tenant. Membership data must be validated as the authoritative tenant boundary.
+
