@@ -71,4 +71,5 @@ UNCHANGED
 - Official `scripts/staging-smoke.ps1` was attempted with PowerShell execution-policy bypass. Database/Redis/migrate reached healthy/exit-0, but API startup failed because port `0.0.0.0:8000` is already allocated by healthy `stagingwave-api-1` from the other compose project. No container was stopped to force the test.
 - Direct readiness probe against the already-running staging API passed: `{"status":"ready","migration_head":"20260909_0015"}`. The script default still expects `20260907_0008`, so its expectation is stale relative to the running staging lineage.
 - Read-only endpoint smoke: `/health` returned HTTP 200 and `/openapi.json` returned HTTP 200. The expected liveness route is `/health` (not `/health/live`); `/health/live` returned 404.
+- Health/database contract tests: 6 passed in 15.31s; two existing deprecation warnings were emitted (Starlette/httpx and Alembic `path_separator`).
 
