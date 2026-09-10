@@ -336,6 +336,7 @@ class GeneratedAsset(Base):
     __tablename__ = "generated_assets"
     id: Mapped[int] = mapped_column(primary_key=True)
     job_id: Mapped[int] = mapped_column(ForeignKey("content_generation_jobs.id"), unique=True)
+    content_version_id: Mapped[int | None] = mapped_column(ForeignKey("content_versions.id"), nullable=True, index=True)
     asset_type: Mapped[str] = mapped_column(String(64), index=True)
     content_json: Mapped[str] = mapped_column(Text)
     content_hash: Mapped[str] = mapped_column(String(64), index=True)

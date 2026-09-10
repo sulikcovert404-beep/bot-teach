@@ -11,6 +11,8 @@ intentionally rejected.
 
 Add immutable identity fields to `generated_assets`:
 
+- `content_version_id` (explicit product content identity, nullable for legacy rows)
+
 - `school_stage` (`ELEMENTARY`, `LOWER_SECONDARY`, `UPPER_SECONDARY`)
 - `language` (BCP-47 string, for example `fa-IR`)
 - `profile_version` (application contract version)
@@ -18,10 +20,11 @@ Add immutable identity fields to `generated_assets`:
 Keep provider, model, voice, and generation details in structured metadata and
 outside the uniqueness contract. Add a unique constraint over:
 
-`(job_id, asset_type, school_stage, language, profile_version)`
+`(content_version_id, asset_type, school_stage, language, profile_version)`
 
-The job's existing `content_version_id` supplies content-version isolation and
-the existing job uniqueness key remains the generation request idempotency key.
+`job_id` remains the execution and trace reference; it is not used as the
+product uniqueness key. The existing job uniqueness key remains the generation
+request idempotency key.
 
 ## Qualification sequence
 
