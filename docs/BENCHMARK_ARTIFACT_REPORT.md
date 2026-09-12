@@ -32,3 +32,15 @@ This change builds the artifact envelope but does not write external files or da
 ## Next recommendation
 
 Commander may approve a narrow persistence adapter that writes these envelopes to a reviewed local artifact path after each controlled run, including environment and commit hashes.
+
+## Decision options
+
+- **Option A — Local JSON writer:** write one immutable, atomically-renamed JSON
+  file per run under an explicitly configured artifact directory. This is the
+  smallest slice and does not require PostgreSQL.
+- **Option B — Database registry:** add a reviewed persistence boundary and
+  migration for benchmark metadata and artifact references. This requires a
+  separate schema decision and a ready PostgreSQL environment.
+
+Until Commander selects an option, the current in-memory artifact contract remains
+the authoritative implementation.

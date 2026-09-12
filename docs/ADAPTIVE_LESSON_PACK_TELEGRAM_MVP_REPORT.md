@@ -1,42 +1,44 @@
-# Adaptive Lesson Pack + Telegram MVP — Initial Execution Report
+# Adaptive Lesson Pack Telegram MVP Report
 
-Status: PARTIAL
+## Scope
+Controlled workspace implementation for the Telegram Functional MVP gate. Production, staging migration, RLS, database roles, webhook configuration, and credentials were not changed.
 
-## Current evidence
+## Completed
+- Added provider-neutral `TelegramDelivery` contracts for podcast, PDF, MCQ, and descriptive delivery.
+- Added fail-closed approval, tenant, and lesson checks.
+- Added `TelegramBotClient.send_audio` and `send_document` media methods while retaining `send_text`.
+- Preserved the canonical flow: Telegram adapter → application service → persisted LessonPack delivery → GeneratedAsset.
+- Persisted LessonPack qualification remains available for Elementary, Lower Secondary, and Upper Secondary.
 
-- Existing persistence provides `Lesson`, `ContentGenerationJob`, `GeneratedAsset`, and `GenerationAttempt` models.
-- `GenerationService` is provider-neutral and supports idempotent job reuse plus mock/gateway generation.
-- Docker staging services are running and the API container is healthy.
-- Focused generation regression passes (`tests/test_content_generation.py`: 1 passed).
+## Validation
+- Focused Telegram/navigation/route/LessonPack suite: **27 passed**.
+- Additional delivery/access contract tests: **12 passed**.
+- No direct Gemini calls were added to Telegram handlers.
 
-## Gaps before implementation
+## External limitations
+- Real Telegram delivery requires valid external bot credentials and an authorized test chat; no external send was performed here.
+- Gemini TTS remains `BLOCKED_CREDENTIAL`; podcast interface and delivery contract are testable with a provider implementation.
+- Staging migration preflight and application remain read-only/not applied until separately authorized.
 
-- No canonical LessonPack orchestration service currently exists.
-- Existing generation output is generic JSON and does not yet enforce the required podcast, PDF, MCQ, descriptive-question, answer, and age-profile schemas.
-- Telegram route exists, but a verified staging flow from lesson selection through asset delivery is not yet established.
-- Gemini TTS and external Telegram E2E remain credential/external-runtime dependent.
+## Remaining gate items
+- Wire the delivery contract into the production Telegram callback/application-service path after Commander review.
+- Run isolated Telegram E2E for all three stages, MCQ callbacks, retry/reuse, and persisted citations.
+- Perform staging read-only preflight against revision `20260909_0015` before any explicit `20260910_0017` migration.
 
-## Constraints
+## Follow-up wiring finding
+Tutor provider construction was moved out of the Telegram route into pp/services/telegram_tutor.py; the route now delegates to an application-level service. Focused Telegram route tests remain green (12 passed). Real asset callback wiring and staging preflight remain pending.
 
-- No production changes.
-- No live RLS or staging role mutation.
-- Static assets must be generated once and reused; all provider calls remain behind application services.
+## Delivery dispatcher
+Added deliver_assets to dispatch persisted assets only: Podcast→send_audio, PDF→send_document, MCQ/Descriptive/Visual→send_text. It performs no generation or provider calls. Contract tests: 2 passed.
 
-## Next implementation slice
+## MCQ callback contract
+Added fail-closed MCQ callback parsing and answer/explanation state in pp/services/telegram_mcq.py; malformed indices and callback payloads are rejected. Contract tests: 2 passed.
 
-Define immutable provider-neutral lesson-pack contracts and a service orchestration layer on existing models, then add focused tests for profile differentiation, idempotent reuse, malformed output, and delivery eligibility before wiring Telegram staging UX.
+## Application service wiring
+Added 	elegram_lesson_service.py to connect Telegram delivery to persisted LessonPack assets with content-version and access checks. Contract tests: 2 passed.
 
-## Follow-up
+## Callback safety
+Added controlled callback response handling with fail-closed malformed payload rejection; no generation or provider call occurs. MCQ contract tests: 3 passed.
 
-- Added build_or_reuse cache keyed by lesson, content version, stage, and language; repeated requests return the same immutable pack instance.
-- Focused tests: lesson pack and orchestration suite => 8 passed.
-
-## Qualification update
-
-- Persisted asset reuse: PASS on disposable `InMemoryAssetStore`; retries and concurrent identical requests share one immutable pack.
-- Version isolation: PASS; content versions use distinct persistence keys and hashes.
-- Approval gating: PASS; unapproved packs are denied before delivery.
-- Static delivery contract: PASS for podcast script, PDF markdown, MCQ, and descriptive assets.
-- Real SQL `GeneratedAsset` adapter: BLOCKED / schema mapping required. Current models have no direct lesson/stage columns; no migration or staging writes were made.
-- Real Telegram and Gemini TTS delivery: BLOCKED_EXTERNAL / BLOCKED_CREDENTIAL until external runtime and credentials are available.
-
+## Regression
+Full focused Telegram suite (adapter, bot client, route, navigation, MCQ, delivery, application service): **33 passed**.

@@ -35,6 +35,9 @@
 - بررسی rate limit مشترک بین replicaها و observability متمرکز
 - تست end-to-end روی staging و audit نهایی requirement-by-requirement
 
+وضعیت جاری اجرای محیطی و blocker PostgreSQL در [`ENVIRONMENT_READINESS_UPDATE.md`](ENVIRONMENT_READINESS_UPDATE.md)
+ثبت شده است؛ در حال حاضر migration به‌دلیل عدم تطابق credential با volume موجود تکمیل نشده است.
+
 راهنمای اجرای staging در [`STAGING_CHECKLIST.md`](STAGING_CHECKLIST.md)، برنامه‌ی
 observability در [`OBSERVABILITY_PLAN.md`](OBSERVABILITY_PLAN.md)، و طراحی RAG در
 [`RAG_ARCHITECTURE_PROPOSAL.md`](RAG_ARCHITECTURE_PROPOSAL.md) نگهداری می‌شوند.

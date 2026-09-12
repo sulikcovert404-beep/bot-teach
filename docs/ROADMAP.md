@@ -21,7 +21,7 @@
   آزمون و endpointهای آموزشی انجام می‌شود و خلاصهٔ Admin نیز موجود است.
 - کلید Gemini در header امن ارسال می‌شود، Source Guardian دادهٔ منبع را escape می‌کند، و secret scan برای فایل‌های tracked در CI فعال است.
 - پیش‌نویس قرارداد Admin Content Pipeline در `docs/ADMIN_CONTENT_PIPELINE_PRD.md` برای تصمیم‌گیری lifecycle، نقش‌ها و نسخه‌بندی آماده است.
-- provider مستقل Gemini Embedding و PgVectorStore برای foundation اضافه شده‌اند؛`r`n  benchmark کنترل‌شده lexical/vector در محیط Docker ایزوله اجرا شده است، اما نتیجهٔ`r`n  production یا corpus واقعی فارسی محسوب نمی‌شود.
+- provider مستقل Gemini Embedding و PgVectorStore برای foundation اضافه شده‌اند؛ benchmark کنترل‌شده lexical/vector در محیط Docker ایزوله اجرا شده است، اما نتیجهٔ production یا corpus واقعی فارسی محسوب نمی‌شود.
 
 ## شکاف‌های باقی‌مانده برای Production
 
