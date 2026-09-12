@@ -2,22 +2,274 @@
 <html lang="fa" dir="rtl">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
-    <title>یارِ یادگیری</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>یارِ یادگیری — کلاس هوشمند</title>
+    <!-- Modern Iranian typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    
+    <!-- KaTeX for high-performance LaTeX math equation rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
     <link rel="stylesheet" href="/mini-app/styles.css" />
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
   </head>
   <body>
     <main class="shell">
-      <h1>یارِ یادگیری</h1>
-      <p id="status">در حال آماده‌سازی…</p>
+      <header class="app-header">
+        <div class="logo-badge">🎓</div>
+        <div class="header-titles">
+          <h1>یارِ یادگیری</h1>
+          <p class="subtitle">دستیار هوشمند و مستند به کتاب‌های درسی رسمی</p>
+        </div>
+      </header>
+
+      <section id="diagnostic-readout" class="diagnostic-readout" hidden aria-live="polite">
+        <div class="diagnostic-readout-header">
+          <strong>Diagnostic snapshot</strong>
+          <button type="button" id="copy-diagnostics-btn">Copy diagnostics</button>
+        </div>
+        <pre id="diagnostic-readout-content"></pre>
+        <span id="diagnostic-copy-status" hidden>Copied</span>
+      </section>
+
+      <div class="status-container">
+        <span id="status" class="status-badge">در حال اتصال به سامانه…</span>
+      </div>
+
+      <!-- Navigation Tabs: Tutor / Student Dashboard / Exams / Plans / Growth -->
+      <nav class="app-nav" style="display: flex; gap: 4px; margin-bottom: 16px;">
+        <button type="button" id="tab-tutor-btn" class="nav-tab active" style="flex: 1; padding: 8px 3px; border-radius: 8px; border: 1px solid var(--border); background: var(--primary); color: #fff; font-weight: 600; cursor: pointer; font-size: 0.75rem;">پرسش</button>
+        <button type="button" id="tab-student-btn" class="nav-tab" style="flex: 1; padding: 8px 3px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-weight: 600; cursor: pointer; font-size: 0.75rem;">پیشرفت</button>
+        <button type="button" id="tab-exam-btn" class="nav-tab" style="flex: 1; padding: 8px 3px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-weight: 600; cursor: pointer; font-size: 0.75rem;">📝 آزمون</button>
+        <button type="button" id="tab-plans-btn" class="nav-tab" style="flex: 1; padding: 8px 3px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-weight: 600; cursor: pointer; font-size: 0.75rem;">💎 ارتقا</button>
+        <button type="button" id="tab-growth-btn" class="nav-tab" style="flex: 1; padding: 8px 3px; border-radius: 8px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); font-weight: 600; cursor: pointer; font-size: 0.75rem;">🎁 دعوت</button>
+      </nav>
+
+      <!-- Growth & Referral View -->
+      <section id="growth-view" hidden style="margin-bottom: 20px;">
+        <div class="growth-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+          <h2 style="font-size: 1.1rem; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
+            <span>🎁</span>
+            <span>دعوت از دوستان و دریافت اشتراک هدیه</span>
+          </h2>
+          <div style="background: rgba(99, 102, 241, 0.08); border-radius: 8px; padding: 12px; margin-bottom: 14px; text-align: center;">
+            <p style="margin: 0 0 8px 0; font-size: 0.85rem; color: var(--text);">کد دعوت اختصاصی شما:</p>
+            <div id="referral-code-display" style="font-size: 1.25rem; font-weight: bold; letter-spacing: 2px; color: var(--primary); font-family: monospace;">در حال دریافت…</div>
+            <p style="margin: 8px 0 0 0; font-size: 0.8rem; color: #6b7280;">با هر دعوت موفق: ۵۰ امتیاز رشد + ۳ روز اشتراک پلاس رایگان</p>
+          </div>
+          <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <div style="flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+              <span style="font-size: 0.75rem; color: #6b7280; display: block;">دعوت‌های موفق</span>
+              <strong id="ref-invites-count" style="font-size: 1.1rem; color: #059669;">—</strong>
+            </div>
+            <div style="flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px; text-align: center;">
+              <span style="font-size: 0.75rem; color: #6b7280; display: block;">امتیاز رشد</span>
+              <strong id="ref-points-count" style="font-size: 1.1rem; color: #d97706;">—</strong>
+            </div>
+          </div>
+          <button type="button" id="copy-referral-link-btn" style="width: 100%; padding: 10px; border-radius: 8px; background: var(--primary); color: #fff; border: none; font-weight: 600; cursor: pointer;">📋 کپی لینک اختصاصی تلگرام</button>
+        </div>
+      </section>
+
+      <!-- Subscription Plans View -->
+      <section id="plans-view" hidden style="margin-bottom: 20px;">
+        <div class="plans-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+          <h2 style="font-size: 1.1rem; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
+            <span>💎</span>
+            <span>طرح‌های اشتراک تحصیلی و آزمون</span>
+          </h2>
+          <div id="plans-catalog-list" style="display: flex; flex-direction: column; gap: 12px;">
+            <!-- Rendered by JS -->
+          </div>
+          <div id="upgrade-status-msg" style="margin-top: 10px; font-size: 0.85rem; text-align: center; color: #059669; font-weight: bold;" hidden></div>
+        </div>
+      </section>
+
+      <!-- Exam Online Section -->
+      <section id="exam-view" hidden style="margin-bottom: 20px;">
+        <div class="exam-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h2 style="font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>📝</span>
+              <span id="active-exam-title">آزمون جامع مرور سرفصل‌های دهم</span>
+            </h2>
+            <span style="background: rgba(16, 185, 129, 0.1); color: #059669; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">مدت: ۳۰ دقیقه</span>
+          </div>
+
+          <div id="exam-questions-list" style="display: flex; flex-direction: column; gap: 14px;">
+            <!-- Rendered by JS -->
+          </div>
+
+          <button type="button" id="submit-exam-btn" style="width: 100%; margin-top: 16px; padding: 10px; background: #2563eb; color: #fff; border: none; border-radius: 8px; font-weight: 700; cursor: pointer;">ثبت پاسخ‌ها و دریافت کارنامه آنی</button>
+        </div>
+
+        <!-- Exam Report Card -->
+        <div id="exam-report-card" hidden style="background: var(--card-bg); border: 1px solid #10b981; border-radius: 12px; padding: 16px;">
+          <h3 style="margin-top: 0; color: #059669; display: flex; align-items: center; gap: 6px;">
+            <span>🏆</span>
+            <span>کارنامه و ارزیابی هوشمند آزمون</span>
+          </h3>
+          <div id="exam-report-summary" style="font-size: 0.95rem; margin-bottom: 10px;"></div>
+          <div id="exam-report-details" style="display: flex; flex-direction: column; gap: 8px; font-size: 0.85rem;"></div>
+        </div>
+      </section>
+
+      <!-- Student Learning Profile & Dashboard Section -->
+      <section id="student-view" hidden style="margin-bottom: 20px;">
+        <!-- Gamification Banner (Streak & XP) -->
+        <div class="streak-card" style="background: linear-gradient(135deg, #f97316 0%, #ea580c 100%); color: #fff; border-radius: 12px; padding: 16px; margin-bottom: 14px; box-shadow: 0 4px 12px rgba(234, 88, 12, 0.25);">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <span id="streak-badge-text" style="font-size: 1.2rem; font-weight: 800; display: block;">در حال دریافت وضعیت…</span>
+              <span id="streak-quote-text" style="font-size: 0.8rem; opacity: 0.9; display: block; margin-top: 4px;">تداوم روزانه حتی به مدت ۱۵ دقیقه، تفاوت رتبه‌های برتر را رقم می‌زند!</span>
+            </div>
+            <div style="text-align: center; background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 8px;">
+              <span style="font-size: 0.75rem; display: block;">امتیاز کل (XP)</span>
+              <span id="user-xp-text" style="font-size: 1.1rem; font-weight: 800;">—</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Badges & Achievements Card -->
+        <div class="badges-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; margin-bottom: 14px;">
+          <h2 style="font-size: 1rem; margin: 0 0 10px 0; display: flex; align-items: center; gap: 6px;">
+            <span>🎖️</span>
+            <span>نشان‌ها و دستاوردهای تحصیلی</span>
+          </h2>
+          <div id="badges-container" style="display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px;">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div class="profile-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <h2 style="font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 6px;">
+              <span>👤</span>
+              <span>پروفایل دانش‌آموز</span>
+            </h2>
+            <span id="profile-badge" style="background: rgba(37,99,235,0.1); color: #2563eb; padding: 2px 8px; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">پایه دهم تجربی</span>
+          </div>
+          <form id="profile-form" style="display: flex; flex-direction: column; gap: 10px;">
+            <div style="display: flex; gap: 10px;">
+              <div style="flex: 1;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">پایه تحصیلی:</label>
+                <input type="text" id="prof-grade" value="پایه دهم" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit;" />
+              </div>
+              <div style="flex: 1;">
+                <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">رشته تحصیلی:</label>
+                <input type="text" id="prof-field" value="علوم تجربی" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit;" />
+              </div>
+            </div>
+            <div>
+              <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 4px;">سطح هدف تحصیلی:</label>
+              <select id="prof-level" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: inherit;">
+                <option value="مبتدی">مبتدی (تسلط بر کتاب)</option>
+                <option value="متوسط" selected>متوسط (امتحانات نهایی)</option>
+                <option value="کنکوری / پیشرفته">کنکوری و پیشرفته</option>
+              </select>
+            </div>
+            <button type="submit" id="save-profile-btn" style="padding: 8px; background: #059669; color: #fff; border: none; border-radius: 6px; font-weight: 600; cursor: pointer;">ذخیره تنظیمات تحصیلی</button>
+            <span id="profile-save-status" style="font-size: 0.8rem; color: #059669; text-align: center;" hidden>پروفایل ذخیره شد ✅</span>
+          </form>
+        </div>
+
+        <!-- Mastery Breakdown Card -->
+        <div class="mastery-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px;">
+          <h2 style="font-size: 1.1rem; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
+            <span>📊</span>
+            <span>درصد تسلط بر سرفصل‌های درسی</span>
+          </h2>
+          <div id="mastery-list" style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 0.85rem; color: var(--text-muted);">در حال دریافت تحلیل تسلط...</div>
+          </div>
+        </div>
+
+        <!-- Smart Recommendations Card -->
+        <div class="recommendations-card" style="background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 16px;">
+          <h2 style="font-size: 1.1rem; margin: 0 0 12px 0; display: flex; align-items: center; gap: 6px;">
+            <span>💡</span>
+            <span>پیشنهادات هوشمند یادگیری</span>
+          </h2>
+          <div id="recommendations-list" style="display: flex; flex-direction: column; gap: 8px;">
+            <div style="font-size: 0.85rem; color: var(--text-muted);">در حال استخراج پیشنهاد مطالعه...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Tutor View Wrapper -->
+      <section id="tutor-view">
+
+      <!-- Quick prompts for common high school subjects -->
+      <section class="quick-prompts">
+        <span class="quick-label">نمونه پرسش‌های آماده:</span>
+        <div class="chips-container">
+          <button type="button" class="chip" data-q="فرمول انرژی جنبشی چیست؟">⚡️ انرژی جنبشی</button>
+          <button type="button" class="chip" data-q="دلتا کوچکتر از صفر یعنی چه؟">📐 معادله درجه دوم و دلتا</button>
+          <button type="button" class="chip" data-q="انتقال فعال از غشا چیست؟">🧬 انتقال فعال غشا</button>
+          <button type="button" class="chip" data-q="قوانین حرکت نیوتن را توضیح بده">🍎 قوانین نیوتن</button>
+          <button type="button" class="chip" data-q="کودتای سوم اسفند ۱۲۹۹ و پیامدهای آن چیست؟">📜 تاریخ معاصر ایران</button>
+        </div>
+      </section>
+
       <form id="tutor-form">
-        <label for="query">پرسش آموزشی</label>
-        <textarea id="query" required maxlength="10000" placeholder="مثلاً فتوسنتز چیست؟"></textarea>
-        <button type="submit">پرسش از مدرس هوشمند</button>
+        <div class="input-group">
+          <label for="query">پرسش یا مبحث درسی خود را بنویسید:</label>
+          <textarea id="query" required maxlength="10000" placeholder="مثلاً فرمول انرژی جنبشی چیست و یک مثال از آن حل کن..."></textarea>
+        </div>
+        <button type="submit" id="submit-btn">
+          <span class="btn-text">پرسش از مدرس هوشمند</span>
+          <span class="btn-spinner" hidden></span>
+        </button>
       </form>
-      <article id="answer" hidden></article>
+
+        <!-- Compact feedback action shared by normal and Source Guard response states. -->
+        <div id="compact-feedback" class="compact-feedback" aria-label="بازخورد پاسخ" hidden>
+          <span>بازخورد:</span>
+          <button type="button" class="btn-feedback" data-val="5">👍 مفید</button>
+          <button type="button" class="btn-feedback" data-val="1">👎 نیاز به بهبود</button>
+        </div>
+      <!-- Educational rich result card -->
+      <section id="answer" class="answer-card" hidden>
+        <div class="answer-header">
+          <div class="answer-header-title">
+            <span class="icon">📖</span>
+            <span>پاسخ تشریحی مدرس</span>
+          </div>
+          <div class="model-tag" id="model-tag">Gemini 3.5</div>
+        </div>
+
+        <div id="answer-content" class="answer-content"></div>
+
+        <!-- Distinct Citations & Sources Card -->
+        <div id="citations-card" class="citations-card" hidden>
+          <div class="citations-header">
+            <span class="cite-icon">📚</span>
+            <span>استناد مستقیم به سرفصل‌های مصوب درسی:</span>
+          </div>
+          <div id="citations-list" class="citations-list"></div>
+        </div>
+
+        <!-- Beta Feedback Loop Section -->
+        <div id="feedback-section" class="feedback-section" style="margin-top: 16px; padding-top: 12px; border-top: 1px dashed rgba(0,0,0,0.1); text-align: center;">
+          <div style="font-size: 0.85rem; color: #555; margin-bottom: 8px;">کیفیت این پاسخ آموزشی چطور بود؟</div>
+          <div style="display: flex; justify-content: center; gap: 8px;">
+            <button type="button" class="btn-feedback" data-val="5" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer;">👍 عالی بود</button>
+            <button type="button" class="btn-feedback" data-val="3" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer;">👌 متوسط</button>
+            <button type="button" class="btn-feedback" data-val="1" style="padding: 4px 10px; border-radius: 6px; border: 1px solid #ddd; background: #fff; cursor: pointer;">👎 نیاز به اصلاح</button>
+          </div>
+          <div id="feedback-status" style="font-size: 0.8rem; color: #2e7d32; margin-top: 6px;" hidden>نظر شما با موفقیت ثبت شد ✅</div>
+        </div>
+      </section>
+      </section>
     </main>
-    <script src="/mini-app/app.js"></script>
+    <script src="/mini-app/app.js?v=20260909_02"></script>
   </body>
 </html>
+
+
+
+

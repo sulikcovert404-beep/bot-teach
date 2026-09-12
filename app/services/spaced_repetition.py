@@ -10,7 +10,9 @@ class ReviewSchedule:
     next_review_at: datetime
 
 
-def schedule_review(*, quality: int, review_count: int, interval_days: int, ease_factor: float, now: datetime) -> ReviewSchedule:
+def schedule_review(
+    *, quality: int, review_count: int, interval_days: int, ease_factor: float, now: datetime
+) -> ReviewSchedule:
     if not 0 <= quality <= 5:
         raise ValueError("quality must be between 0 and 5")
     if review_count < 0 or interval_days < 0 or ease_factor < 1.3:
@@ -22,4 +24,6 @@ def schedule_review(*, quality: int, review_count: int, interval_days: int, ease
         new_interval = 6
     else:
         new_interval = max(1, round(interval_days * updated_ease))
-    return ReviewSchedule(review_count + 1, new_interval, round(updated_ease, 4), now + timedelta(days=new_interval))
+    return ReviewSchedule(
+        review_count + 1, new_interval, round(updated_ease, 4), now + timedelta(days=new_interval)
+    )

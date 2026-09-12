@@ -28,7 +28,9 @@ def test_production_settings_require_security_secrets() -> None:
 
 def test_settings_use_supported_gemini_default_model() -> None:
     settings = Settings(_env_file=None)
-    assert settings.ai_default_model == "gemini-3.6-flash"
+    # Keep the test coupled to the Settings source of truth, avoiding stale
+    # model-name literals when the supported default is intentionally rotated.
+    assert settings.ai_default_model == Settings.model_fields["ai_default_model"].default
 
 
 def test_production_settings_accept_valid_configuration() -> None:

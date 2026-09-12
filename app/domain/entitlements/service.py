@@ -14,14 +14,26 @@ class Entitlement:
 
 
 _PLAN_FEATURES: dict[SubscriptionPlan, frozenset[FeatureCode]] = {
-    SubscriptionPlan.FREE: frozenset({FeatureCode.AI_CHAT, FeatureCode.FLASHCARDS}),
+    SubscriptionPlan.FREE: frozenset({FeatureCode.ASSIGNMENT_ACCESS, FeatureCode.AI_CHAT, FeatureCode.FLASHCARDS, FeatureCode.BOOK_QA}),
     SubscriptionPlan.STUDENT_PLUS: frozenset(
-        {FeatureCode.AI_CHAT, FeatureCode.FLASHCARDS, FeatureCode.SMART_SUMMARY, FeatureCode.QUESTION_GENERATOR}
+        {
+            FeatureCode.AI_CHAT,
+            FeatureCode.FLASHCARDS,
+            FeatureCode.SMART_SUMMARY,
+            FeatureCode.QUESTION_GENERATOR,
+            FeatureCode.ASSIGNMENT_ACCESS,
+        }
     ),
     SubscriptionPlan.STUDENT_PRO: frozenset(FeatureCode),
     SubscriptionPlan.TEACHER_PRO: frozenset(
-        {FeatureCode.AI_CHAT, FeatureCode.SMART_SUMMARY, FeatureCode.QUESTION_GENERATOR,
-         FeatureCode.EXAM_GENERATOR, FeatureCode.EXAM_CORRECTOR, FeatureCode.TEACHER_ASSISTANT}
+        {
+            FeatureCode.AI_CHAT,
+            FeatureCode.SMART_SUMMARY,
+            FeatureCode.QUESTION_GENERATOR,
+            FeatureCode.EXAM_GENERATOR,
+            FeatureCode.EXAM_CORRECTOR,
+            FeatureCode.TEACHER_ASSISTANT,
+        }
     ),
     SubscriptionPlan.SCHOOL: frozenset(FeatureCode),
     SubscriptionPlan.ENTERPRISE: frozenset(FeatureCode),

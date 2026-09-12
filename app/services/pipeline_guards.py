@@ -3,6 +3,7 @@
 These guards validate intent and state snapshots; persistence and dispatch remain
 owned by the caller so the module is safe to exercise without PostgreSQL.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -38,9 +39,15 @@ class VectorSyncState(StrEnum):
 
 
 PROCESSING_TRANSITIONS: Mapping[str, frozenset[str]] = {
-    ProcessingState.UPLOADED: frozenset({ProcessingState.PROCESSING, ProcessingState.FAILED, ProcessingState.QUARANTINED}),
-    ProcessingState.PROCESSING: frozenset({ProcessingState.EXTRACTED, ProcessingState.FAILED, ProcessingState.QUARANTINED}),
-    ProcessingState.EXTRACTED: frozenset({ProcessingState.VALIDATED, ProcessingState.FAILED, ProcessingState.QUARANTINED}),
+    ProcessingState.UPLOADED: frozenset(
+        {ProcessingState.PROCESSING, ProcessingState.FAILED, ProcessingState.QUARANTINED}
+    ),
+    ProcessingState.PROCESSING: frozenset(
+        {ProcessingState.EXTRACTED, ProcessingState.FAILED, ProcessingState.QUARANTINED}
+    ),
+    ProcessingState.EXTRACTED: frozenset(
+        {ProcessingState.VALIDATED, ProcessingState.FAILED, ProcessingState.QUARANTINED}
+    ),
     ProcessingState.VALIDATED: frozenset({ProcessingState.FAILED, ProcessingState.QUARANTINED}),
     ProcessingState.FAILED: frozenset(),
     ProcessingState.QUARANTINED: frozenset(),
@@ -52,15 +59,23 @@ REVIEW_TRANSITIONS: Mapping[str, frozenset[str]] = {
     ReviewState.REJECTED: frozenset(),
 }
 VECTOR_TRANSITIONS: Mapping[str, frozenset[str]] = {
-    VectorSyncState.VECTOR_PENDING: frozenset({VectorSyncState.VECTOR_SYNCING, VectorSyncState.VECTOR_FAILED}),
-    VectorSyncState.VECTOR_SYNCING: frozenset({VectorSyncState.VECTOR_SYNCED, VectorSyncState.VECTOR_FAILED}),
+    VectorSyncState.VECTOR_PENDING: frozenset(
+        {VectorSyncState.VECTOR_SYNCING, VectorSyncState.VECTOR_FAILED}
+    ),
+    VectorSyncState.VECTOR_SYNCING: frozenset(
+        {VectorSyncState.VECTOR_SYNCED, VectorSyncState.VECTOR_FAILED}
+    ),
     VectorSyncState.VECTOR_FAILED: frozenset({VectorSyncState.VECTOR_PENDING}),
     VectorSyncState.VECTOR_SYNCED: frozenset({VectorSyncState.VECTOR_FAILED}),
 }
 
 
 def assert_transition(machine: str, current: str, target: str) -> None:
-    tables = {"processing": PROCESSING_TRANSITIONS, "review": REVIEW_TRANSITIONS, "vector": VECTOR_TRANSITIONS}
+    tables = {
+        "processing": PROCESSING_TRANSITIONS,
+        "review": REVIEW_TRANSITIONS,
+        "vector": VECTOR_TRANSITIONS,
+    }
     try:
         allowed = tables[machine][current]
     except (KeyError, TypeError) as exc:
@@ -88,7 +103,10 @@ def assert_publishable(candidate: PublicationCandidate, expected_digest: str | N
         raise GuardViolation("publication requires VALIDATED + APPROVED + VECTOR_SYNCED")
     if not candidate.pipeline_digest:
         raise GuardViolation("publication requires a pipeline digest")
-    if candidate.approval_digest is not None and candidate.approval_digest != candidate.pipeline_digest:
+    if (
+        candidate.approval_digest is not None
+        and candidate.approval_digest != candidate.pipeline_digest
+    ):
         raise GuardViolation("approval digest does not match content digest")
     if expected_digest is not None and expected_digest != candidate.pipeline_digest:
         raise GuardViolation("content digest changed during publication (CAS mismatch)")
@@ -108,4 +126,3 @@ def assert_idempotent_request(existing_hash: str | None, request_hash: str) -> b
     if existing_hash != request_hash:
         raise GuardViolation("idempotency key reused with a different request")
     return True
-

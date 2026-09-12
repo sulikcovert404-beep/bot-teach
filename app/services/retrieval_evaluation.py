@@ -28,11 +28,19 @@ class EvaluationCase:
     provenance: str | None = None
 
     def __post_init__(self) -> None:
-        if not self.dataset_version.strip() or not self.query_id.strip() or not self.question.strip():
+        if (
+            not self.dataset_version.strip()
+            or not self.query_id.strip()
+            or not self.question.strip()
+        ):
             raise ValueError("Evaluation query id and question are required")
         if (self.expects_no_source or self.expected_state == "no_source") and self.expected_sources:
             raise ValueError("No-source cases cannot define expected sources")
-        if not self.expects_no_source and self.expected_state != "no_source" and not self.expected_sources:
+        if (
+            not self.expects_no_source
+            and self.expected_state != "no_source"
+            and not self.expected_sources
+        ):
             raise ValueError("Expected sources are required for sourced cases")
 
 
@@ -64,13 +72,20 @@ def evaluate_ranked_sources(
     relevance_grades: Mapping[str, int] | None = None,
     cited_sources: Sequence[str] | None = None,
 ) -> RetrievalEvaluation:
-    if not query_id.strip() or (not expected_sources and not expects_no_source) or not 1 <= k <= 100:
+    if (
+        not query_id.strip()
+        or (not expected_sources and not expects_no_source)
+        or not 1 <= k <= 100
+    ):
         raise ValueError("Evaluation query, expected sources and k are required")
     top_k = list(ranked_sources[:k])
     unique_top_k = set(top_k)
     hits = len(unique_top_k.intersection(expected_sources))
     unique_hits = len(set(top_k).intersection(expected_sources))
-    first_hit = next((index + 1 for index, source in enumerate(top_k) if source in expected_sources), None)
+    first_hit = next(
+        (index + 1 for index, source in enumerate(top_k) if source in expected_sources),
+        None,
+    )
     reciprocal_rank = 1 / first_hit if first_hit else 0.0
     no_source_correct = (not top_k) == expects_no_source if expects_no_source else None
     grades = relevance_grades or {source: int(source in expected_sources) for source in top_k}
@@ -129,12 +144,18 @@ PERSIAN_NORMALIZATION_FIXTURES: tuple[tuple[str, str], ...] = (
 def normalize_persian_text(text: str) -> str:
     """Normalize common Persian/Arabic and whitespace variants for benchmark fixtures."""
     return " ".join(
-        text.replace("ي", "ی").replace("ى", "ی").replace("ك", "ک")
-        .replace("ۀ", "هٔ").replace("ـ", "").split()
+        text.replace("ي", "ی")
+        .replace("ى", "ی")
+        .replace("ك", "ک")
+        .replace("ۀ", "هٔ")
+        .replace("ـ", "")
+        .split()
     )
 
 
-def stratify_results(cases: Sequence[EvaluationCase], results: Sequence[RetrievalEvaluation]) -> dict[tuple[str | None, str | None, str | None], dict[str, float]]:
+def stratify_results(
+    cases: Sequence[EvaluationCase], results: Sequence[RetrievalEvaluation]
+) -> dict[tuple[str | None, str | None, str | None], dict[str, float]]:
     """Aggregate benchmark metrics by grade, subject and chapter without thresholds."""
     if len(cases) != len(results):
         raise ValueError("Cases and results must have equal lengths")

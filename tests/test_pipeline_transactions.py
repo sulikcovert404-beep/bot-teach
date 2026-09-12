@@ -90,7 +90,11 @@ async def test_cas_conflict_rolls_back(session):
 @pytest.mark.asyncio
 async def test_invalid_gate_does_not_persist(session):
     version_id = await seed(session)
-    await session.execute(update(ContentVersion).where(ContentVersion.id == version_id).values(vector_sync_state="VECTOR_PENDING"))
+    await session.execute(
+        update(ContentVersion)
+        .where(ContentVersion.id == version_id)
+        .values(vector_sync_state="VECTOR_PENDING")
+    )
     await session.commit()
     with pytest.raises(InvalidStateError):
         await publish_content_version(

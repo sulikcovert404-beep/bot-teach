@@ -36,7 +36,8 @@ class InMemoryRateLimitMiddleware:
 
     def _prune(self, now: float) -> None:
         expired = [
-            key for key, (started, _count) in self._windows.items()
+            key
+            for key, (started, _count) in self._windows.items()
             if now - started >= self.window_seconds
         ]
         for key in expired:
@@ -60,7 +61,9 @@ class InMemoryRateLimitMiddleware:
 class RedisRateLimitMiddleware(InMemoryRateLimitMiddleware):
     """Shared fixed-window limiter with an in-memory fallback for local development."""
 
-    def __init__(self, app: ASGIApp, redis_url: str, requests: int = 60, window_seconds: int = 60) -> None:
+    def __init__(
+        self, app: ASGIApp, redis_url: str, requests: int = 60, window_seconds: int = 60
+    ) -> None:
         super().__init__(app, requests, window_seconds)
         from redis.asyncio import Redis
 

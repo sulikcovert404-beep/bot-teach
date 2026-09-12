@@ -8,19 +8,22 @@ from app.main import app
 from app.security.tokens import create_access_token
 
 
-def test_admin_audit_logs_requires_admin_or_teacher(monkeypatch) -> None:
+def test_admin_audit_logs_requires_super_admin(monkeypatch) -> None:
     secret = "x" * 32
     monkeypatch.setattr(get_settings(), "jwt_secret", secret)
     token = create_access_token("1", secret, role="STUDENT")
     with TestClient(app) as client:
-        response = client.get("/api/v1/admin/audit-logs", headers={"Authorization": f"Bearer {token}"})
+        response = client.get(
+            "/api/v1/admin/audit-logs",
+            headers={"Authorization": f"Bearer {token}"},
+        )
     assert response.status_code == 403
 
 
 def test_admin_audit_logs_returns_page(monkeypatch) -> None:
     secret = "x" * 32
     monkeypatch.setattr(get_settings(), "jwt_secret", secret)
-    token = create_access_token("1", secret, role="ADMIN")
+    token = create_access_token("1", secret, role="SUPER_ADMIN")
 
     async def override_session():
         class FakeResult:
@@ -63,7 +66,7 @@ def test_admin_audit_logs_returns_page(monkeypatch) -> None:
 def test_admin_ai_usage_summary_returns_aggregate(monkeypatch) -> None:
     secret = "x" * 32
     monkeypatch.setattr(get_settings(), "jwt_secret", secret)
-    token = create_access_token("1", secret, role="ADMIN")
+    token = create_access_token("1", secret, role="SUPER_ADMIN")
 
     async def override_session():
         class FakeResult:
@@ -89,3 +92,4 @@ def test_admin_ai_usage_summary_returns_aggregate(monkeypatch) -> None:
         assert response.json() == {"event_count": 3, "requested_tokens": 900, "charged_tokens": 720}
     finally:
         app.dependency_overrides.pop(get_session, None)
+

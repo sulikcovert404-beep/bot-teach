@@ -45,7 +45,9 @@ class HttpPaymentProvider:
             )
             response.raise_for_status()
             payload = response.json()
-        if not isinstance(payload, dict) or not isinstance(payload.get("provider_transaction_id"), str):
+        if not isinstance(payload, dict) or not isinstance(
+            payload.get("provider_transaction_id"), str
+        ):
             raise TypeError("Payment provider returned an invalid checkout")
         checkout_url = payload.get("checkout_url")
         if checkout_url is not None and not isinstance(checkout_url, str):

@@ -44,7 +44,11 @@ def validate_web_app_init_data(
     except ValueError as exc:
         raise ValueError("Invalid Telegram auth_date") from exc
     current_time = int(time.time()) if now is None else now
-    if auth_date <= 0 or current_time - auth_date > max_age_seconds or auth_date > current_time + 60:
+    if (
+        auth_date <= 0
+        or current_time - auth_date > max_age_seconds
+        or auth_date > current_time + 60
+    ):
         raise ValueError("Expired Telegram initData")
     user_raw = values.get("user", [None])[0]
     try:

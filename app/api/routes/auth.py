@@ -45,8 +45,12 @@ async def authenticate_telegram(
     try:
         identity = validate_web_app_init_data(request.init_data, settings.telegram_bot_token)
     except ValueError as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid init data") from exc
-    user = await session.scalar(select(User).where(User.telegram_user_id == identity.telegram_user_id))
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid init data"
+        ) from exc
+    user = await session.scalar(
+        select(User).where(User.telegram_user_id == identity.telegram_user_id)
+    )
     if user is None:
         user = User(telegram_user_id=identity.telegram_user_id, username=identity.username)
         session.add(user)

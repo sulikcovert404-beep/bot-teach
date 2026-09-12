@@ -38,7 +38,10 @@ async def test_payment_callback_is_idempotent_and_activates_subscription() -> No
         assert subscription is not None
         assert subscription.plan == "STUDENT_PLUS"
         assert subscription.active_until is not None
-        assert subscription.active_until.tzinfo is not None or subscription.active_until.tzinfo is None
+        assert (
+            subscription.active_until.tzinfo is not None
+            or subscription.active_until.tzinfo is None
+        )
         loaded = await session.get(PaymentTransaction, transaction.id)
         assert loaded is not None and loaded.status == "SUCCEEDED"
         audit_logs = await session.scalars(AuditLog.__table__.select())

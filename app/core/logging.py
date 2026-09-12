@@ -11,6 +11,23 @@ logger = logging.getLogger("education.api")
 _REQUEST_ID_PATTERN = re.compile(r"^[A-Za-z0-9._:-]{1,128}$")
 
 
+def configure_ai_provider_logging() -> logging.Logger:
+    """Enable redacted AI provider events without adding duplicate handlers."""
+    provider_logger = logging.getLogger("education.ai_provider")
+    provider_logger.setLevel(logging.INFO)
+    provider_logger.propagate = True
+    if not any(getattr(handler, "_ai_provider_handler", False) for handler in provider_logger.handlers):
+        handler = logging.StreamHandler()
+        handler.setLevel(logging.INFO)
+        handler.setFormatter(logging.Formatter("%(message)s"))
+        handler._ai_provider_handler = True  # type: ignore[attr-defined]
+        provider_logger.addHandler(handler)
+    return provider_logger
+
+
+configure_ai_provider_logging()
+
+
 class RequestMetrics:
     def __init__(self) -> None:
         self._lock = Lock()
@@ -73,11 +90,28 @@ class RequestLoggingMiddleware:
                     if key.lower() != b"x-request-id"
                 ]
                 headers.append((b"x-request-id", request_id.encode()))
-                headers.extend(
-                    [
-                        (b"x-content-type-options", b"nosniff"),
+                raw_path = scope.get("path", "")
+                is_mini_app = raw_path.startswith("/mini-app") or raw_path.startswith("/static")
+                sec_headers = [
+                    (b"x-content-type-options", b"nosniff"),
+                    (b"referrer-policy", b"no-referrer"),
+                    (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
+                ]
+                if is_mini_app:
+                    sec_headers.append(
+                        (
+                            b"content-security-policy",
+                            (
+                                b"default-src 'self' 'unsafe-inline' data: https:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://telegram.org; "
+                                b"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; "
+                                b"connect-src 'self' https: wss:; img-src 'self' data: https:; "
+                                b"frame-ancestors *;"
+                            ),
+                        )
+                    )
+                else:
+                    sec_headers.extend([
                         (b"x-frame-options", b"DENY"),
-                        (b"referrer-policy", b"no-referrer"),
                         (
                             b"content-security-policy",
                             (
@@ -86,9 +120,8 @@ class RequestLoggingMiddleware:
                                 b"base-uri 'none'; frame-ancestors 'none'"
                             ),
                         ),
-                        (b"permissions-policy", b"camera=(), microphone=(), geolocation=()"),
-                    ]
-                )
+                    ])
+                headers.extend(sec_headers)
                 message["headers"] = headers
             await send(message)
 

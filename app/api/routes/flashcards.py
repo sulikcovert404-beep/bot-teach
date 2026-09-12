@@ -44,7 +44,9 @@ async def create_flashcard(
         user_id = int(subject)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail="Invalid user identity") from exc
-    card = Flashcard(user_id=user_id, front=request.front, back=request.back, book_id=request.book_id)
+    card = Flashcard(
+        user_id=user_id, front=request.front, back=request.back, book_id=request.book_id
+    )
     session.add(card)
     await session.commit()
     await session.refresh(card)
@@ -77,7 +79,9 @@ async def review_flashcard(
         user_id = int(subject)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail="Invalid user identity") from exc
-    card = await session.scalar(select(Flashcard).where(Flashcard.id == card_id, Flashcard.user_id == user_id))
+    card = await session.scalar(
+        select(Flashcard).where(Flashcard.id == card_id, Flashcard.user_id == user_id)
+    )
     if card is None:
         raise HTTPException(status_code=404, detail="Flashcard not found")
     schedule = schedule_review(

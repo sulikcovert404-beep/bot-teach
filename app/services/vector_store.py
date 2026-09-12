@@ -3,6 +3,7 @@ from typing import Protocol
 
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import joinedload
 
 from app.db.models import SourceChunk as SourceChunkModel
 from app.services.rag import SourceChunk
@@ -55,7 +56,11 @@ class PgVectorStore:
         if not request.embedding or not 1 <= request.limit <= 100:
             raise ValueError("Embedding and search limit are invalid")
         distance = SourceChunkModel.embedding.cosine_distance(request.embedding).label("distance")
-        query = select(SourceChunkModel, distance).where(SourceChunkModel.embedding.is_not(None))
+        query = (
+            select(SourceChunkModel, distance)
+            .options(joinedload(SourceChunkModel.document))
+            .where(SourceChunkModel.embedding.is_not(None))
+        )
         for field, value in (
             (SourceChunkModel.source_type, request.source_type),
             (SourceChunkModel.book_id, request.book_id),

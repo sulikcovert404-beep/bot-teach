@@ -25,6 +25,13 @@ def test_platform_info() -> None:
     assert response.json()["api_version"] == "v1"
 
 
+def test_migration_heads_are_resolved_from_source() -> None:
+    heads = health_route.migration_heads()
+    # The source of truth is the checked-in migration graph.
+    assert heads == tuple(sorted(heads))
+    assert heads == ("20260909_0009", "20260910_0019")
+
+
 def test_readiness_requires_database_configuration() -> None:
     response = TestClient(app).get("/health/ready")
     assert response.status_code == 503
@@ -42,7 +49,7 @@ async def test_readiness_checks_redis_when_configured(monkeypatch: pytest.Monkey
 
     class Session:
         async def execute(self, query) -> Result:
-            return Result(1 if "SELECT 1" in str(query) else "e2f3a4b5c6d7")
+            return Result(1 if "SELECT 1" in str(query) else health_route.EXPECTED_MIGRATION_HEAD)
 
         async def __aenter__(self) -> Self:
             return self
@@ -68,7 +75,11 @@ async def test_readiness_checks_redis_when_configured(monkeypatch: pytest.Monkey
     settings = get_settings()
     monkeypatch.setattr(settings, "database_url", "sqlite+aiosqlite://")
     monkeypatch.setattr(settings, "redis_url", "redis://localhost:6379/0")
+    monkeypatch.setattr(settings, "expected_migration_head", health_route.EXPECTED_MIGRATION_HEAD)
     monkeypatch.setattr(health_route, "build_session_factory", lambda _url: Factory())
     monkeypatch.setattr(health_route, "Redis", Redis)
 
-    assert await health_route.readiness() == {"status": "ready", "migration_head": "e2f3a4b5c6d7"}
+    assert await health_route.readiness() == {
+        "status": "ready",
+        "migration_head": health_route.EXPECTED_MIGRATION_HEAD,
+    }

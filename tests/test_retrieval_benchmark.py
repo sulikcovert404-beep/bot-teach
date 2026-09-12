@@ -1,3 +1,4 @@
+from json import dumps
 from pathlib import Path
 
 from app.services.rag import SourceChunk
@@ -35,6 +36,8 @@ def test_controlled_benchmark_runs_lexical_fixture() -> None:
         timestamp="2026-09-02T00:00:00+00:00",
     )
     report = artifact.to_report()
+    serialized = dumps(report, ensure_ascii=False, sort_keys=True)
+    assert '"artifact_hash"' in serialized
     assert report["run_id"].startswith("run-")
     assert len(report["artifact_hash"]) == 64
     assert report["dataset_version"] == "rag-eval-v1.1-synthetic"

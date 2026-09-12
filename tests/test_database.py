@@ -45,7 +45,14 @@ async def test_user_model_round_trip() -> None:
         loaded_exam = await session.scalar(select(Exam).where(Exam.title == "آزمون ریاضی"))
         assert loaded_exam is not None
         assert loaded_exam.questions[0].correct_option == "۴"
-        session.add(LearningEvent(user_id=1, event_type="lesson_completed", duration_seconds=600, score=0.9))
+        session.add(
+            LearningEvent(
+                user_id=1,
+                event_type="lesson_completed",
+                duration_seconds=600,
+                score=0.9,
+            )
+        )
         await session.commit()
         event = await session.scalar(select(LearningEvent).where(LearningEvent.user_id == 1))
         assert event is not None

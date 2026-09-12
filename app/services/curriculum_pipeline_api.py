@@ -3,10 +3,11 @@
 This module deliberately contains no OCR, parser, worker, vector-store, or HTTP
 client code.  It provides the stable service boundary that adapters can call.
 """
+
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from enum import StrEnum
 from typing import Any
 from uuid import uuid4
@@ -34,8 +35,32 @@ class CASConflictError(PipelineError):
     retryable = True
 
 
+class ContentValidationError(PipelineError):
+    code = "CONTENT_VALIDATION_ERROR"
+
+
+class PermissionBoundaryError(AuthorizationError):
+    code = "PERMISSION_BOUNDARY_ERROR"
+
+
+class InvalidLifecycleTransitionError(InvalidStateError):
+    code = "INVALID_LIFECYCLE_TRANSITION"
+
+
+class PublicationConflictError(CASConflictError):
+    code = "PUBLICATION_CONFLICT"
+
+
 class IdempotencyConflictError(PipelineError):
     code = "IDEMPOTENCY_CONFLICT"
+
+
+class IdempotencyRecordMissingError(PipelineError):
+    code = "IDEMPOTENCY_RECORD_MISSING"
+
+
+class SessionNotInitializedError(PipelineError):
+    code = "SESSION_NOT_INITIALIZED"
 
 
 class RetryableProcessingError(PipelineError):
@@ -47,6 +72,11 @@ class ProcessingState(StrEnum):
     UPLOADED = "UPLOADED"
     VALIDATED = "VALIDATED"
     VECTOR_SYNCED = "VECTOR_SYNCED"
+
+
+class VectorSyncState(StrEnum):
+    PENDING = "PENDING"
+    SYNCED = "VECTOR_SYNCED"
 
 
 class ReviewState(StrEnum):
@@ -84,8 +114,9 @@ class ContentVersionSnapshot:
     version: int
     processing_state: ProcessingState
     review_state: ReviewState
-    vector_sync_state: ProcessingState
+    vector_sync_state: VectorSyncState
     digest: str | None
+    approval_digest: str | None = None
     retired: bool = False
 
 
@@ -102,12 +133,12 @@ class CommandReceipt:
     status: str
     result: Any
     event_id: str | None = None
-    occurred_at: datetime = field(default_factory=lambda: datetime.now(timezone.utc))
+    occurred_at: datetime = field(default_factory=lambda: datetime.now(UTC))
 
 
 ROLE_RULES: dict[str, frozenset[str]] = {
     "create": frozenset({"CONTENT_ADMIN", "SUPER_ADMIN"}),
-    "submit": frozenset({"CONTENT_ADMIN", "PIPELINE" , "SUPER_ADMIN"}),
+    "submit": frozenset({"CONTENT_ADMIN", "PIPELINE", "SUPER_ADMIN"}),
     "validate": frozenset({"PIPELINE", "SUPER_ADMIN"}),
     "approve": frozenset({"REVIEWER", "SUPER_ADMIN"}),
     "vector_sync": frozenset({"PIPELINE", "SUPER_ADMIN"}),
@@ -135,25 +166,48 @@ class CurriculumPipelineService:
         existing = self._receipts.get(ctx.idempotency_key)
         if existing is not None:
             if self._request_hashes[ctx.idempotency_key] != ctx.request_hash:
-                raise PipelineError("idempotency key was reused for a different request")
+                raise IdempotencyConflictError("idempotency key was reused for a different request")
             return existing
         receipt = CommandReceipt(str(uuid4()), "COMMITTED", result)
         self._receipts[ctx.idempotency_key] = receipt
         self._request_hashes[ctx.idempotency_key] = ctx.request_hash
         return receipt
 
-    def create_content_version(self, ctx: CommandContext, source_document_id: int, digest: str) -> CommandReceipt:
+    def _replay(self, ctx: CommandContext) -> CommandReceipt | None:
+        existing = self._receipts.get(ctx.idempotency_key)
+        if existing is not None:
+            if self._request_hashes[ctx.idempotency_key] != ctx.request_hash:
+                raise IdempotencyConflictError("idempotency key was reused for a different request")
+            return existing
+        return None
+
+    def create_content_version(
+        self, ctx: CommandContext, source_document_id: int, digest: str
+    ) -> CommandReceipt:
         require_role(ctx.actor, "create")
+        replay = self._replay(ctx)
+        if replay is not None:
+            return replay
         if not digest:
             raise DigestMismatchError("content digest is required")
-        version = ContentVersionSnapshot(self._next_id, source_document_id, 1, ProcessingState.UPLOADED,
-                                         ReviewState.DRAFT, ProcessingState.UPLOADED, digest)
+        version = ContentVersionSnapshot(
+            self._next_id,
+            source_document_id,
+            1,
+            ProcessingState.UPLOADED,
+            ReviewState.DRAFT,
+            VectorSyncState.PENDING,
+            digest,
+        )
         self._next_id += 1
         self._versions[version.content_version_id] = version
         return self._receipt(ctx, version)
 
     def submit_processing_job(self, ctx: CommandContext, content_version_id: int) -> CommandReceipt:
         require_role(ctx.actor, "submit")
+        replay = self._replay(ctx)
+        if replay is not None:
+            return replay
         version = self._get(content_version_id)
         job = JobReceipt(str(uuid4()), version.content_version_id, JobState.ACCEPTED)
         self._jobs[job.job_id] = job
@@ -161,42 +215,74 @@ class CurriculumPipelineService:
 
     def validate_content(self, ctx: CommandContext, content_version_id: int) -> CommandReceipt:
         require_role(ctx.actor, "validate")
+        replay = self._replay(ctx)
+        if replay is not None:
+            return replay
         version = self._get(content_version_id)
         self._expect_version(ctx, version)
         if version.retired or version.processing_state is not ProcessingState.UPLOADED:
             raise InvalidStateError("content must be uploaded and active before validation")
         return self._replace(ctx, version, processing_state=ProcessingState.VALIDATED)
 
-    def approve_content(self, ctx: CommandContext, content_version_id: int, digest: str) -> CommandReceipt:
+    def approve_content(
+        self, ctx: CommandContext, content_version_id: int, digest: str
+    ) -> CommandReceipt:
         require_role(ctx.actor, "approve")
+        replay = self._replay(ctx)
+        if replay is not None:
+            return replay
         version = self._get(content_version_id)
         self._expect_version(ctx, version)
         if digest != version.digest:
             raise DigestMismatchError("approval digest does not match content digest")
         if version.processing_state is not ProcessingState.VALIDATED:
             raise InvalidStateError("content must be validated before approval")
-        return self._replace(ctx, version, review_state=ReviewState.APPROVED)
+        return self._replace(
+            ctx, version, review_state=ReviewState.APPROVED, approval_digest=digest
+        )
 
-    def mark_vector_synced(self, ctx: CommandContext, content_version_id: int, digest: str) -> CommandReceipt:
+    def mark_vector_synced(
+        self, ctx: CommandContext, content_version_id: int, digest: str
+    ) -> CommandReceipt:
         require_role(ctx.actor, "vector_sync")
+        replay = self._replay(ctx)
+        if replay is not None:
+            return replay
         version = self._get(content_version_id)
         self._expect_version(ctx, version)
         if digest != version.digest:
             raise DigestMismatchError("vector sync digest does not match content digest")
         if version.review_state is not ReviewState.APPROVED:
             raise InvalidStateError("content must be approved before vector sync")
-        return self._replace(ctx, version, vector_sync_state=ProcessingState.VECTOR_SYNCED)
+        return self._replace(ctx, version, vector_sync_state=VectorSyncState.SYNCED)
 
-    def publish_content_version(self, ctx: CommandContext, content_version_id: int) -> CommandReceipt:
+    def publish_content_version(
+        self, ctx: CommandContext, content_version_id: int
+    ) -> CommandReceipt:
         require_role(ctx.actor, "publish")
+        replay = self._replay(ctx)
+        if replay is not None:
+            return replay
         version = self._get(content_version_id)
         self._expect_version(ctx, version)
-        if version.processing_state is not ProcessingState.VALIDATED or version.review_state is not ReviewState.APPROVED or version.vector_sync_state is not ProcessingState.VECTOR_SYNCED:
-            raise InvalidStateError("publish gate requires VALIDATED, APPROVED, VECTOR_SYNCED, and digest match")
+        if (
+            version.processing_state is not ProcessingState.VALIDATED
+            or version.review_state is not ReviewState.APPROVED
+            or version.vector_sync_state is not VectorSyncState.SYNCED
+            or version.approval_digest != version.digest
+        ):
+            raise InvalidStateError(
+                "publish gate requires VALIDATED, APPROVED, VECTOR_SYNCED, and digest match"
+            )
         return self._receipt(ctx, version)
 
-    def retire_content_version(self, ctx: CommandContext, content_version_id: int) -> CommandReceipt:
+    def retire_content_version(
+        self, ctx: CommandContext, content_version_id: int
+    ) -> CommandReceipt:
         require_role(ctx.actor, "retire")
+        replay = self._replay(ctx)
+        if replay is not None:
+            return replay
         version = self._get(content_version_id)
         self._expect_version(ctx, version)
         return self._replace(ctx, version, retired=True)
@@ -221,11 +307,19 @@ class CurriculumPipelineService:
         if ctx.expected_version is not None and ctx.expected_version != version.version:
             raise CASConflictError("content version changed")
 
-    def _replace(self, ctx: CommandContext, version: ContentVersionSnapshot, **changes: Any) -> CommandReceipt:
-        updated = ContentVersionSnapshot(version.content_version_id, version.source_document_id, version.version + 1,
-                                         changes.get("processing_state", version.processing_state),
-                                         changes.get("review_state", version.review_state),
-                                         changes.get("vector_sync_state", version.vector_sync_state),
-                                         version.digest, changes.get("retired", version.retired))
+    def _replace(
+        self, ctx: CommandContext, version: ContentVersionSnapshot, **changes: Any
+    ) -> CommandReceipt:
+        updated = ContentVersionSnapshot(
+            version.content_version_id,
+            version.source_document_id,
+            version.version + 1,
+            changes.get("processing_state", version.processing_state),
+            changes.get("review_state", version.review_state),
+            changes.get("vector_sync_state", version.vector_sync_state),
+            version.digest,
+            changes.get("approval_digest", version.approval_digest),
+            changes.get("retired", version.retired),
+        )
         self._versions[version.content_version_id] = updated
         return self._receipt(ctx, updated)

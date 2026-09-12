@@ -11,11 +11,18 @@ import httpx
 
 @dataclass(frozen=True)
 class AIRequest:
-    prompt: str
+    """Provider-neutral request with compatibility for content-generation callers."""
+    prompt: str = ""
     model: str | None = None
     max_tokens: int = 1000
     task_type: str = "general"
     context_chars: int | None = None
+    content_context: str | None = None
+    parameters: dict[str, object] | None = None
+
+    def __post_init__(self) -> None:
+        if not self.prompt and self.content_context:
+            object.__setattr__(self, "prompt", self.content_context)
 
 
 @dataclass(frozen=True)
@@ -23,6 +30,32 @@ class AIResponse:
     text: str
     model: str
     usage_tokens: int | None = None
+    # Optional evidence returned by grounded callers.  Providers never
+    # manufacture citations; the retrieval boundary attaches them.
+    citations: tuple[object, ...] = ()
+    provider_name: str | None = None
+    latency_ms: float = 0.0
+
+    @property
+    def content(self) -> str:
+        """Legacy gateway callers consume generated content under this name."""
+        return self.text
+
+    @property
+    def provider(self) -> str:
+        return self.provider_name or (self.model.split(":", 1)[0] if ":" in self.model else self.model)
+
+    @property
+    def input_tokens(self) -> int:
+        return 0
+
+    @property
+    def output_tokens(self) -> int:
+        return self.usage_tokens or 0
+
+    @property
+    def estimated_cost(self) -> float:
+        return 0.0
 
 
 @dataclass(frozen=True)
@@ -89,6 +122,12 @@ class StructuredLoggingAIProviderObserver:
 class ProviderError(RuntimeError):
     """Base class for errors that are safe to map at the API boundary."""
 
+    def __init__(self, message: str = "AI provider error") -> None:
+        super().__init__(message)
+        # Adapters use a stable machine-readable category when deciding
+        # whether a provider failure is retryable.
+        self.code = message
+
 
 class ProviderQuotaError(ProviderError):
     def __init__(self, message: str = "AI provider quota exhausted", retry_after: float | None = None) -> None:
@@ -136,6 +175,71 @@ class AIRouter:
 
     async def generate(self, request: AIRequest) -> AIResponse:
         return await self._provider.generate(request)
+
+
+class MockProvider:
+    """Deterministic provider used by unit tests and local composition."""
+    name = "mock"
+    model = "mock"
+
+    async def health_check(self) -> bool:
+        return True
+
+    async def generate(self, request: AIRequest) -> AIResponse:
+        if not request.prompt.strip():
+            raise ProviderError("INVALID_REQUEST")
+        return AIResponse(text=request.prompt, model=self.model)
+
+
+class AIGateway:
+    """Failover gateway; invalid requests are rejected before provider fallback."""
+
+    def __init__(self, providers: list[AIProvider], observer: AIProviderObserver | None = None) -> None:
+        if not providers:
+            raise ValueError("at least one AI provider is required")
+        self.providers = providers
+        self.observer = observer or NoopAIProviderObserver()
+
+    async def generate(self, request: AIRequest) -> AIResponse:
+        if not request.prompt.strip():
+            error = ProviderError("INVALID_REQUEST")
+            error.code = "INVALID_REQUEST"  # type: ignore[attr-defined]
+            raise error
+        last_error: Exception | None = None
+        for attempt, provider in enumerate(self.providers, start=1):
+            started = time.perf_counter()
+            try:
+                response = await provider.generate(request)
+                if isinstance(response, AIResponse):
+                    if not response.text or not response.text.strip():
+                        raise ProviderResponseError("INVALID_RESPONSE")
+                    if response.provider_name is None:
+                        result = AIResponse(response.text, response.model, response.usage_tokens, response.citations,
+                                          getattr(provider, "name", None), response.latency_ms)
+                        self.observer.emit(AIProviderEvent("gateway_success", getattr(provider, "name", "unknown"), result.model, request.task_type, "success", (time.perf_counter()-started)*1000, attempts=attempt, retry_count=attempt-1, latency_ms=(time.perf_counter()-started)*1000, prompt_chars=len(request.prompt), requested_tokens=request.max_tokens, usage_tokens=result.usage_tokens))
+                        return result
+                    result = response
+                    self.observer.emit(AIProviderEvent("gateway_success", getattr(provider, "name", "unknown"), result.model, request.task_type, "success", (time.perf_counter()-started)*1000, attempts=attempt, retry_count=attempt-1, latency_ms=(time.perf_counter()-started)*1000, prompt_chars=len(request.prompt), requested_tokens=request.max_tokens, usage_tokens=result.usage_tokens))
+                    return result
+                # Permit simple provider test doubles returning text.
+                if not str(response).strip():
+                    raise ProviderResponseError("INVALID_RESPONSE")
+                result = AIResponse(text=str(response), model=getattr(provider, "model", "unknown"),
+                                  provider_name=getattr(provider, "name", None))
+                self.observer.emit(AIProviderEvent("gateway_success", getattr(provider, "name", "unknown"), result.model, request.task_type, "success", (time.perf_counter()-started)*1000, attempts=attempt, retry_count=attempt-1, latency_ms=(time.perf_counter()-started)*1000, prompt_chars=len(request.prompt), requested_tokens=request.max_tokens))
+                return result
+            except ProviderError as exc:
+                last_error = exc
+                self.observer.emit(AIProviderEvent("gateway_failure", getattr(provider, "name", "unknown"), getattr(provider, "model", "unknown"), request.task_type, "failure", (time.perf_counter()-started)*1000, error_type=type(exc).__name__, error_category=exc.code, attempts=attempt, retry_count=attempt-1, latency_ms=(time.perf_counter()-started)*1000, prompt_chars=len(request.prompt), requested_tokens=request.max_tokens))
+                continue
+        if last_error is not None:
+            raise last_error
+        raise ProviderError("AI provider unavailable")
+
+
+def redact_secrets(value: str) -> str:
+    """Redact common credential assignments before logging or reporting."""
+    return re.sub(r"(?i)(api[_-]?key|token|password|secret)\s*=\s*[^\s,;]+", r"\1=[REDACTED]", value)
 
 
 class GeminiProvider:

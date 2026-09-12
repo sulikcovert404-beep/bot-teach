@@ -93,7 +93,12 @@ def test_persian_normalization_and_faithfulness_contract() -> None:
 
 
 def test_stratified_report_groups_by_metadata() -> None:
-    case = EvaluationCase(query_id="q1", question="سوال", expected_sources=frozenset({"a"}), grade="دهم", subject="فیزیک", chapter="۱")
-    result = evaluate_ranked_sources(query_id="q1", expected_sources={"a"}, ranked_sources=["a"], k=1)
+    case = EvaluationCase(
+        query_id="q1", question="سوال", expected_sources=frozenset({"a"}),
+        grade="دهم", subject="فیزیک", chapter="۱",
+    )
+    result = evaluate_ranked_sources(
+        query_id="q1", expected_sources={"a"}, ranked_sources=["a"], k=1
+    )
     report = stratify_results([case], [result])
     assert report[("دهم", "فیزیک", "۱")]["mrr"] == 1.0

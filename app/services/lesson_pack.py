@@ -54,13 +54,22 @@ class LessonPack:
     answers: tuple[dict[str, str], ...]
     content_hash: str
     content_version_id: int | None = None
+    assets_are_placeholders: bool = True
+
+
+def count_script_words(text: str) -> int:
+    """Deterministic whitespace word count used by the stage contract."""
+    return len(text.split())
 
 
 class LessonPackService:
     """Generate deterministic, provider-neutral packs for a reviewed source."""
 
-    def __init__(self) -> None:
-        self._cache: dict[tuple[int, str, SchoolStage, str], LessonPack] = {}
+    def __init__(self, *, provider_version: str = "deterministic-v1", prompt_version: str = "lesson-pack-v1", profile_version: str = "profile-v1") -> None:
+        self.provider_version = provider_version
+        self.prompt_version = prompt_version
+        self.profile_version = profile_version
+        self._cache: dict[tuple[int, str, SchoolStage, str, int, str, str, str], LessonPack] = {}
 
     def build(self, request: LessonPackRequest) -> LessonPack:
         profile = PROFILES[request.stage]
@@ -70,6 +79,8 @@ class LessonPackService:
             f"سطح {profile.target_grade}: {profile.tone}.\n"
             f"موضوع را با این مثال بررسی کن: {excerpt}"
         )
+        if count_script_words(script) > profile.max_script_words:
+            raise ValueError("SCRIPT_WORD_LIMIT_EXCEEDED")
         podcast = f"[Podcast {request.stage}] {script}"
         pdf = f"# {request.title}\n\n{script}\n\n## نکته کلیدی\nبازبینی منبع و یادداشت‌برداری."
         mcq = (
@@ -78,14 +89,26 @@ class LessonPackService:
         descriptive = ({"question": f"یک توضیح کوتاه درباره «{request.title}» بنویسید."},)
         answers = ({"question": descriptive[0]["question"], "answer": "پاسخ باید بر اساس متن منبع و با ذکر دلیل باشد."},)
         canonical = json.dumps({"lesson_id": request.lesson_id, "content_version": request.content_version, "language": request.language, "stage": request.stage.value, "script": script, "podcast": podcast, "pdf": pdf, "mcq": mcq, "descriptive": descriptive, "answers": answers}, ensure_ascii=False, sort_keys=True)
-        return LessonPack(request.lesson_id, request.content_version, request.stage, request.language, script, podcast, pdf, mcq, descriptive, answers, sha256(canonical.encode()).hexdigest(), request.content_version_id)
+        return LessonPack(request.lesson_id, request.content_version, request.stage, request.language, script, podcast, pdf, mcq, descriptive, answers, sha256(canonical.encode()).hexdigest(), request.content_version_id, True)
 
     def build_or_reuse(self, request: LessonPackRequest) -> LessonPack:
         """Return one generated pack per lesson/version/profile/language."""
-        key = (request.lesson_id, request.content_version, request.stage, request.language)
+        key = (request.lesson_id, request.content_version, request.stage, request.language,
+               PROFILES[request.stage].max_script_words, self.provider_version,
+               self.prompt_version, self.profile_version)
         cached = self._cache.get(key)
         if cached is not None:
             return cached
         pack = self.build(request)
         self._cache[key] = pack
         return pack
+
+    @staticmethod
+    def visual_decision(request: LessonPackRequest, *, visual_required: bool = True) -> dict[str, str | bool]:
+        """Provider-neutral decision for a visual companion asset."""
+        return {
+            "include_visual": visual_required,
+            "stage": request.stage.value,
+            "format": "diagram",
+            "alt_text": f"نمودار آموزشی {request.stage.value} برای {request.title}",
+        }

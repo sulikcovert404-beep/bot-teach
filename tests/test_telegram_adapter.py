@@ -36,4 +36,9 @@ def test_validate_web_app_init_data_rejects_expired_data() -> None:
 
 def test_validate_web_app_init_data_rejects_invalid_age_window() -> None:
     with pytest.raises(ValueError):
-        validate_web_app_init_data(signed_init_data("token", 1_000), "token", max_age_seconds=0, now=1_100)
+        validate_web_app_init_data(
+            signed_init_data("token", 1_000),
+            "token",
+            max_age_seconds=0,
+            now=1_100,
+        )

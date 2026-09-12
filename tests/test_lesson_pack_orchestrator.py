@@ -1,6 +1,6 @@
 import pytest
 
-from app.services.lesson_pack import LessonPackRequest, SchoolStage
+from app.services.lesson_pack import LessonPackRequest, LessonPackService, SchoolStage
 from app.services.lesson_pack_orchestrator import InMemoryAssetStore, LessonPackOrchestrator
 
 
@@ -51,3 +51,51 @@ async def test_content_version_isolation_prevents_old_asset_reuse() -> None:
     new = await orchestrator.generate_or_reuse(LessonPackRequest(5, "v2", "آب", "منبع", SchoolStage.ELEMENTARY))
     assert old is not new
     assert old.content_hash != new.content_hash
+
+
+@pytest.mark.asyncio
+async def test_persisted_delivery_path_requires_approval_and_returns_four_assets() -> None:
+    request = LessonPackRequest(6, "v1", "زیست", "منبع آموزشی", SchoolStage.LOWER_SECONDARY)
+    orchestrator = LessonPackOrchestrator(store=InMemoryAssetStore())
+    with pytest.raises(PermissionError, match="UNAPPROVED_ASSET"):
+        await orchestrator.delivery_assets_persisted(request, review_state="DRAFT", job_id=1)
+    assets = await orchestrator.delivery_assets_persisted(request, review_state="APPROVED", job_id=1)
+    assert [asset.asset_type for asset in assets] == ["PODCAST", "PDF", "MCQ", "DESCRIPTIVE"]
+
+
+@pytest.mark.asyncio
+async def test_all_school_stages_produce_distinct_adaptive_packs() -> None:
+    store = InMemoryAssetStore()
+    title = "چرخه آب"
+    packs = []
+    scripts = []
+    for stage in SchoolStage:
+        request = LessonPackRequest(7, "v1", title, "تبخیر و بارش", stage)
+        assets = await LessonPackOrchestrator(store=store).delivery_assets_persisted(
+            request, review_state="APPROVED", job_id=stage.value.__hash__() & 0x7FFFFFFF
+        )
+        packs.append(assets)
+        scripts.append(assets[0].content)
+    assert all(len(assets) == 4 for assets in packs)
+    captions = {assets[0].caption for assets in packs}
+    assert len(captions) == 3
+    assert len(set(scripts)) == 3
+
+
+def test_visual_decision_is_provider_neutral_and_rtl_safe() -> None:
+    request = LessonPackRequest(8, "v1", "چرخه آب", "تبخیر", SchoolStage.ELEMENTARY)
+    decision = LessonPackService.visual_decision(request)
+    assert decision["include_visual"] is True
+    assert decision["format"] == "diagram"
+    assert "چرخه آب" in decision["alt_text"]
+    assert LessonPackService.visual_decision(request, visual_required=False)["include_visual"] is False
+
+
+def test_visual_decision_isolated_by_stage() -> None:
+    service = LessonPackService()
+    elementary = LessonPackRequest(9, "v1", "نور", "منبع", SchoolStage.ELEMENTARY)
+    upper = LessonPackRequest(9, "v1", "نور", "منبع", SchoolStage.UPPER_SECONDARY)
+    first = service.visual_decision(elementary)
+    second = service.visual_decision(upper)
+    assert first["stage"] != second["stage"]
+    assert first["alt_text"] != second["alt_text"]

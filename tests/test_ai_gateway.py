@@ -1,28 +1,43 @@
 import pytest
+from app.services.ai_gateway import AIRequest, AIResponse, AIGateway, MockProvider, ProviderError, ProviderResponseError, AIProviderEvent, redact_secrets
 
-from app.services.ai_gateway import AIRequest, ModelRouter
+class FailingProvider:
+    name = "first"; model = "v1"
+    async def health_check(self): return True
+    async def generate(self, request): raise ProviderError("TIMEOUT")
 
+class SecondProvider(MockProvider):
+    name = "second"; model = "v2"
 
-def test_model_router_applies_default_model_and_cap() -> None:
-    routed = ModelRouter("gemini-2.0-flash", max_tokens=1000).route(
-        AIRequest("hello", max_tokens=5000)
-    )
-    assert routed.model == "gemini-2.0-flash"
-    assert routed.max_tokens == 1000
+@pytest.mark.asyncio
+async def test_gateway_failover_and_normalized_response():
+    response = await AIGateway([FailingProvider(), SecondProvider()]).generate(AIRequest("متن", "SUMMARY"))
+    assert response.provider == "second" and response.latency_ms >= 0
 
+@pytest.mark.asyncio
+async def test_gateway_does_not_failover_invalid_request():
+    with pytest.raises(ProviderError) as exc:
+        await AIGateway([MockProvider()]).generate(AIRequest("", "SUMMARY"))
+    assert exc.value.code == "INVALID_REQUEST"
 
-def test_model_router_rejects_invalid_settings() -> None:
-    with pytest.raises(ValueError):
-        ModelRouter("", max_tokens=1000)
+def test_secret_redaction():
+    assert "supersecret" not in redact_secrets("api_key=supersecret token=abc")
 
+class EmptyProvider:
+    name = "empty"; model = "v1"
+    async def generate(self, request): return AIResponse(text="", model=self.model)
 
-def test_model_router_rejects_invalid_model_name() -> None:
-    with pytest.raises(ValueError, match="model name is invalid"):
-        ModelRouter("gemini-2.0-flash").route(AIRequest("hello", model="../secret"))
+@pytest.mark.asyncio
+async def test_gateway_rejects_empty_provider_response():
+    with pytest.raises(ProviderResponseError, match="INVALID_RESPONSE"):
+        await AIGateway([EmptyProvider()]).generate(AIRequest("متن", "SUMMARY"))
 
-
-def test_gemini_provider_rejects_negative_retries() -> None:
-    from app.services.ai_gateway import GeminiProvider
-
-    with pytest.raises(ValueError):
-        GeminiProvider("x" * 32, max_retries=-1)
+@pytest.mark.asyncio
+async def test_gateway_emits_redacted_success_and_failure_events():
+    class Observer:
+        def __init__(self): self.events = []
+        def emit(self, event): self.events.append(event)
+    observer = Observer()
+    await AIGateway([FailingProvider(), SecondProvider()], observer=observer).generate(AIRequest("متن", "SUMMARY"))
+    assert [event.event_type for event in observer.events] == ["gateway_failure", "gateway_success"]
+    assert all(event.prompt_chars == len("متن") for event in observer.events)

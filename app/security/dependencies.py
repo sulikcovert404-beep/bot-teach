@@ -13,11 +13,15 @@ def require_user(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer),  # noqa: B008
 ) -> str:
     if credentials is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+        )
     try:
         return decode_access_token(credentials.credentials, get_settings().jwt_secret)
     except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+        ) from exc
 
 
 def authorize_role(user_role: str, allowed_roles: set[str]) -> None:
@@ -32,7 +36,9 @@ def require_roles(*allowed_roles: str) -> Callable[..., str]:
         credentials: HTTPAuthorizationCredentials | None = Depends(bearer),  # noqa: B008
     ) -> str:
         if credentials is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Authentication required"
+            )
         try:
             claims = decode_access_token_claims(credentials.credentials, get_settings().jwt_secret)
             subject = claims.get("sub")
@@ -44,6 +50,8 @@ def require_roles(*allowed_roles: str) -> Callable[..., str]:
         except HTTPException:
             raise
         except Exception as exc:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token") from exc
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
+            ) from exc
 
     return dependency

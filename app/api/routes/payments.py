@@ -79,10 +79,14 @@ async def payment_webhook(
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> PaymentIntentResponse:
     expected = get_settings().payment_webhook_secret
-    if not expected or not x_payment_webhook_secret or not hmac.compare_digest(
-        x_payment_webhook_secret, expected
+    if (
+        not expected
+        or not x_payment_webhook_secret
+        or not hmac.compare_digest(x_payment_webhook_secret, expected)
     ):
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid payment webhook secret")
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid payment webhook secret"
+        )
     try:
         transaction = await apply_payment_callback(session, **request.model_dump())
     except ValueError as exc:

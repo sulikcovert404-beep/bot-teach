@@ -19,6 +19,21 @@ def test_retrieval_request_validates_contract_limits() -> None:
         RetrievalRequest("query", limit=21)
     with pytest.raises(ValueError, match="scope"):
         RetrievalRequest("query", scope=" ")
+    with pytest.raises(ValueError, match="between"):
+        RetrievalRequest("query", minimum_score=1.1)
+
+
+@pytest.mark.asyncio
+async def test_source_guardian_reports_low_confidence() -> None:
+    class Retriever:
+        async def retrieve(self, query: str, limit: int = 5) -> list[SourceChunk]:
+            return [SourceChunk(text="x", source_id="s", score=0.1)]
+
+    context = await SourceGuardian(Retriever()).retrieve_context(
+        RetrievalRequest(query="q", minimum_score=0.5)
+    )
+    assert context.state is GroundingState.LOW_CONFIDENCE
+    assert context.reason == "scores_below_threshold"
 
 
 def test_citation_manifest_deduplicates_and_validates_membership() -> None:

@@ -12,13 +12,18 @@ class EducationalAI:
         if not text.strip():
             raise ValueError("Text is required")
         request = AIRequest(
-            prompt=("متن آموزشی زیر را به فارسی، دقیق و ساختاریافته خلاصه کن و نکات کلیدی را جدا کن:\n\n" + text),
+            prompt=(
+                "متن آموزشی زیر را به فارسی، دقیق و ساختاریافته خلاصه کن و نکات کلیدی را جدا کن:\n\n"
+                + text
+            ),
             max_tokens=max_tokens,
             task_type="smart_summary",
         )
         return await self.provider.generate(self.router.route(request))
 
-    async def generate_questions(self, text: str, *, count: int = 5, max_tokens: int = 1200) -> AIResponse:
+    async def generate_questions(
+        self, text: str, *, count: int = 5, max_tokens: int = 1200
+    ) -> AIResponse:
         if not text.strip() or not 1 <= count <= 20:
             raise ValueError("Text and question count are invalid")
         request = AIRequest(
@@ -31,7 +36,9 @@ class EducationalAI:
         )
         return await self.provider.generate(self.router.route(request))
 
-    async def generate_exam(self, text: str, *, count: int = 10, max_tokens: int = 2400) -> AIResponse:
+    async def generate_exam(
+        self, text: str, *, count: int = 10, max_tokens: int = 2400
+    ) -> AIResponse:
         if not text.strip() or not 1 <= count <= 50:
             raise ValueError("Text and exam question count are invalid")
         request = AIRequest(
@@ -44,7 +51,9 @@ class EducationalAI:
         )
         return await self.provider.generate(self.router.route(request))
 
-    async def correct_exam(self, answer_key: str, answers: str, *, max_tokens: int = 1200) -> AIResponse:
+    async def correct_exam(
+        self, answer_key: str, answers: str, *, max_tokens: int = 1200
+    ) -> AIResponse:
         if not answer_key.strip() or not answers.strip():
             raise ValueError("Answer key and answers are required")
         request = AIRequest(

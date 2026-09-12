@@ -20,7 +20,9 @@ def load_evaluation_dataset(path: Path) -> tuple[EvaluationCase, ...]:
         if not isinstance(item, dict):
             raise TypeError("Dataset cases must be objects")
         source_values = item.get("expected_sources", [])
-        if not isinstance(source_values, list) or not all(isinstance(value, str) for value in source_values):
+        if not isinstance(source_values, list) or not all(
+            isinstance(value, str) for value in source_values
+        ):
             raise ValueError("expected_sources must be a list of strings")
         variants = item.get("paraphrase_variants", [])
         if not isinstance(variants, list) or not all(isinstance(value, str) for value in variants):

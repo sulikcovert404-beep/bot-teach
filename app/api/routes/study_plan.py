@@ -72,10 +72,15 @@ async def create_study_plan(
         missing_ids = lesson_ids - existing_ids
         if missing_ids:
             raise HTTPException(status_code=404, detail="One or more lessons were not found")
-    stored_plan = StudyPlan(user_id=user_id, daily_minutes=request.daily_minutes, max_days=request.max_days)
+    stored_plan = StudyPlan(
+        user_id=user_id, daily_minutes=request.daily_minutes, max_days=request.max_days
+    )
     stored_plan.tasks = [
         StudyPlanTask(
-            lesson_id=task.lesson_id, day_number=day.day_number, title=task.title, minutes=task.minutes
+            lesson_id=task.lesson_id,
+            day_number=day.day_number,
+            title=task.title,
+            minutes=task.minutes,
         )
         for day in plan
         for task in day.tasks
@@ -130,7 +135,9 @@ async def list_latest_study_plan(
     )
     if plan is None:
         return []
-    tasks = await session.scalars(select(StudyPlanTask).where(StudyPlanTask.plan_id == plan.id).order_by(StudyPlanTask.id))
+    tasks = await session.scalars(
+        select(StudyPlanTask).where(StudyPlanTask.plan_id == plan.id).order_by(StudyPlanTask.id)
+    )
     grouped: dict[int, list[PlannedTaskResponse]] = {}
     for task in tasks:
         grouped.setdefault(task.day_number, []).append(
@@ -142,6 +149,8 @@ async def list_latest_study_plan(
             )
         )
     return [
-        PlannedDayResponse(day_number=day, tasks=items, total_minutes=sum(item.minutes for item in items))
+        PlannedDayResponse(
+            day_number=day, tasks=items, total_minutes=sum(item.minutes for item in items)
+        )
         for day, items in grouped.items()
     ]

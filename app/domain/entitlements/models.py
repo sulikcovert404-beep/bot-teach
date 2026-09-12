@@ -11,6 +11,7 @@ class SubscriptionPlan(StrEnum):
 
 
 class FeatureCode(StrEnum):
+    ASSIGNMENT_ACCESS = "ASSIGNMENT_ACCESS"
     AI_CHAT = "AI_CHAT"
     BOOK_QA = "BOOK_QA"
     SMART_SUMMARY = "SMART_SUMMARY"
@@ -26,4 +27,3 @@ class FeatureCode(StrEnum):
     TEACHER_ASSISTANT = "TEACHER_ASSISTANT"
     SCHOOL_ANALYTICS = "SCHOOL_ANALYTICS"
     VOICE_TUTOR = "VOICE_TUTOR"
-

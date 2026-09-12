@@ -85,8 +85,7 @@ def compare_artifacts(
         before = baseline.metric_snapshot[provider]
         after = candidate.metric_snapshot[provider]
         deltas[provider] = {
-            key: after[key] - before[key]
-            for key in sorted(set(before) & set(after))
+            key: after[key] - before[key] for key in sorted(set(before) & set(after))
         }
     return ExperimentComparison(baseline.run_id, candidate.run_id, deltas, True)
 
@@ -123,7 +122,9 @@ def persist_run_artifact(
         results=tuple(reports),
     )
     canonical = dumps(asdict(artifact), sort_keys=True, separators=(",", ":"), default=str)
-    return BenchmarkRunArtifact(**{**asdict(artifact), "artifact_hash": sha256(canonical.encode()).hexdigest()})
+    return BenchmarkRunArtifact(
+        **{**asdict(artifact), "artifact_hash": sha256(canonical.encode()).hexdigest()}
+    )
 
 
 def _mean(values: Any) -> float:
@@ -179,9 +180,15 @@ def run_benchmark(
                     "query": case.question,
                     "retriever": provider,
                     "retrieved_source_ids": ranked_ids,
-                    "rank": {str(index): source_id for index, source_id in enumerate(ranked_ids, 1)},
+                    "rank": {
+                        str(index): source_id for index, source_id in enumerate(ranked_ids, 1)
+                    },
                     "scores": {str(index): chunk.score for index, chunk in enumerate(ranked, 1)},
-                    "filters": {"grade": case.grade, "subject": case.subject, "chapter": case.chapter},
+                    "filters": {
+                        "grade": case.grade,
+                        "subject": case.subject,
+                        "chapter": case.chapter,
+                    },
                     "latency_ms": latency_ms,
                     "expected_sources": sorted(case.expected_sources),
                     "metrics": asdict(evaluations[-1]),

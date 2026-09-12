@@ -90,10 +90,17 @@ async def create_book(
         metadata={"title": book.title},
     )
     await session.commit()
-    return book
+    result = await session.execute(
+        select(Book)
+        .options(selectinload(Book.chapters).selectinload(Chapter.lessons))
+        .where(Book.id == book.id)
+    )
+    return result.scalar_one()
 
 
-@router.post("/books/{book_id}/chapters", response_model=ChapterResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/books/{book_id}/chapters", response_model=ChapterResponse, status_code=status.HTTP_201_CREATED
+)
 async def create_chapter(
     book_id: int,
     request: ChapterCreate,
@@ -119,7 +126,11 @@ async def create_chapter(
     return chapter
 
 
-@router.post("/chapters/{chapter_id}/lessons", response_model=LessonResponse, status_code=status.HTTP_201_CREATED)
+@router.post(
+    "/chapters/{chapter_id}/lessons",
+    response_model=LessonResponse,
+    status_code=status.HTTP_201_CREATED,
+)
 async def create_lesson(
     chapter_id: int,
     request: LessonCreate,

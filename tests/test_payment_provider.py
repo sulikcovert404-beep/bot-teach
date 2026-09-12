@@ -26,7 +26,13 @@ async def test_http_payment_provider_creates_checkout(monkeypatch: pytest.Monkey
         async def __aexit__(self, *_args: object) -> None:
             return None
 
-        async def post(self, url: str, *, headers: dict[str, str], json: dict[str, object]) -> Response:
+        async def post(
+            self,
+            url: str,
+            *,
+            headers: dict[str, str],
+            json: dict[str, object],
+        ) -> Response:
             captured.update(url=url, headers=headers, json=json)
             return Response()
 
@@ -43,7 +49,11 @@ async def test_http_payment_provider_creates_checkout(monkeypatch: pytest.Monkey
         "timeout": 10.0,
         "url": "https://gateway.test/v1/checkout",
         "headers": {"Authorization": "Bearer api-key"},
-        "json": {"amount": 250_000, "plan": "STUDENT_PLUS", "merchant_transaction_id": "merchant-1"},
+        "json": {
+            "amount": 250_000,
+            "plan": "STUDENT_PLUS",
+            "merchant_transaction_id": "merchant-1",
+        },
     }
 
 
@@ -56,7 +66,9 @@ def test_http_payment_provider_rejects_missing_configuration() -> None:
 
 
 @pytest.mark.asyncio
-async def test_http_payment_provider_rejects_invalid_response(monkeypatch: pytest.MonkeyPatch) -> None:
+async def test_http_payment_provider_rejects_invalid_response(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     class Response:
         def raise_for_status(self) -> None:
             return None

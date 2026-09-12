@@ -98,10 +98,31 @@ class DeliveryAsset:
     asset_type: str
     content: str
     caption: str
+    is_placeholder: bool = False
 
 
 class LessonPackOrchestrator:
     ASSET_TYPES = ("PODCAST", "PDF", "MCQ", "DESCRIPTIVE")
+
+    @staticmethod
+    def validate_delivery(
+        request: LessonPackRequest,
+        *,
+        review_state: str,
+        approved_version: str | None = None,
+        tenant_id: str | None = None,
+        requested_tenant_id: str | None = None,
+        entitled: bool = True,
+    ) -> None:
+        """Fail closed before a pack can cross the delivery boundary."""
+        if review_state != "APPROVED":
+            raise PermissionError("UNAPPROVED_ASSET")
+        if approved_version is not None and approved_version != request.content_version:
+            raise PermissionError("STALE_ASSET_VERSION")
+        if tenant_id is None or requested_tenant_id is None or tenant_id != requested_tenant_id:
+            raise PermissionError("WRONG_TENANT")
+        if not entitled:
+            raise PermissionError("ENTITLEMENT_DENIED")
 
     def __init__(self, *, generator: LessonPackService | None = None, store: AssetStore | None = None) -> None:
         self.generator = generator or LessonPackService()
@@ -116,6 +137,9 @@ class LessonPackOrchestrator:
             "lesson_id": request.lesson_id,
             "school_stage": request.stage.value,
             "script_version": "lesson-pack-v1",
+            "provider_version": "deterministic-v1",
+            "prompt_version": "lesson-pack-v1",
+            "profile_version": "profile-v1",
         }
 
     async def generate_or_reuse(self, request: LessonPackRequest) -> LessonPack:
@@ -149,13 +173,30 @@ class LessonPackOrchestrator:
         return await self.store.put_for_request(request, pack, job_id=job_id)
 
     async def delivery_assets(self, request: LessonPackRequest, *, review_state: str) -> tuple[DeliveryAsset, ...]:
+        # Legacy in-process callers do not carry tenant context; external
+        # delivery must call validate_delivery with explicit identity.
         if review_state != "APPROVED":
             raise PermissionError("UNAPPROVED_ASSET")
         pack = await self.generate_or_reuse(request)
         caption = f"{request.title} | {request.stage} | {request.content_version}"
         return (
-            DeliveryAsset("PODCAST", pack.podcast_script, caption),
-            DeliveryAsset("PDF", pack.pdf_markdown, caption),
-            DeliveryAsset("MCQ", str(pack.mcq), caption),
-            DeliveryAsset("DESCRIPTIVE", str(pack.descriptive), caption),
+            DeliveryAsset("PODCAST", pack.podcast_script, caption, pack.assets_are_placeholders),
+            DeliveryAsset("PDF", pack.pdf_markdown, caption, pack.assets_are_placeholders),
+            DeliveryAsset("MCQ", str(pack.mcq), caption, pack.assets_are_placeholders),
+            DeliveryAsset("DESCRIPTIVE", str(pack.descriptive), caption, pack.assets_are_placeholders),
+        )
+
+    async def delivery_assets_persisted(
+        self, request: LessonPackRequest, *, review_state: str, job_id: int
+    ) -> tuple[DeliveryAsset, ...]:
+        """Deliver approved assets after resolving the real persistent adapter."""
+        if review_state != "APPROVED":
+            raise PermissionError("UNAPPROVED_ASSET")
+        pack = await self.generate_or_reuse_persisted(request, job_id=job_id)
+        caption = f"{request.title} | {request.stage} | {request.content_version}"
+        return (
+            DeliveryAsset("PODCAST", pack.podcast_script, caption, pack.assets_are_placeholders),
+            DeliveryAsset("PDF", pack.pdf_markdown, caption, pack.assets_are_placeholders),
+            DeliveryAsset("MCQ", str(pack.mcq), caption, pack.assets_are_placeholders),
+            DeliveryAsset("DESCRIPTIVE", str(pack.descriptive), caption, pack.assets_are_placeholders),
         )

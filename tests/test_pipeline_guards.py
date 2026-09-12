@@ -11,7 +11,13 @@ from app.services.pipeline_guards import (
 
 
 def candidate(**overrides):
-    values = dict(version_id=1, processing_state="VALIDATED", review_state="APPROVED", vector_sync_state="VECTOR_SYNCED", pipeline_digest="d")
+    values = dict(
+        version_id=1,
+        processing_state="VALIDATED",
+        review_state="APPROVED",
+        vector_sync_state="VECTOR_SYNCED",
+        pipeline_digest="d",
+    )
     values.update(overrides)
     return PublicationCandidate(**values)
 
@@ -25,7 +31,14 @@ def test_invalid_transition_is_rejected():
         assert_transition("processing", "UPLOADED", "VALIDATED")
 
 
-@pytest.mark.parametrize("field,value", [("review_state", "DRAFT"), ("vector_sync_state", "VECTOR_PENDING"), ("processing_state", "PROCESSING")])
+@pytest.mark.parametrize(
+    "field,value",
+    [
+        ("review_state", "DRAFT"),
+        ("vector_sync_state", "VECTOR_PENDING"),
+        ("processing_state", "PROCESSING"),
+    ],
+)
 def test_publish_requires_all_gates(field, value):
     with pytest.raises(GuardViolation):
         assert_publishable(candidate(**{field: value}))
@@ -43,4 +56,3 @@ def test_idempotent_replay_and_key_reuse():
     assert assert_idempotent_request("h", "h") is True
     with pytest.raises(GuardViolation):
         assert_idempotent_request("h", "different")
-

@@ -39,7 +39,12 @@ def test_redis_rate_limit_uses_shared_counter(monkeypatch) -> None:
 
     monkeypatch.setattr("redis.asyncio.Redis.from_url", FakeRedis.from_url)
     app = FastAPI()
-    app.add_middleware(RedisRateLimitMiddleware, redis_url="redis://test", requests=1, window_seconds=60)
+    app.add_middleware(
+        RedisRateLimitMiddleware,
+        redis_url="redis://test",
+        requests=1,
+        window_seconds=60,
+    )
 
     @app.get("/")
     async def root() -> dict[str, str]:

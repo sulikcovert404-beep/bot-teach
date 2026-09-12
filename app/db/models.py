@@ -1642,6 +1642,21 @@ class SchoolTenant(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class SchoolAdminMembership(Base):
+    """Audited, revocable binding between a school administrator and a tenant."""
+
+    __tablename__ = "school_admin_memberships"
+    __table_args__ = (UniqueConstraint("user_id", "tenant_id", name="uq_school_admin_membership_user_tenant"),)
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    tenant_id: Mapped[str] = mapped_column(ForeignKey("school_tenants.tenant_id"), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="ACTIVE", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class TeacherProfile(Base):
     """Persistence boundary for a teacher's membership in one school tenant."""
 

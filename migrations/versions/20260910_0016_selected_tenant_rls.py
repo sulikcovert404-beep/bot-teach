@@ -16,7 +16,8 @@ TABLES = (
     "assignment_targets",
     "assignments",
     "classrooms",
-    "content_generation_jobs",
+    # content_generation_jobs.tenant_id is nullable and its system/background
+    # semantics are not yet classified; it is explicitly excluded from phase 1.
     "student_submissions",
     "submission_reviews",
     "teacher_profiles",

@@ -7,9 +7,10 @@ from app.services.curriculum_pipeline_api import (
     CommandContext,
     CurriculumPipelineService,
     DigestMismatchError,
+    IdempotencyConflictError,
     InvalidStateError,
     JobState,
-    PipelineError,
+    VectorSyncState,
 )
 
 
@@ -35,7 +36,9 @@ def test_staged_flow_and_publish_gate() -> None:
 
 def test_publish_cannot_trigger_vector_sync() -> None:
     service = CurriculumPipelineService()
-    version_id = service.create_content_version(ctx("CONTENT_ADMIN", "c"), 1, "d").result.content_version_id
+    version_id = service.create_content_version(
+        ctx("CONTENT_ADMIN", "c"), 1, "d"
+    ).result.content_version_id
     service.validate_content(ctx("PIPELINE", "v", 1), version_id)
     service.approve_content(ctx("REVIEWER", "a", 2), version_id, "d")
     with pytest.raises(InvalidStateError):
@@ -44,7 +47,9 @@ def test_publish_cannot_trigger_vector_sync() -> None:
 
 def test_authorization_and_digest_errors() -> None:
     service = CurriculumPipelineService()
-    version_id = service.create_content_version(ctx("CONTENT_ADMIN", "c"), 1, "d").result.content_version_id
+    version_id = service.create_content_version(
+        ctx("CONTENT_ADMIN", "c"), 1, "d"
+    ).result.content_version_id
     with pytest.raises(AuthorizationError):
         service.validate_content(ctx("REVIEWER", "v", 1), version_id)
     with pytest.raises(DigestMismatchError):
@@ -65,15 +70,39 @@ def test_idempotency_key_reuse_with_different_request_is_rejected() -> None:
         CommandContext(Actor(7, "CONTENT_ADMIN"), "same", request_hash="h1"), 1, "d"
     )
     assert first.status == "COMMITTED"
-    with pytest.raises(PipelineError, match="different request"):
+    with pytest.raises(IdempotencyConflictError, match="different request"):
         service.create_content_version(
             CommandContext(Actor(7, "CONTENT_ADMIN"), "same", request_hash="h2"), 2, "d2"
         )
 
 
+def test_publish_requires_digest_bound_approval() -> None:
+    service, version_id = prepared()
+    snapshot = service.get_content_status(version_id)
+    assert snapshot.vector_sync_state is VectorSyncState.SYNCED
+    assert snapshot.approval_digest == snapshot.digest
+
+
+def test_idempotency_conflict_does_not_mutate_state() -> None:
+    service = CurriculumPipelineService()
+    created = service.create_content_version(
+        CommandContext(Actor(7, "CONTENT_ADMIN"), "create", request_hash="h1"), 1, "d"
+    )
+    version_id = created.result.content_version_id
+    before = service.get_content_status(version_id)
+    with pytest.raises(IdempotencyConflictError):
+        service.validate_content(
+            CommandContext(Actor(7, "PIPELINE"), "create", 1, request_hash="h2"),
+            version_id,
+        )
+    assert service.get_content_status(version_id) == before
+
+
 def test_cas_conflict_and_async_job_contract() -> None:
     service = CurriculumPipelineService()
-    version_id = service.create_content_version(ctx("CONTENT_ADMIN", "c"), 1, "d").result.content_version_id
+    version_id = service.create_content_version(
+        ctx("CONTENT_ADMIN", "c"), 1, "d"
+    ).result.content_version_id
     with pytest.raises(CASConflictError):
         service.validate_content(ctx("PIPELINE", "v", 99), version_id)
     job = service.submit_processing_job(ctx("CONTENT_ADMIN", "job"), version_id)
