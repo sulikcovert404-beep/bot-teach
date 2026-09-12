@@ -46,3 +46,28 @@ async def test_migration_roundtrip_0019_0018_0019_and_post_smoke():
         assert "school_admin_memberships" in tables_0019_reloaded
         
     await engine.dispose()
+
+
+def test_dual_parent_lineage_convergence_0009_and_0019_to_0020():
+    project_root = Path(__file__).resolve().parents[1]
+    alembic_cfg = Config(str(project_root / "alembic.ini"))
+    alembic_cfg.set_main_option("script_location", str(project_root / "migrations"))
+    script = ScriptDirectory.from_config(alembic_cfg)
+
+    # 1. Verify single converged head
+    heads = script.get_heads()
+    assert heads == ["20260912_0020"]
+
+    # 2. Verify merge revision points to both 0009 and 0019
+    rev_0020 = script.get_revision("20260912_0020")
+    assert set(rev_0020.down_revision) == {"20260909_0009", "20260910_0019"}
+
+    # 3. Verify production branch ancestry from 0009
+    rev_0009 = script.get_revision("20260909_0009")
+    assert rev_0009.down_revision == "2e0b56730806"
+    rev_bigint = script.get_revision("2e0b56730806")
+    assert rev_bigint.down_revision == "f7a8b9c0d1e2"
+
+    # 4. Verify staging branch ancestry from 0019
+    rev_0019 = script.get_revision("20260910_0019")
+    assert rev_0019.down_revision == "20260910_0018"
