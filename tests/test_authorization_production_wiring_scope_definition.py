@@ -1,4 +1,7 @@
-from app.services.authorization_production_wiring_scope_definition import Outcome, AuthorizationProductionWiringScopeDefinition
+from app.services.authorization_production_wiring_scope_definition import (
+    AuthorizationProductionWiringScopeDefinition,
+    Outcome,
+)
 
 
 def make(**overrides):
