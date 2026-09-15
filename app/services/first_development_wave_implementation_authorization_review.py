@@ -1,7 +1,6 @@
 """Advisory review of entry conditions; never grants implementation permission."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,15 +13,15 @@ class Outcome(str, Enum):
 @dataclass(frozen=True)
 class FirstDevelopmentWaveImplementationAuthorizationReview:
     selected_capability: str = ""
-    boundary_verification: Tuple[str, ...] = ()
-    dependency_readiness: Tuple[str, ...] = ()
-    acceptance_readiness: Tuple[str, ...] = ()
-    quality_gate_readiness: Tuple[str, ...] = ()
-    expected_files: Tuple[str, ...] = ()
-    affected_boundaries: Tuple[str, ...] = ()
-    risk_assessment: Tuple[str, ...] = ()
+    boundary_verification: tuple[str, ...] = ()
+    dependency_readiness: tuple[str, ...] = ()
+    acceptance_readiness: tuple[str, ...] = ()
+    quality_gate_readiness: tuple[str, ...] = ()
+    expected_files: tuple[str, ...] = ()
+    affected_boundaries: tuple[str, ...] = ()
+    risk_assessment: tuple[str, ...] = ()
     decision: str = ""
-    blockers: Tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     authorization_review_only: bool = True
     implementation_permission: bool = False
