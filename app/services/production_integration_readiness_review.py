@@ -1,7 +1,6 @@
 """Immutable readiness review for production integration composition."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,21 +12,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionIntegrationReadinessReview:
-    data_ownership: Tuple[str, ...] = ()
-    access_enforcement: Tuple[str, ...] = ()
-    lifecycle_consistency: Tuple[str, ...] = ()
-    execution_sequence: Tuple[str, ...] = ()
-    prerequisite_chain: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
-    ownership_risks: Tuple[str, ...] = ()
-    permission_risks: Tuple[str, ...] = ()
-    data_integrity_risks: Tuple[str, ...] = ()
-    monitoring: Tuple[str, ...] = ()
-    incident_handling: Tuple[str, ...] = ()
-    recovery: Tuple[str, ...] = ()
+    data_ownership: tuple[str, ...] = ()
+    access_enforcement: tuple[str, ...] = ()
+    lifecycle_consistency: tuple[str, ...] = ()
+    execution_sequence: tuple[str, ...] = ()
+    prerequisite_chain: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    ownership_risks: tuple[str, ...] = ()
+    permission_risks: tuple[str, ...] = ()
+    data_integrity_risks: tuple[str, ...] = ()
+    monitoring: tuple[str, ...] = ()
+    incident_handling: tuple[str, ...] = ()
+    recovery: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     integration_readiness_review_only: bool = True
     implementation_execution: bool = False
     credential_change: bool = False
