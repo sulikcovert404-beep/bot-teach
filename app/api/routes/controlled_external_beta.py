@@ -1,7 +1,7 @@
 import asyncio
 import time
 from datetime import UTC, datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from app.security.dependencies import require_roles, require_user
@@ -83,7 +83,7 @@ class InviteValidateRequest(BaseModel):
 
 class ActivityEventRequest(BaseModel):
     event_type: str = Field(..., description="BOT_START, MINIAPP_OPEN, QUESTION_ASKED, EXAM_SIMULATOR_RUN, D1_RETURN")
-    metadata: Dict[str, Any] = Field(default_factory=dict)
+    metadata: dict[str, Any] = Field(default_factory=dict)
 
 class IncidentReportRequest(BaseModel):
     category: str = Field(..., description="AI_QUALITY, CONTENT_GAP, UX, TELEGRAM_MINIAPP, PERFORMANCE")
