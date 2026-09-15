@@ -1,7 +1,6 @@
 """Immutable definition of the second-wave implementation scope."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -15,20 +14,20 @@ class Outcome(str, Enum):
 class SecondDevelopmentWaveExecutionScope:
     capability: str = ""
     purpose: str = ""
-    user_system_behavior: Tuple[str, ...] = ()
-    non_goals: Tuple[str, ...] = ()
-    allowed_files: Tuple[str, ...] = ()
-    restricted_files: Tuple[str, ...] = ()
-    forbidden_files: Tuple[str, ...] = ()
-    input_contract: Tuple[str, ...] = ()
-    output_contract: Tuple[str, ...] = ()
-    error_contract: Tuple[str, ...] = ()
-    compatibility_requirements: Tuple[str, ...] = ()
-    acceptance_criteria: Tuple[str, ...] = ()
-    required_tests: Tuple[str, ...] = ()
-    regression_tests: Tuple[str, ...] = ()
-    out_of_scope: Tuple[str, ...] = ()
-    warnings: Tuple[str, ...] = ()
+    user_system_behavior: tuple[str, ...] = ()
+    non_goals: tuple[str, ...] = ()
+    allowed_files: tuple[str, ...] = ()
+    restricted_files: tuple[str, ...] = ()
+    forbidden_files: tuple[str, ...] = ()
+    input_contract: tuple[str, ...] = ()
+    output_contract: tuple[str, ...] = ()
+    error_contract: tuple[str, ...] = ()
+    compatibility_requirements: tuple[str, ...] = ()
+    acceptance_criteria: tuple[str, ...] = ()
+    required_tests: tuple[str, ...] = ()
+    regression_tests: tuple[str, ...] = ()
+    out_of_scope: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     trace_reference: str = ""
     scope_definition_only: bool = True
     implementation_permission: bool = False
