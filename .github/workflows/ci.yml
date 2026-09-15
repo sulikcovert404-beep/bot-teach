@@ -32,13 +32,18 @@ jobs:
       - name: Verify migration chain
         env:
           DATABASE_URL: sqlite:///ci-migrations.sqlite
-        run: python -m alembic upgrade head
+          EXPECTED_MIGRATION_HEAD: 20260912_0021
+        run: |
+          python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
+          test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
       - name: Verify migration rollback and re-upgrade
         env:
           DATABASE_URL: sqlite:///ci-migrations.sqlite
+          EXPECTED_MIGRATION_HEAD: 20260912_0021
         run: |
           python -m alembic downgrade -1
-          python -m alembic upgrade head
+          python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
+          test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
 
   docker:
     runs-on: ubuntu-latest
@@ -58,7 +63,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Prepare non-secret staging configuration
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          echo "EXPECTED_MIGRATION_HEAD=20260912_0021" >> .env
       - name: Start staging stack
         run: docker compose up -d --build db redis migrate api
       - name: Wait for readiness and migration head
@@ -68,7 +75,7 @@ jobs:
             if response=$(curl --silent --show-error --fail http://localhost:8000/health/ready); then
               echo "$response"
               test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["status"])')" = "ready"
-              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "e2f3a4b5c6d7"
+              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "20260912_0021"
               exit 0
             fi
             sleep 2
