@@ -1,7 +1,6 @@
 """Immutable design package for production enablement."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,22 +12,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionEnablementDesignPackage:
-    storage_architecture: Tuple[str, ...] = ()
-    migration_strategy: Tuple[str, ...] = ()
-    data_validation: Tuple[str, ...] = ()
-    rollback_design: Tuple[str, ...] = ()
-    identity_integration: Tuple[str, ...] = ()
-    permission_mapping: Tuple[str, ...] = ()
-    security_controls: Tuple[str, ...] = ()
-    activation_sequence: Tuple[str, ...] = ()
-    operational_ownership: Tuple[str, ...] = ()
-    monitoring_model: Tuple[str, ...] = ()
-    release_strategy: Tuple[str, ...] = ()
-    checkpoints: Tuple[str, ...] = ()
-    recovery_flow: Tuple[str, ...] = ()
+    storage_architecture: tuple[str, ...] = ()
+    migration_strategy: tuple[str, ...] = ()
+    data_validation: tuple[str, ...] = ()
+    rollback_design: tuple[str, ...] = ()
+    identity_integration: tuple[str, ...] = ()
+    permission_mapping: tuple[str, ...] = ()
+    security_controls: tuple[str, ...] = ()
+    activation_sequence: tuple[str, ...] = ()
+    operational_ownership: tuple[str, ...] = ()
+    monitoring_model: tuple[str, ...] = ()
+    release_strategy: tuple[str, ...] = ()
+    checkpoints: tuple[str, ...] = ()
+    recovery_flow: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     production_enablement_design_only: bool = True
     implementation_execution: bool = False
     migration_execution: bool = False
