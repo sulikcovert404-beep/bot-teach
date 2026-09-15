@@ -1,7 +1,6 @@
 """Immutable catalog of RAG regression scenarios and validation outcomes."""
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Tuple
 
 
 class Outcome(StrEnum):
@@ -14,19 +13,19 @@ class Outcome(StrEnum):
 
 @dataclass(frozen=True)
 class RAGRegressionValidationSuite:
-    baseline_scenarios: Tuple[str, ...] = ()
-    expected_grounding_states: Tuple[str, ...] = ()
-    failure_cases: Tuple[str, ...] = ()
-    retrieval_request_validation: Tuple[str, ...] = ()
-    source_guardian_behavior: Tuple[str, ...] = ()
-    confidence_outcomes: Tuple[str, ...] = ()
-    conflict_cases: Tuple[str, ...] = ()
-    acceptance_criteria: Tuple[str, ...] = ()
-    edge_cases: Tuple[str, ...] = ()
-    compatibility_checks: Tuple[str, ...] = ()
-    validated_behaviors: Tuple[str, ...] = ()
-    known_limitations: Tuple[str, ...] = ()
-    deferred_risks: Tuple[str, ...] = ()
+    baseline_scenarios: tuple[str, ...] = ()
+    expected_grounding_states: tuple[str, ...] = ()
+    failure_cases: tuple[str, ...] = ()
+    retrieval_request_validation: tuple[str, ...] = ()
+    source_guardian_behavior: tuple[str, ...] = ()
+    confidence_outcomes: tuple[str, ...] = ()
+    conflict_cases: tuple[str, ...] = ()
+    acceptance_criteria: tuple[str, ...] = ()
+    edge_cases: tuple[str, ...] = ()
+    compatibility_checks: tuple[str, ...] = ()
+    validated_behaviors: tuple[str, ...] = ()
+    known_limitations: tuple[str, ...] = ()
+    deferred_risks: tuple[str, ...] = ()
     trace_reference: str = ""
     rag_validation_only: bool = True
     runtime_execution: bool = False
