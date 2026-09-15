@@ -5,7 +5,8 @@ from dataclasses import dataclass
 from enum import Enum
 import hashlib
 import json
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 import unicodedata
 
 from .readiness_evidence_gate import (
