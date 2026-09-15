@@ -6,3 +6,20 @@ __pycache__/
 .env
 *.py[cod]
 *.egg-info/
+
+# local/runtime artifacts
+prod_secrets.env
+*.env
+*.pem
+*.key
+payload.json
+webhook_smoke_payload.json
+articles.json
+chatgpt_buttons.json
+tg_buttons.json
+.temp/
+.pytest-tmp/
+
+temp/
+.pytest-tmp/
+
