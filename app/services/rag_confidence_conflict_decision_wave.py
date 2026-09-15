@@ -1,7 +1,6 @@
 """Immutable decision model for RAG confidence and source conflicts."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,22 +12,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class RAGConfidenceConflictDecisionWave:
-    conflict_detection_semantics: Tuple[str, ...] = ()
-    source_precedence_rules: Tuple[str, ...] = ()
-    resolution_outcomes: Tuple[str, ...] = ()
-    confidence_bands: Tuple[str, ...] = ()
-    threshold_policy: Tuple[str, ...] = ()
-    scoring_interpretation: Tuple[str, ...] = ()
-    valid_source: Tuple[str, ...] = ()
-    low_confidence: Tuple[str, ...] = ()
-    conflicting_sources: Tuple[str, ...] = ()
-    no_source: Tuple[str, ...] = ()
-    backward_compatibility: Tuple[str, ...] = ()
-    required_changes: Tuple[str, ...] = ()
-    migration_risk: Tuple[str, ...] = ()
-    approved_semantics: Tuple[str, ...] = ()
-    deferred_items: Tuple[str, ...] = ()
-    future_implementation_boundary: Tuple[str, ...] = ()
+    conflict_detection_semantics: tuple[str, ...] = ()
+    source_precedence_rules: tuple[str, ...] = ()
+    resolution_outcomes: tuple[str, ...] = ()
+    confidence_bands: tuple[str, ...] = ()
+    threshold_policy: tuple[str, ...] = ()
+    scoring_interpretation: tuple[str, ...] = ()
+    valid_source: tuple[str, ...] = ()
+    low_confidence: tuple[str, ...] = ()
+    conflicting_sources: tuple[str, ...] = ()
+    no_source: tuple[str, ...] = ()
+    backward_compatibility: tuple[str, ...] = ()
+    required_changes: tuple[str, ...] = ()
+    migration_risk: tuple[str, ...] = ()
+    approved_semantics: tuple[str, ...] = ()
+    deferred_items: tuple[str, ...] = ()
+    future_implementation_boundary: tuple[str, ...] = ()
     trace_reference: str = ""
     rag_decision_design_only: bool = True
     runtime_execution: bool = False
