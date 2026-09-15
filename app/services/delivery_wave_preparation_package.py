@@ -1,7 +1,6 @@
 """Immutable preparation contract for a delivery wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,22 +13,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class DeliveryWavePreparationPackage:
-    wave_scope: Tuple[str, ...] = ()
-    selected_capabilities: Tuple[str, ...] = ()
-    exclusions: Tuple[str, ...] = ()
-    success_criteria: Tuple[str, ...] = ()
-    technical_prerequisites: Tuple[str, ...] = ()
-    dependency_readiness: Tuple[str, ...] = ()
-    development_constraints: Tuple[str, ...] = ()
-    test_requirements: Tuple[str, ...] = ()
-    review_checkpoints: Tuple[str, ...] = ()
-    acceptance_preparation: Tuple[str, ...] = ()
-    planned_change_boundaries: Tuple[str, ...] = ()
-    impact_classification: Tuple[str, ...] = ()
-    rollback_expectations: Tuple[str, ...] = ()
+    wave_scope: tuple[str, ...] = ()
+    selected_capabilities: tuple[str, ...] = ()
+    exclusions: tuple[str, ...] = ()
+    success_criteria: tuple[str, ...] = ()
+    technical_prerequisites: tuple[str, ...] = ()
+    dependency_readiness: tuple[str, ...] = ()
+    development_constraints: tuple[str, ...] = ()
+    test_requirements: tuple[str, ...] = ()
+    review_checkpoints: tuple[str, ...] = ()
+    acceptance_preparation: tuple[str, ...] = ()
+    planned_change_boundaries: tuple[str, ...] = ()
+    impact_classification: tuple[str, ...] = ()
+    rollback_expectations: tuple[str, ...] = ()
     wave_rationale: str = ""
-    expected_outcomes: Tuple[str, ...] = ()
-    remaining_blockers: Tuple[str, ...] = ()
+    expected_outcomes: tuple[str, ...] = ()
+    remaining_blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     delivery_wave_planning_only: bool = True
     implementation_execution: bool = False
