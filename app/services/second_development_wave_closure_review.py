@@ -1,7 +1,6 @@
 """Immutable closure review for the second development wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,16 +12,16 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class SecondDevelopmentWaveClosureReview:
-    delivered_changes: Tuple[str, ...] = ()
-    objective_achievement: Tuple[str, ...] = ()
-    scope_compliance: Tuple[str, ...] = ()
-    test_validation: Tuple[str, ...] = ()
-    regression_status: Tuple[str, ...] = ()
-    compatibility_review: Tuple[str, ...] = ()
-    carryover_risks: Tuple[str, ...] = ()
-    reusable_patterns: Tuple[str, ...] = ()
-    constraints: Tuple[str, ...] = ()
-    improvements: Tuple[str, ...] = ()
+    delivered_changes: tuple[str, ...] = ()
+    objective_achievement: tuple[str, ...] = ()
+    scope_compliance: tuple[str, ...] = ()
+    test_validation: tuple[str, ...] = ()
+    regression_status: tuple[str, ...] = ()
+    compatibility_review: tuple[str, ...] = ()
+    carryover_risks: tuple[str, ...] = ()
+    reusable_patterns: tuple[str, ...] = ()
+    constraints: tuple[str, ...] = ()
+    improvements: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
     second_wave_closure_review_only: bool = True
