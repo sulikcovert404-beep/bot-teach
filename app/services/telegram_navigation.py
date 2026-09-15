@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from enum import StrEnum
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlunparse
 
 
 class NavigationAction(StrEnum):
@@ -137,9 +137,31 @@ def build_start_inline_keyboard(web_app_url: str, label: str = "🎓 ورود ب
     }
 
 
+ROLE_DASHBOARD_PATHS: dict[str, str] = {
+    "STUDENT": "/student-dashboard/",
+    "TEACHER": "/teacher-dashboard/",
+    "SCHOOL_ADMIN": "/admin-dashboard/",
+    "SUPER_ADMIN": "/platform/",
+}
+
+
+def web_app_url_for_role(base_url: str, role: str | None) -> str:
+    """Resolve the server-owned dashboard URL for a known backend role.
+
+    Unknown or unresolved identities deliberately retain the configured Mini App
+    fallback. Query strings and fragments are discarded from role routes.
+    """
+    parsed = urlparse(base_url)
+    normalized = (role or "").strip().upper()
+    path = ROLE_DASHBOARD_PATHS.get(normalized)
+    if path is None:
+        return base_url
+    return urlunparse((parsed.scheme, parsed.netloc, path, "", "", ""))
+
+
 __all__ = [
     "NavigationAction", "NavigationConfig", "NavigationIntent", "allowed_callback",
     "build_inline_keyboard", "build_reply_keyboard", "build_start_inline_keyboard",
     "default_intents", "fallback_text",
-    "build_role_keyboard", "lesson_card_text", "role_menu_labels",
+    "build_role_keyboard", "lesson_card_text", "role_menu_labels", "web_app_url_for_role",
 ]

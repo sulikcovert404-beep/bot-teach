@@ -18,6 +18,8 @@ from app.db.models import (
     StudentProfile,
     TeacherProfile,
     User,
+    ExamAttempt,
+    ExamResult,
 )
 from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_roles
@@ -32,6 +34,8 @@ from app.services.teacher_assistant import TeacherAssistant
 from app.services.publication_access import PublicationContext, can_publish
 from app.services.usage_repository import record_usage
 from app.security.teacher_scope import resolve_teacher_scope
+from app.db.base import set_tenant_context
+from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 
 router = APIRouter(prefix="/teacher", tags=["teacher-classroom-intelligence"])
 
@@ -512,6 +516,43 @@ async def list_assignment_submissions_v1(assignment_id: int, subject: str = Depe
     if a is None: raise HTTPException(status_code=404, detail="Assignment not found")
     rows = (await session.execute(select(StudentSubmission).where(StudentSubmission.assignment_id == assignment_id, StudentSubmission.tenant_id == a.tenant_id).order_by(StudentSubmission.id))).scalars().all()
     return {"submissions": [{"id": s.id, "student_id": s.student_id, "status": s.status, "revision": s.revision, "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None} for s in rows]}
+
+
+@router.get("/exam-results")
+async def list_exam_results_v1(
+    subject: str = Depends(require_roles("TEACHER", "ADMIN")),
+    session: AsyncSession = Depends(get_session),
+):
+    """Return persisted exam results for classrooms owned by this teacher."""
+    teacher_id = int(subject)
+    try:
+        resolved_tenant = await resolve_tenant(session, user_id=teacher_id)
+        await set_tenant_context(session, resolved_tenant)
+    except (ValueError, TenantResolutionError) as exc:
+        await session.rollback()
+        raise HTTPException(status_code=403, detail="Tenant scope denied") from exc
+    rows = await session.execute(
+        select(ExamResult, ExamAttempt, Assignment)
+        .join(ExamAttempt, ExamAttempt.id == ExamResult.attempt_id)
+        .join(Assignment, Assignment.id == ExamAttempt.assignment_id)
+        .join(Classroom, Classroom.id == Assignment.classroom_id)
+        .join(TeacherProfile, TeacherProfile.id == Classroom.teacher_profile_id)
+        .where(
+            Assignment.teacher_id == teacher_id,
+            Assignment.tenant_id == resolved_tenant,
+            TeacherProfile.teacher_id == teacher_id,
+            Classroom.tenant_id == Assignment.tenant_id,
+            ExamResult.tenant_id == Assignment.tenant_id,
+        )
+        .order_by(ExamResult.id.desc())
+    )
+    return {"results": [
+        {"result_id": result.id, "attempt_id": attempt.id,
+         "assignment_id": assignment.id, "student_id": attempt.student_id,
+         "score": result.score, "max_score": result.max_score,
+         "grading_status": result.grading_status}
+        for result, attempt, assignment in rows.all()
+    ]}
 
 @router.post("/v1/submissions/{submission_id}/review", status_code=201)
 async def review_submission_v1(submission_id: int, req: AssignmentReviewRequest, subject: str = Depends(require_roles("TEACHER", "ADMIN")), session: AsyncSession = Depends(get_session)):

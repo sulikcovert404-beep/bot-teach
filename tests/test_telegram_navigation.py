@@ -12,6 +12,7 @@ from app.services.telegram_navigation import (
     fallback_text,
     lesson_card_text,
     role_menu_labels,
+    web_app_url_for_role,
 )
 
 
@@ -75,3 +76,19 @@ def test_start_inline_keyboard_uses_fixed_url() -> None:
     payload = build_start_inline_keyboard("https://demo-ai.codeshow.ir/mini-app/")
     assert payload["inline_keyboard"][0][0]["text"] == "🎓 ورود به پنل آموزشی"
     assert payload["inline_keyboard"][0][0]["web_app"]["url"] == "https://demo-ai.codeshow.ir/mini-app/"
+
+
+@pytest.mark.parametrize(("role", "path"), [
+    ("STUDENT", "/student-dashboard/"),
+    ("TEACHER", "/teacher-dashboard/"),
+    ("SCHOOL_ADMIN", "/admin-dashboard/"),
+    ("SUPER_ADMIN", "/platform/"),
+])
+def test_web_app_url_for_role_uses_backend_role(role: str, path: str) -> None:
+    assert web_app_url_for_role("https://bot.codeshow.ir/mini-app/", role) == f"https://bot.codeshow.ir{path}"
+
+
+def test_web_app_url_for_role_falls_back_for_unknown_identity() -> None:
+    base = "https://bot.codeshow.ir/mini-app/"
+    assert web_app_url_for_role(base, None) == base
+    assert web_app_url_for_role(base, "PARENT") == base

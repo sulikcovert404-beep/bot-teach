@@ -63,6 +63,28 @@ class Identity(Base):
     user: Mapped[User] = relationship(back_populates="identities")
 
 
+class UserTenantMembership(Base):
+    """Authoritative server-side identity to tenant binding.
+
+    This model is intentionally inert until its migration is approved; it is
+    used by the disposable request-context qualification only.
+    """
+
+    __tablename__ = "user_tenant_memberships"
+    __table_args__ = (
+        UniqueConstraint("user_id", "tenant_id", name="uq_user_tenant_membership_user_tenant"),
+        CheckConstraint("status IN ('ACTIVE','REVOKED','SUSPENDED')", name="ck_user_tenant_membership_status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    status: Mapped[str] = mapped_column(String(20), default="ACTIVE", index=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
 class TelegramUpdate(Base):
     __tablename__ = "telegram_updates"
 
@@ -164,6 +186,7 @@ class Exam(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True, nullable=False)
     title: Mapped[str] = mapped_column(String(255))
     generated_content: Mapped[str | None] = mapped_column(String(20_000))
     correction_content: Mapped[str | None] = mapped_column(String(20_000))
@@ -1852,6 +1875,7 @@ class Assignment(Base):
     tenant_id: Mapped[str] = mapped_column(String(64), index=True)
     teacher_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
     classroom_id: Mapped[int] = mapped_column(ForeignKey("classrooms.id"), index=True)
+    exam_id: Mapped[int | None] = mapped_column(ForeignKey("exams.id"), index=True, nullable=True)
     title: Mapped[str] = mapped_column(String(255))
     instructions: Mapped[str] = mapped_column(Text, default="")
     status: Mapped[str] = mapped_column(String(32), default="DRAFT", index=True)
@@ -1861,6 +1885,38 @@ class Assignment(Base):
     idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ExamAttempt(Base):
+    __tablename__ = "exam_attempts"
+    __table_args__ = (
+        UniqueConstraint("assignment_id", "student_id", "attempt_no", name="uq_exam_attempt_identity"),
+        CheckConstraint("status IN ('STARTED', 'IN_PROGRESS', 'SUBMITTED', 'GRADED')", name="ck_exam_attempt_status"),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    assignment_id: Mapped[int] = mapped_column(ForeignKey("assignments.id", ondelete="CASCADE"), index=True)
+    student_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    attempt_no: Mapped[int] = mapped_column(Integer)
+    status: Mapped[str] = mapped_column(String(32), default="STARTED", index=True)
+    question_snapshot: Mapped[str] = mapped_column(Text)
+    answer_payload: Mapped[str] = mapped_column(Text, default="{}")
+    started_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    last_saved_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+
+class ExamResult(Base):
+    __tablename__ = "exam_results"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
+    attempt_id: Mapped[int] = mapped_column(ForeignKey("exam_attempts.id", ondelete="CASCADE"), unique=True, index=True)
+    score: Mapped[float] = mapped_column(Float)
+    max_score: Mapped[float] = mapped_column(Float)
+    grading_status: Mapped[str] = mapped_column(String(32), default="GRADED", index=True)
+    grading_source: Mapped[str] = mapped_column(String(64), default="server")
+    graded_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
 class AssignmentSnapshot(Base):

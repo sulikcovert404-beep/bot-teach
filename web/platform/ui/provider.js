@@ -1,21 +1,37 @@
 /** Provider selection for Phase 6B. Real mode uses the shared Core API and a bearer token. */
 import {CoreApiClient} from "/student/core-api.js";
+import {ensureTelegramAuth, storedToken, clearStoredToken} from "/platform/ui/auth-bootstrap.js";
 const params=new URLSearchParams(location.search);
 // Product dashboards must never present fabricated business metrics. Use the
 // Core API whenever a session exists; without one, fail closed with an auth
 // state instead of silently falling back to mock data.
-const useReal=params.get("provider")==="real" || Boolean(sessionStorage.getItem("studentToken")||sessionStorage.getItem("teacherToken")||sessionStorage.getItem("accessToken"));
+let useReal=params.get("provider")==="real" || Boolean(storedToken());
 const realClient=new CoreApiClient();
-const token=sessionStorage.getItem("studentToken")||sessionStorage.getItem("teacherToken")||sessionStorage.getItem("accessToken");
+const token=storedToken();
 if(token) realClient.setSession({token});
+let authPromise;
+let reauthPromise;
+async function ensureSession(force=false){
+  if(!force && realClient.session?.token) return;
+  if(force){
+    if (reauthPromise) return reauthPromise;
+    clearStoredToken(); realClient.setSession(null); authPromise=null;
+    reauthPromise = (async () => { const auth=await ensureTelegramAuth(); realClient.setSession({token:auth.token}); useReal=true; return auth; })();
+    try { await reauthPromise; } finally { reauthPromise=null; }
+    return;
+  }
+  authPromise ||= ensureTelegramAuth(); const auth=await authPromise; realClient.setSession({token:auth.token}); useReal=true;
+}
+async function request(path, options={}, retried=false) { await ensureSession(); try { return await realClient.request(path, options); } catch (error) { if(error.status!==401 || retried) throw error; await ensureSession(true); return request(path, options, true); } }
 export const platformProvider={
-  mode:useReal?"real":"unavailable",
+  get mode(){ return useReal?"real":"unavailable" },
   async dashboard(role="student"){
+    await ensureSession();
     if(!useReal) throw new Error("برای مشاهده داشبورد، ابتدا وارد حساب کاربری شوید.");
     if(role==="teacher"){
       const [classrooms,analytics]=await Promise.all([
-        realClient.request("/teacher/classrooms"),
-        realClient.request("/teacher/dashboard/analytics"),
+        request("/teacher/classrooms"),
+        request("/teacher/dashboard/analytics"),
       ]);
       return {
         name:analytics.teacher?.name||"معلم",
@@ -26,24 +42,26 @@ export const platformProvider={
       };
     }
     const [dashboard,progress,assignments]=await Promise.all([
-      realClient.request("/student/dashboard"),
-      realClient.request("/student/progress"),
-      realClient.request("/student/v1/assignments"),
+      request("/student/dashboard"),
+      request("/student/progress"),
+      request("/student/v1/assignments"),
     ]);
     return {name:dashboard.student?.username||"دانش‌آموز",progress:dashboard.summary_metrics?.overall_readiness_pct||0,streak:dashboard.summary_metrics?.streak_days??null,assignments:(assignments.assignments||[]).map(a=>({title:a.title,meta:a.due_at?`تا ${a.due_at}`:"تکلیف فعال",icon:"✓",status:a.status})),courses:Object.entries(progress.subject_mastery||{}).map(([name,v])=>({name,value:v.mastery_score_pct||0}))};
   },
   async tutorAnswer(query, context={}){
+    await ensureSession();
     if(!useReal) throw new Error("برای استفاده از دستیار، ابتدا وارد حساب کاربری شوید.");
-    return realClient.request("/tutor/answer",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query,context})});
+    return request("/tutor/answer",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({query,context})});
   },
   async profile(){
+    await ensureSession();
     if(!useReal) throw new Error("برای مشاهده پروفایل، ابتدا وارد حساب کاربری شوید.");
-    return realClient.request("/student/profile");
+    return request("/student/profile");
   },
   async assignments(){
+    await ensureSession();
     if(!useReal) throw new Error("برای مشاهده تکالیف، ابتدا وارد حساب کاربری شوید.");
-    return realClient.request("/student/v1/assignments");
+    return request("/student/v1/assignments");
   }
 };
-
 

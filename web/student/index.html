@@ -1,3 +1,62 @@
-<!doctype html><html lang="fa" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>تکالیف من</title><link rel="stylesheet" href="/student-dashboard/styles.css"></head><body><main><header><h1>تکالیف من</h1><span id="status" class="badge">در حال اتصال…</span></header><section id="notice" aria-live="polite"></section><section class="toolbar"><button id="refresh">به‌روزرسانی</button><button id="progressBtn">پیشرفت من</button><button id="contentBtn">محتوای کلاس</button></section><section id="progress" class="panel" hidden></section><section id="content" class="panel" hidden></section><section id="inbox" class="grid"></section><section id="detail" class="panel" hidden></section></main><script src="/student-dashboard/app.js"></script></body></html>
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>داشبورد دانش‌آموز | یارِ یادگیری</title>
+  <link rel="stylesheet" href="/student-dashboard/styles.css">
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="brand-group">
+        <span class="brand-icon">🎓</span>
+        <div>
+          <h1>داشبورد دانش‌آموز</h1>
+          <p class="subtitle">یارِ یادگیری — کلاس هوشمند</p>
+        </div>
+      </div>
+      <span id="status" class="badge">در حال اتصال…</span>
+    </header>
 
+    <!-- Navigation Hub to Mini App Features -->
+    <nav class="tools-nav" aria-label="ابزارهای آموزشی">
+      <a href="/mini-app/?tab=class" class="tool-btn" id="btn-smart-class">
+        <span class="tool-icon">🏫</span>
+        <span class="tool-text">کلاس هوشمند</span>
+      </a>
+      <a href="/mini-app/?tab=tutor" class="tool-btn primary" id="btn-ai-tutor">
+        <span class="tool-icon">🤖</span>
+        <span class="tool-text">مدرس هوشمند</span>
+      </a>
+      <a href="/mini-app/?tab=exam" class="tool-btn" id="btn-exam">
+        <span class="tool-icon">📝</span>
+        <span class="tool-text">آزمون</span>
+      </a>
+      <a href="/mini-app/?tab=student" class="tool-btn" id="btn-progress">
+        <span class="tool-icon">📊</span>
+        <span class="tool-text">پیشرفت تحصیلی</span>
+      </a>
+    </nav>
 
+    <section id="notice" aria-live="polite"></section>
+
+    <!-- Assignments & Classroom Content Section -->
+    <section class="section-title">
+      <h2>📋 تکالیف و فعالیت‌های کلاسی</h2>
+      <div class="toolbar">
+        <button id="refresh" class="btn-refresh">به‌روزرسانی</button>
+        <button id="progressBtn" class="btn-sub">پیشرفت من</button>
+        <button id="contentBtn" class="btn-sub">محتوای کلاس</button>
+      </div>
+    </section>
+
+    <section id="progress" class="panel" hidden></section>
+    <section id="content" class="panel" hidden></section>
+    <section id="inbox" class="grid"></section>
+    <section id="detail" class="panel" hidden></section>
+  </main>
+  <script src="/student-dashboard/app.js"></script>
+</body>
+</html>

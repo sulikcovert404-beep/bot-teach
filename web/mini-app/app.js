@@ -13,10 +13,16 @@ const queryInput = document.querySelector("#query");
 const compactFeedback = document.querySelector("#compact-feedback");
 
 let isRequestInProgress = false;
-let accessToken = null;
+let accessToken = sessionStorage.getItem("accessToken") || null;
+function setAccessToken(token) {
+  accessToken = token || null;
+  if (accessToken) sessionStorage.setItem("accessToken", accessToken);
+  else sessionStorage.removeItem("accessToken");
+}
+function clearAccessToken() { setAccessToken(null); }
 
 // Workspace-only diagnostics: coarse lifecycle events, never user or payload data.
-const DIAGNOSTIC_BUILD_ID = "mini-app-20260909-01";
+const DIAGNOSTIC_BUILD_ID = "mini-app-20260912-01";
 const diagnosticEvents = [];
 function recordDiagnostic(state, errorType = null, component = null) {
   const event = { state, build_id: DIAGNOSTIC_BUILD_ID, timestamp: new Date().toISOString() };
@@ -421,10 +427,10 @@ let currentUserRole = "STUDENT";
     configureTelegramNavigation();
     setStatus("در حال احراز هویت تلگرام…", "loading");
     const authData = await authenticate();
-    accessToken = authData.access_token;
+    setAccessToken(authData.access_token);
     currentUserRole = (authData.role || "STUDENT").toUpperCase();
 
-    // Role-based routing: if teacher or admin opens mini-app, navigate to their dedicated panel
+    // Role-based routing: redirect users to their dedicated dashboard
     if (currentUserRole === "TEACHER") {
       setStatus("هدایت به پنل معلمان…", "success");
       window.location.replace("/teacher-dashboard/");
@@ -439,6 +445,15 @@ let currentUserRole = "STUDENT";
       setStatus("هدایت به داشبورد پلتفرم…", "success");
       window.location.replace("/platform/");
       return;
+    }
+    if (currentUserRole === "STUDENT") {
+      const params = new URLSearchParams(window.location.search);
+      const hasDirectTool = params.has("tab") || params.has("view") || window.location.hash;
+      if (!hasDirectTool) {
+        setStatus("هدایت به داشبورد دانش‌آموز…", "success");
+        window.location.replace("/student-dashboard/");
+        return;
+      }
     }
 
     setStatus("سامانه آماده پاسخ‌گویی آموزشی است", "success");
@@ -759,6 +774,7 @@ async function trackFeatureUsage(featureKey, action = "VIEW", durationSec = 0) {
     console.debug("Feature usage track failed silently:", e);
   }
 }
+
 
 
 

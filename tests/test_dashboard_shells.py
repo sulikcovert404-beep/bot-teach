@@ -20,6 +20,8 @@ def test_dashboard_shells_and_assets_are_served() -> None:
 
     platform_page = client.get("/platform/")
     assert "Mock API" not in platform_page.text
+    assert "telegram-web-app.js" in platform_page.text
+    assert client.get("/platform/ui/auth-bootstrap.js").status_code == 200
 
 
 def test_dashboard_scripts_are_available() -> None:

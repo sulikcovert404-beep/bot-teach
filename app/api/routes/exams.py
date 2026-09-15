@@ -10,7 +10,7 @@ from sqlalchemy.orm import selectinload
 
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
-from app.db.models import AuditLog, Exam, ExamQuestion, User
+from app.db.models import AuditLog, Exam, ExamQuestion, User, Assignment, AssignmentTarget, ClassMembership, Classroom, StudentProfile
 from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_roles, require_user
 from app.security.entitlements import require_feature_access
@@ -22,6 +22,8 @@ from app.services.ai_gateway import (
 from app.services.audit_repository import record_audit_log
 from app.services.educational_ai import EducationalAI
 from app.services.usage_repository import record_usage
+from app.services.exam_attempts import ExamAccessError, start_attempt, save_answers, submit_attempt
+from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 
 router = APIRouter(prefix="/exams", tags=["assessment-exam-engine"])
 
@@ -143,46 +145,9 @@ async def list_question_bank(
         except Exception:
             pass
 
-    # Built-in curated official questions bank if empty
+    # Empty storage is an honest empty state; sample questions belong in fixtures.
     if not items:
-        items = [
-            {
-                "id": 1,
-                "subject": "شیمی دهم",
-                "chapter": "فصل ۱: کیهان زادگاه الفبای هستی",
-                "difficulty": "متوسط",
-                "question_type": "چهارگزینه‌ای",
-                "prompt": "در آرایش الکترونی کدام عنصر زیر، تعداد الکترون‌های با l=1 برابر ۶ است؟",
-                "options": ["سدیم (۱۱)", "نئون (۱۰)", "منیزیم (۱۲)", "همه موارد"],
-                "correct_option": "همه موارد",
-                "detailed_solution": "زیرلایه p دارای l=1 است. در عناصر با عدد اتمی ۱۰ و بیشتر، زیرلایه 2p کاملاً با ۶ الکترون پر شده است.",
-                "source_book_ref": "شیمی دهم — صفحه ۲۸",
-            },
-            {
-                "id": 2,
-                "subject": "فیزیک دهم",
-                "chapter": "فصل ۳: کار و انرژی",
-                "difficulty": "آسان",
-                "question_type": "چهارگزینه‌ای",
-                "prompt": "اگر تندی جسمی ۲ برابر شود، انرژی جنبشی آن چند برابر خواهد شد؟",
-                "options": ["۲ برابر", "۴ برابر", "نصف", "تغییری نمی‌کند"],
-                "correct_option": "۴ برابر",
-                "detailed_solution": "انرژی جنبشی با مجذور سرعت متناسب است: K = 1/2 m v^2. با دو برابر شدن v، انرژی جنبشی ۴ برابر می‌شود.",
-                "source_book_ref": "فیزیک دهم — فصل ۳",
-            },
-            {
-                "id": 3,
-                "subject": "زیست‌شناسی دهم",
-                "chapter": "فصل ۱: غشای یاخته",
-                "difficulty": "سخت",
-                "question_type": "چهارگزینه‌ای",
-                "prompt": "کدام فرآیند انتقال مواد از خلال غشای یاخته مستلزم مصرف مستقیم مولکول ATP است؟",
-                "options": ["انتشار ساده", "انتشار تسهیل‌شده", "انتقال فعال", "اسمز"],
-                "correct_option": "انتقال فعال",
-                "detailed_solution": "انتقال فعال مواد را بر خلاف شیب غلظت و با صرف مستقیم انرژی زیستی ATP انتقال می‌دهد.",
-                "source_book_ref": "زیست‌شناسی دهم — صفحه ۱۵",
-            },
-        ]
+        return {"total_questions": 0, "questions": []}
 
     # Filter
     if subject:
@@ -239,24 +204,15 @@ async def build_custom_exam(
 ):
     teacher_id = int(teacher_sub)
 
-    # Standard questions if none provided
-    sample_questions = [
-        ExamQuestionRequest(
-            prompt="در آرایش الکترونی کدام عنصر زیر، تعداد الکترون‌های با l=1 برابر ۶ است؟",
-            options=["سدیم (۱۱)", "نئون (۱۰)", "منیزیم (۱۲)", "همه موارد"],
-            correct_option="همه موارد",
-        ),
-        ExamQuestionRequest(
-            prompt="اگر تندی جسمی ۲ برابر شود، انرژی جنبشی آن چند برابر خواهد شد؟",
-            options=["۲ برابر", "۴ برابر", "نصف", "تغییری نمی‌کند"],
-            correct_option="۴ برابر",
-        ),
-        ExamQuestionRequest(
-            prompt="کدام فرآیند انتقال مواد از خلال غشای یاخته مستلزم مصرف مستقیم مولکول ATP است؟",
-            options=["انتشار ساده", "انتشار تسهیل‌شده", "انتقال فعال", "اسمز"],
-            correct_option="انتقال فعال",
-        ),
-    ]
+    if not req.question_ids:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="At least one persisted question_id is required",
+        )
+    raise HTTPException(
+        status_code=status.HTTP_501_NOT_IMPLEMENTED,
+        detail="Exam builder question-bank integration is not available",
+    )
 
     exam = Exam(user_id=teacher_id, title=req.title)
     exam.questions = [
@@ -306,59 +262,31 @@ async def submit_student_exam(
     session: AsyncSession = Depends(get_session),
 ):
     student_id = int(subject)
-    exam = await session.scalar(
-        select(Exam).options(selectinload(Exam.questions)).where(Exam.id == exam_id)
+    # Legacy compatibility path must resolve an authorized Assignment first.
+    row = await session.execute(
+        select(Assignment).join(AssignmentTarget, AssignmentTarget.assignment_id == Assignment.id)
+        .join(Classroom, Classroom.id == AssignmentTarget.classroom_id)
+        .join(ClassMembership, ClassMembership.classroom_id == Classroom.id)
+        .join(StudentProfile, StudentProfile.id == ClassMembership.student_id)
+        .where(Assignment.exam_id == exam_id, StudentProfile.student_id == student_id,
+               Assignment.status == "PUBLISHED", Classroom.tenant_id == Assignment.tenant_id)
+        .limit(2)
     )
-    if not exam:
-        raise HTTPException(status_code=404, detail="Exam not found")
-
-    correct_count = 0
-    total_count = len(exam.questions)
-    answers_analysis = []
-
-    submitted_map = {a.question_id: a.selected_option for a in req.answers}
-
-    for q in exam.questions:
-        student_ans = submitted_map.get(q.id)
-        is_correct = (student_ans == q.correct_option)
-        if is_correct:
-            correct_count += 1
-
-        answers_analysis.append({
-            "question_id": q.id,
-            "prompt": q.prompt,
-            "selected_option": student_ans,
-            "correct_option": q.correct_option,
-            "is_correct": is_correct,
-            "explanation": "پاسخ صحیح بر اساس مفاهیم صریح کتب درسی استخراج و ثبت شد.",
-        })
-
-    score_pct = round((correct_count / total_count * 100), 1) if total_count > 0 else 0.0
-
-    result_payload = {
-        "exam_id": exam_id,
-        "exam_title": exam.title,
-        "student_id": student_id,
-        "total_questions": total_count,
-        "correct_answers": correct_count,
-        "score_percentage": score_pct,
-        "status": "عالی / قبولی با تسلط کامل" if score_pct >= 80 else ("متوسط / نیاز به مرور" if score_pct >= 50 else "نیاز به بازآموزی"),
-        "detailed_results": answers_analysis,
-        "next_study_recommendation": "مرور مباحث مرتبط با سوالات پاسخ اشتباه داده شده" if score_pct < 100 else "آماده برای آزمون‌های پیشرفته‌تر",
-    }
-
-    # Record evaluation event
-    await record_audit_log(
-        session,
-        actor_user_id=student_id,
-        action="EXAM_SUBMISSION_EVALUATION",
-        resource_type="exam_submission",
-        resource_id=str(exam_id),
-        metadata=result_payload,
-    )
-    await session.commit()
-
-    return result_payload
+    assignments = row.scalars().all()
+    if len(assignments) != 1:
+        raise HTTPException(status_code=403, detail="No unique authorized exam assignment")
+    assignment = assignments[0]
+    try:
+        attempt = await start_attempt(session, assignment_id=assignment.id, student_id=student_id, tenant_id=assignment.tenant_id)
+        answers = {str(a.question_id): a.selected_option for a in req.answers}
+        await save_answers(session, attempt_id=attempt.id, student_id=student_id, tenant_id=assignment.tenant_id, answers=answers)
+        result = await submit_attempt(session, attempt_id=attempt.id, student_id=student_id, tenant_id=assignment.tenant_id)
+        await session.commit()
+    except ExamAccessError as exc:
+        await session.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    return {"exam_id": exam_id, "attempt_id": attempt.id, "result_id": result.id,
+            "score": result.score, "max_score": result.max_score, "grading_source": result.grading_source}
 
 
 # --- 4. Exam Intelligence & Teacher Aggregation ---
@@ -369,29 +297,30 @@ async def get_exam_intelligence(
     _teacher_sub: str = Depends(require_roles("TEACHER", "ADMIN")),
     session: AsyncSession = Depends(get_session),
 ):
-    exam = await session.get(Exam, exam_id)
+    try:
+        actor_id = int(_teacher_sub)
+        tenant_id = await resolve_tenant(session, user_id=actor_id)
+    except (TypeError, ValueError, TenantResolutionError) as exc:
+        raise HTTPException(status_code=403, detail="Tenant scope denied") from exc
+    exam = await session.scalar(
+        select(Exam)
+        .join(Assignment, Assignment.exam_id == Exam.id)
+        .where(
+            Exam.id == exam_id,
+            Exam.tenant_id == tenant_id,
+            Assignment.tenant_id == tenant_id,
+            Assignment.teacher_id == actor_id,
+        )
+    )
     if not exam:
         raise HTTPException(status_code=404, detail="Exam not found")
 
     return {
         "exam_id": exam_id,
         "exam_title": exam.title,
-        "cohort_metrics": {
-            "total_participants": 28,
-            "class_average_score_pct": 74.2,
-            "pass_rate_pct": 85.7,
-            "highest_score_pct": 100.0,
-            "lowest_score_pct": 42.5,
-        },
-        "question_difficulty_breakdown": [
-            {"question_index": 1, "topic": "آرایش الکترونی و لایه ظرفیت", "correct_rate_pct": 82.0, "difficulty_evaluated": "استاندارد"},
-            {"question_index": 2, "topic": "نسبت انرژی جنبشی و سرعت", "correct_rate_pct": 64.0, "difficulty_evaluated": "نیازمند توضیح مجدد فرمول"},
-            {"question_index": 3, "topic": "انتقال فعال و نقش ATP", "correct_rate_pct": 78.5, "difficulty_evaluated": "مطلوب"},
-        ],
-        "pedagogical_action_plan": {
-            "focus_area_to_review": "مفهوم رابطه توان دوم سرعت در انرژی جنبشی",
-            "recommended_next_step": "تخصیص ۳ تست مکمل محاسباتی در سامانه برای دانش‌آموزان با نمره زیر ۶۰٪",
-        },
+        "cohort_metrics": None,
+        "question_difficulty_breakdown": [],
+        "pedagogical_action_plan": None,
     }
 
 

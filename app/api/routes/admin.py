@@ -12,6 +12,7 @@ from app.security.canonical import require_canonical_roles
 from app.security.principal import CanonicalPrincipal, require_principal
 from app.security.tenant_scope import enforce_tenant
 from app.services.audit_repository import record_audit_log
+from app.db.base import set_tenant_context
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -20,6 +21,12 @@ _ADMIN_ROLES = ("ADMIN", "SUPER_ADMIN")
 @router.get("/schools")
 async def admin_schools(principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN", "SCHOOL_ADMIN")), session: AsyncSession = Depends(get_session), tenant_id: str | None = Query(default=None, max_length=64)):
     scope = await enforce_tenant(principal, tenant_id, session)
+    if scope:
+        try:
+            await set_tenant_context(session, scope)
+        except ValueError as exc:
+            await session.rollback()
+            raise HTTPException(status_code=403, detail="Tenant scope denied") from exc
     stmt = select(TeacherProfile.tenant_id).distinct().order_by(TeacherProfile.tenant_id)
     if scope: stmt = stmt.where(TeacherProfile.tenant_id == scope)
     rows = (await session.execute(stmt)).all()

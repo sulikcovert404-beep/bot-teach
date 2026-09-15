@@ -36,7 +36,7 @@ async def test_user_model_round_trip() -> None:
         subscription = await session.scalar(select(Subscription).where(Subscription.user_id == 1))
         assert subscription is not None
         assert subscription.plan == "STUDENT_PLUS"
-        exam = Exam(user_id=1, title="آزمون ریاضی")
+        exam = Exam(user_id=1, tenant_id="test-tenant", title="آزمون ریاضی")
         exam.questions.append(
             ExamQuestion(prompt="۲+۲؟", options="۲|۳|۴", correct_option="۴", position=1)
         )

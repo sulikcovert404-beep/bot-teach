@@ -10,6 +10,7 @@ from app.core.config import get_settings
 from app.db.base import build_session_factory
 from app.db.models import User
 from app.security.tokens import create_access_token
+from app.core.logging import telegram_metrics
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -39,12 +40,15 @@ async def authenticate_telegram(
     request: TelegramAuthRequest,
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> AuthResponse:
+    telegram_metrics.auth_attempt()
     settings = get_settings()
     if not settings.telegram_bot_token or not settings.jwt_secret:
+        telegram_metrics.auth_failure("provider_error")
         raise HTTPException(status_code=503, detail="Authentication unavailable")
     try:
         identity = validate_web_app_init_data(request.init_data, settings.telegram_bot_token)
     except ValueError as exc:
+        telegram_metrics.auth_failure("invalid_init_data")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid init data"
         ) from exc
@@ -59,4 +63,5 @@ async def authenticate_telegram(
     await session.commit()
     await session.refresh(user)
     token = create_access_token(str(user.id), settings.jwt_secret, role=user.role)
+    telegram_metrics.auth_success()
     return AuthResponse(access_token=token, user_id=user.id, role=user.role)

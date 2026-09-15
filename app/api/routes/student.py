@@ -23,8 +23,75 @@ from app.domain.entitlements.foundation import ClassroomContentAccess, resolve_c
 from app.domain.entitlements.models import FeatureCode
 from app.security.entitlements import require_feature_access
 from app.services.audit_repository import record_audit_log
+from app.db.models import ExamAttempt, ExamResult
+from app.services.exam_attempts import ExamAccessError, start_attempt, save_answers, submit_attempt
+from app.db.base import set_tenant_context
+from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 
 router = APIRouter(prefix="/student", tags=["student"])
+
+class ExamAnswersRequest(BaseModel):
+    answers: dict[str, Any] = Field(default_factory=dict)
+
+
+async def _student_tenant_context(session: AsyncSession, subject: str) -> str:
+    """Resolve tenant from the authenticated subject before any Exam query."""
+    try:
+        user_id = int(subject)
+        if not session.in_transaction():
+            await session.begin()
+        tenant_id = await resolve_tenant(session, user_id=user_id)
+        await set_tenant_context(session, tenant_id)
+        return tenant_id
+    except (ValueError, TenantResolutionError) as exc:
+        await session.rollback()
+        raise HTTPException(status_code=403, detail="Tenant scope denied") from exc
+
+@router.post("/exam-assignments/{assignment_id}/attempts", status_code=201)
+async def start_exam_attempt(assignment_id: int, subject: str = Depends(require_roles("STUDENT")), session: AsyncSession = Depends(get_session)):
+    student_id = int(subject)
+    tenant_id = await _student_tenant_context(session, subject)
+    assignment = await session.scalar(select(Assignment).where(Assignment.id == assignment_id, Assignment.tenant_id == tenant_id))
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    try:
+        attempt = await start_attempt(session, assignment_id=assignment_id, student_id=student_id, tenant_id=tenant_id)
+        await session.commit()
+        return {"attempt_id": attempt.id, "attempt_no": attempt.attempt_no, "status": attempt.status, "question_snapshot": json.loads(attempt.question_snapshot)}
+    except ExamAccessError as exc:
+        await session.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+@router.patch("/exam-attempts/{attempt_id}/answers")
+async def save_exam_answers(attempt_id: int, req: ExamAnswersRequest, subject: str = Depends(require_roles("STUDENT")), session: AsyncSession = Depends(get_session)):
+    tenant_id = await _student_tenant_context(session, subject)
+    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.id == attempt_id, ExamAttempt.student_id == int(subject), ExamAttempt.tenant_id == tenant_id))
+    if attempt is None: raise HTTPException(status_code=404, detail="Attempt not found")
+    try:
+        updated = await save_answers(session, attempt_id=attempt_id, student_id=int(subject), tenant_id=tenant_id, answers=req.answers)
+        await session.commit(); return {"attempt_id": updated.id, "status": updated.status}
+    except ExamAccessError as exc:
+        await session.rollback(); raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+@router.post("/exam-attempts/{attempt_id}/submit")
+async def submit_exam_attempt(attempt_id: int, subject: str = Depends(require_roles("STUDENT")), session: AsyncSession = Depends(get_session)):
+    tenant_id = await _student_tenant_context(session, subject)
+    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.id == attempt_id, ExamAttempt.student_id == int(subject), ExamAttempt.tenant_id == tenant_id))
+    if attempt is None: raise HTTPException(status_code=404, detail="Attempt not found")
+    try:
+        result = await submit_attempt(session, attempt_id=attempt_id, student_id=int(subject), tenant_id=tenant_id)
+        await session.commit(); return {"result_id": result.id, "attempt_id": result.attempt_id, "score": result.score, "max_score": result.max_score}
+    except ExamAccessError as exc:
+        await session.rollback(); raise HTTPException(status_code=403, detail=str(exc)) from exc
+
+@router.get("/exam-attempts/{attempt_id}/result")
+async def get_exam_result(attempt_id: int, subject: str = Depends(require_roles("STUDENT")), session: AsyncSession = Depends(get_session)):
+    tenant_id = await _student_tenant_context(session, subject)
+    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.id == attempt_id, ExamAttempt.student_id == int(subject), ExamAttempt.tenant_id == tenant_id))
+    if attempt is None: raise HTTPException(status_code=404, detail="Result not found")
+    result = await session.scalar(select(ExamResult).where(ExamResult.attempt_id == attempt_id, ExamResult.tenant_id == tenant_id))
+    if result is None: raise HTTPException(status_code=404, detail="Result not available")
+    return {"result_id": result.id, "attempt_id": result.attempt_id, "score": result.score, "max_score": result.max_score, "grading_status": result.grading_status}
 
 def _assignment_v1_payload(a: Assignment, snapshot: AssignmentSnapshot | None = None) -> dict[str, object]:
     return {"id": a.id, "classroom_id": a.classroom_id, "title": a.title, "instructions": a.instructions,
@@ -280,8 +347,8 @@ async def get_student_progress(
     for subj, q_list in subject_queries.items():
         count = len(q_list)
         if count == 0:
-            score = 50.0  # Base level
-            status_str = "نیاز به شروع مطالعه"
+            score = None
+            status_str = "داده کافی نیست"
         else:
             cited_count = sum(1 for q in q_list if q.has_citations)
             score = min(100.0, 50.0 + (cited_count * 15.0) + (count * 5.0))
@@ -300,10 +367,7 @@ async def get_student_progress(
             "status": status_str,
         }
 
-    if not strengths:
-        strengths = ["شیمی"]
-    if not weaknesses:
-        weaknesses = ["ریاضی"]
+    # Never manufacture strengths/weaknesses when no persisted evidence exists.
 
     # 3. Smart Recommendations Generation
     recommendations = []
@@ -323,13 +387,14 @@ async def get_student_progress(
             "priority": "MEDIUM",
             "reason": "گام منطقی پس از مفاهیم اولیه سینماتیک",
         })
-    recommendations.append({
-        "type": "practice_quiz",
-        "subject": strengths[0],
-        "topic": f"آزمون جامع مرور سریع مباحث {strengths[0]}",
-        "priority": "LOW",
-        "reason": "تثبیت تسلط بر مباحث قوت دانش‌آموز",
-    })
+    if strengths:
+        recommendations.append({
+            "type": "practice_quiz",
+            "subject": strengths[0],
+            "topic": f"آزمون جامع مرور سریع مباحث {strengths[0]}",
+            "priority": "LOW",
+            "reason": "تثبیت تسلط بر مباحث قوت دانش‌آموز",
+        })
 
     return {
         "user_id": user_id,
@@ -560,20 +625,11 @@ async def get_friendly_leaderboard(
     except ValueError as exc:
         raise HTTPException(status_code=401, detail="Invalid user identity") from exc
 
-    # Friendly, positive-reinforcement leaderboard
-    leaders = [
-        {"rank": 1, "username": "علی ر.", "school": "علامه حلی", "streak": 14, "xp": 1250, "is_current_user": user_id == 10001},
-        {"rank": 2, "username": "سارا ک.", "school": "فرزانگان", "streak": 9, "xp": 980, "is_current_user": False},
-        {"rank": 3, "username": "محمد ا.", "school": "شهید بهشتی", "streak": 7, "xp": 820, "is_current_user": False},
-        {"rank": 4, "username": "مریم م.", "school": "نمونه دولتی", "streak": 6, "xp": 710, "is_current_user": False},
-        {"rank": 5, "username": "رضا ج.", "school": "اندیشه", "streak": 5, "xp": 640, "is_current_user": False},
-    ]
-
     return {
-        "cohort_name": "همکلاسی‌های پایه دهم تجربی",
-        "leaderboard_type": "FRIENDLY_XP",
-        "current_user_rank": 1 if user_id == 10001 else 6,
-        "leaders": leaders,
+        "cohort_name": None,
+        "leaderboard_type": "UNAVAILABLE_WITHOUT_COHORT_DATA",
+        "current_user_rank": None,
+        "leaders": [],
     }
 
 
@@ -587,18 +643,8 @@ async def get_engagement_telemetry(
     total_queries = await session.scalar(select(func.count(BetaQualityAudit.id))) or 0
 
     return {
-        "telemetry_status": "ACTIVE",
-        "engagement_kpis": {
-            "daily_active_users_dau": 64,
-            "seven_day_streak_retention_pct": 78.5,
-            "exam_completion_rate_pct": 92.4,
-            "average_xp_per_active_user": 540,
-            "drop_off_rate_pct": 7.6,
-        },
-        "streak_distribution": {
-            "1_to_3_days": 28,
-            "4_to_7_days": 24,
-            "8_plus_days": 12,
-        },
-        "gamification_impact": "افزایش ۴۳ درصدی بازگشت روزانه به مینی‌اپ پس از فعال‌سازی سیستم زنجیره مطالعه (Streak)",
+        "telemetry_status": "INSUFFICIENT_PERSISTED_DATA",
+        "engagement_kpis": {},
+        "streak_distribution": {},
+        "gamification_impact": None,
     }
