@@ -5,9 +5,9 @@ owned by later gates.  Telegram remains supported through its existing adapter.
 """
 from __future__ import annotations
 
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import StrEnum
-from collections.abc import Mapping, Sequence
 from typing import Any, Protocol
 from uuid import UUID
 
