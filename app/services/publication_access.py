@@ -1,6 +1,7 @@
 """Provider-neutral policy decisions for classroom content publication/access."""
 from dataclasses import dataclass
 
+
 @dataclass(frozen=True)
 class PublicationContext:
     teacher_id: int
