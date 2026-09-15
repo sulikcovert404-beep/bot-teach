@@ -1,7 +1,6 @@
 """Immutable governance contract for future implementation work."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,22 +13,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ImplementationGovernancePackage:
-    coding_boundaries: Tuple[str, ...] = ()
-    review_ownership: Tuple[str, ...] = ()
-    change_ownership: Tuple[str, ...] = ()
-    validation_requirements: Tuple[str, ...] = ()
-    test_expectations: Tuple[str, ...] = ()
-    review_checkpoints: Tuple[str, ...] = ()
-    change_proposal: Tuple[str, ...] = ()
-    implementation_review: Tuple[str, ...] = ()
-    completion_criteria: Tuple[str, ...] = ()
-    defect_classification: Tuple[str, ...] = ()
-    escalation_path: Tuple[str, ...] = ()
-    mitigation_model: Tuple[str, ...] = ()
-    developer_handoff: Tuple[str, ...] = ()
-    reviewer_handoff: Tuple[str, ...] = ()
-    acceptance_boundary: Tuple[str, ...] = ()
-    warnings: Tuple[str, ...] = ()
+    coding_boundaries: tuple[str, ...] = ()
+    review_ownership: tuple[str, ...] = ()
+    change_ownership: tuple[str, ...] = ()
+    validation_requirements: tuple[str, ...] = ()
+    test_expectations: tuple[str, ...] = ()
+    review_checkpoints: tuple[str, ...] = ()
+    change_proposal: tuple[str, ...] = ()
+    implementation_review: tuple[str, ...] = ()
+    completion_criteria: tuple[str, ...] = ()
+    defect_classification: tuple[str, ...] = ()
+    escalation_path: tuple[str, ...] = ()
+    mitigation_model: tuple[str, ...] = ()
+    developer_handoff: tuple[str, ...] = ()
+    reviewer_handoff: tuple[str, ...] = ()
+    acceptance_boundary: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     trace_reference: str = ""
     implementation_governance_only: bool = True
     feature_execution: bool = False
