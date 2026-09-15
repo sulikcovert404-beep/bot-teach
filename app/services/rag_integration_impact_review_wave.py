@@ -1,7 +1,6 @@
 """Immutable impact review for propagating RAG decision semantics."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,18 +12,18 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class RAGIntegrationImpactReviewWave:
-    consumers: Tuple[str, ...] = ()
-    downstream_behavior: Tuple[str, ...] = ()
-    compatibility_boundaries: Tuple[str, ...] = ()
-    affected_interfaces: Tuple[str, ...] = ()
-    required_updates: Tuple[str, ...] = ()
-    backward_compatibility: Tuple[str, ...] = ()
-    existing_tests: Tuple[str, ...] = ()
-    missing_scenarios: Tuple[str, ...] = ()
-    future_regression_needs: Tuple[str, ...] = ()
-    breaking_risks: Tuple[str, ...] = ()
-    migration_risks: Tuple[str, ...] = ()
-    deferred_changes: Tuple[str, ...] = ()
+    consumers: tuple[str, ...] = ()
+    downstream_behavior: tuple[str, ...] = ()
+    compatibility_boundaries: tuple[str, ...] = ()
+    affected_interfaces: tuple[str, ...] = ()
+    required_updates: tuple[str, ...] = ()
+    backward_compatibility: tuple[str, ...] = ()
+    existing_tests: tuple[str, ...] = ()
+    missing_scenarios: tuple[str, ...] = ()
+    future_regression_needs: tuple[str, ...] = ()
+    breaking_risks: tuple[str, ...] = ()
+    migration_risks: tuple[str, ...] = ()
+    deferred_changes: tuple[str, ...] = ()
     approved_decision: str = ""
     trace_reference: str = ""
     rag_integration_review_only: bool = True
