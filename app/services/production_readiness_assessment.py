@@ -1,7 +1,6 @@
 """Immutable production-readiness assessment; no production side effects."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,21 +12,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionReadinessAssessment:
-    storage_options: Tuple[str, ...] = ()
-    durability_requirements: Tuple[str, ...] = ()
-    migration_readiness: Tuple[str, ...] = ()
-    identity_boundary: Tuple[str, ...] = ()
-    permission_architecture: Tuple[str, ...] = ()
-    security_requirements: Tuple[str, ...] = ()
-    monitoring_needs: Tuple[str, ...] = ()
-    failure_handling: Tuple[str, ...] = ()
-    rollback_requirements: Tuple[str, ...] = ()
-    critical_blockers: Tuple[str, ...] = ()
-    deferred_items: Tuple[str, ...] = ()
-    implementation_order: Tuple[str, ...] = ()
+    storage_options: tuple[str, ...] = ()
+    durability_requirements: tuple[str, ...] = ()
+    migration_readiness: tuple[str, ...] = ()
+    identity_boundary: tuple[str, ...] = ()
+    permission_architecture: tuple[str, ...] = ()
+    security_requirements: tuple[str, ...] = ()
+    monitoring_needs: tuple[str, ...] = ()
+    failure_handling: tuple[str, ...] = ()
+    rollback_requirements: tuple[str, ...] = ()
+    critical_blockers: tuple[str, ...] = ()
+    deferred_items: tuple[str, ...] = ()
+    implementation_order: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     production_readiness_review_only: bool = True
     production_execution: bool = False
     deployment: bool = False
