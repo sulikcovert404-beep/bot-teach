@@ -1,7 +1,6 @@
 """Immutable, infrastructure-independent content integration assessment."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,18 +12,18 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ContentIntegrationReadinessReview:
-    storage_requirements: Tuple[str, ...] = ()
-    data_lifecycle: Tuple[str, ...] = ()
-    compatibility_impact: Tuple[str, ...] = ()
-    ownership_model: Tuple[str, ...] = ()
-    access_boundaries: Tuple[str, ...] = ()
-    permission_requirements: Tuple[str, ...] = ()
-    affected_modules: Tuple[str, ...] = ()
-    contracts: Tuple[str, ...] = ()
-    risks: Tuple[str, ...] = ()
+    storage_requirements: tuple[str, ...] = ()
+    data_lifecycle: tuple[str, ...] = ()
+    compatibility_impact: tuple[str, ...] = ()
+    ownership_model: tuple[str, ...] = ()
+    access_boundaries: tuple[str, ...] = ()
+    permission_requirements: tuple[str, ...] = ()
+    affected_modules: tuple[str, ...] = ()
+    contracts: tuple[str, ...] = ()
+    risks: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     integration_review_only: bool = True
     implementation_execution: bool = False
     runtime_execution: bool = False
