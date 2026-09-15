@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 import hashlib
 import json
-from typing import Mapping, Sequence
+from collections.abc import Mapping, Sequence
 
 
 class DesignOutcome(str, Enum):
