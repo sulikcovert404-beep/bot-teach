@@ -1,7 +1,6 @@
 """Immutable controlled-execution runbook design."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,23 +12,23 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ControlledExecutionRunbookDesign:
-    ordered_steps: Tuple[str, ...] = ()
-    checkpoints: Tuple[str, ...] = ()
-    stop_conditions: Tuple[str, ...] = ()
-    rollback_triggers: Tuple[str, ...] = ()
-    recovery_sequence: Tuple[str, ...] = ()
-    post_rollback_validation: Tuple[str, ...] = ()
+    ordered_steps: tuple[str, ...] = ()
+    checkpoints: tuple[str, ...] = ()
+    stop_conditions: tuple[str, ...] = ()
+    rollback_triggers: tuple[str, ...] = ()
+    recovery_sequence: tuple[str, ...] = ()
+    post_rollback_validation: tuple[str, ...] = ()
     execution_owner: str = ""
     approval_owner: str = ""
     incident_owner: str = ""
-    pre_checks: Tuple[str, ...] = ()
-    post_checks: Tuple[str, ...] = ()
-    failure_handling: Tuple[str, ...] = ()
-    planned_actions: Tuple[str, ...] = ()
-    evidence_fields: Tuple[str, ...] = ()
-    decision_points: Tuple[str, ...] = ()
+    pre_checks: tuple[str, ...] = ()
+    post_checks: tuple[str, ...] = ()
+    failure_handling: tuple[str, ...] = ()
+    planned_actions: tuple[str, ...] = ()
+    evidence_fields: tuple[str, ...] = ()
+    decision_points: tuple[str, ...] = ()
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     runbook_design_only: bool = True
     execution_permission: bool = False
     production_execution: bool = False
