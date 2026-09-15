@@ -55,3 +55,17 @@ No secret-manager or external credential-provider reference was found in the bou
 ## Recommendation
 
 Keep Recovery in **SAFE HOLD**. Do not create an env file, start/recreate the API, rollback, migrate, or alter Cloudflare/Webhook. Request an owner-authorized, read-only metadata check by root (file mode/owner/size/timestamp only, never contents) or locate the documented provisioning system outside this host. After provenance is established, perform a separate Commander gate for any runtime action.
+
+## Root metadata audit (Commander-authorized, read-only)
+
+A root-authorized metadata check resolved the earlier permission ambiguity without reading file contents:
+
+- `/etc/apps/ai-teacher`: `root:root`, mode `0750`, directory.
+- `/etc/apps/ai-teacher/staging.env`: exists as a regular file, owner `codex:codex`, mode `0600`, size `767` bytes; mtime `2026-09-14 18:11:23 +0100`. Contents were not read.
+- Running `staging-postgres-1` and `staging-redis-1` both belong to Compose project `staging`, canonical config `/opt/apps/ai-teacher/deploy/staging/docker-compose.yml`, working directory `/opt/apps/ai-teacher/deploy/staging`; both are running.
+- API images present include `staging-api:latest` digest `sha256:f13e836c...`, `staging-api:canonical-0020`, and `staging-api:canonical-0021-candidate`; no API container is present.
+- Compose shape confirms `postgres`, `redis`, `api`, and `migrate` services; `api`/`migrate` use the canonical env path through `env_file`. No lifecycle command was run.
+
+## Updated status
+
+Canonical env **exists and its metadata is now verified**, but API runtime provenance is still incomplete: there is no `staging-api-1` container, no active systemd/cron generator, and multiple candidate API images are present without an authoritative selection record. Recovery remains SAFE HOLD; a separate Commander gate is required before starting or recreating any API container.
