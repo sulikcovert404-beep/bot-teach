@@ -1,4 +1,7 @@
-from app.services.architecture_program_closure_package import ArchitectureProgramClosurePackage, Outcome
+from app.services.architecture_program_closure_package import (
+    ArchitectureProgramClosurePackage,
+    Outcome,
+)
 
 
 def make(**kw):
