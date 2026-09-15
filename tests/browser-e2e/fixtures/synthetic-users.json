@@ -1,0 +1,7 @@
+{
+  "users": [
+    { "id": "student-a", "role": "STUDENT", "tenant": "tenant-a" },
+    { "id": "teacher-a", "role": "TEACHER", "tenant": "tenant-a" },
+    { "id": "admin-a", "role": "SCHOOL_ADMIN", "tenant": "tenant-a" }
+  ]
+}
