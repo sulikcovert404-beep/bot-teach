@@ -1,7 +1,6 @@
 """Final pre-activation gate; review-only and non-authoritative."""
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Tuple
 
 
 class ActivationOutcome(StrEnum):
@@ -13,21 +12,21 @@ class ActivationOutcome(StrEnum):
 
 @dataclass(frozen=True)
 class FinalActivationGateReview:
-    foundation_status: Tuple[str, ...] = ()
-    authorization_status: Tuple[str, ...] = ()
-    operational_readiness: Tuple[str, ...] = ()
-    activation_scope: Tuple[str, ...] = ()
-    allowed_actions: Tuple[str, ...] = ()
-    forbidden_actions: Tuple[str, ...] = ()
-    identity_readiness: Tuple[str, ...] = ()
-    credential_boundary: Tuple[str, ...] = ()
-    secret_handling: Tuple[str, ...] = ()
-    monitoring: Tuple[str, ...] = ()
-    incident_response: Tuple[str, ...] = ()
-    rollback_readiness: Tuple[str, ...] = ()
+    foundation_status: tuple[str, ...] = ()
+    authorization_status: tuple[str, ...] = ()
+    operational_readiness: tuple[str, ...] = ()
+    activation_scope: tuple[str, ...] = ()
+    allowed_actions: tuple[str, ...] = ()
+    forbidden_actions: tuple[str, ...] = ()
+    identity_readiness: tuple[str, ...] = ()
+    credential_boundary: tuple[str, ...] = ()
+    secret_handling: tuple[str, ...] = ()
+    monitoring: tuple[str, ...] = ()
+    incident_response: tuple[str, ...] = ()
+    rollback_readiness: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    conditions: Tuple[str, ...] = ()
+    conditions: tuple[str, ...] = ()
     final_activation_gate_review_only: bool = True
     runtime_activation: bool = False
     production_execution: bool = False
