@@ -1,7 +1,6 @@
 """Immutable scope definition for production authorization wiring."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,23 +12,23 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class AuthorizationProductionWiringScopeDefinition:
-    identity_source: Tuple[str, ...] = ()
-    identity_contract: Tuple[str, ...] = ()
-    ownership_mapping: Tuple[str, ...] = ()
-    permission_checks: Tuple[str, ...] = ()
-    access_rules: Tuple[str, ...] = ()
-    role_ownership_enforcement: Tuple[str, ...] = ()
-    credential_boundary: Tuple[str, ...] = ()
-    secret_handling: Tuple[str, ...] = ()
-    audit_requirements: Tuple[str, ...] = ()
-    existing_authorization_behavior: Tuple[str, ...] = ()
-    regression_risks: Tuple[str, ...] = ()
-    success_conditions: Tuple[str, ...] = ()
-    failure_conditions: Tuple[str, ...] = ()
-    rollback_boundary: Tuple[str, ...] = ()
+    identity_source: tuple[str, ...] = ()
+    identity_contract: tuple[str, ...] = ()
+    ownership_mapping: tuple[str, ...] = ()
+    permission_checks: tuple[str, ...] = ()
+    access_rules: tuple[str, ...] = ()
+    role_ownership_enforcement: tuple[str, ...] = ()
+    credential_boundary: tuple[str, ...] = ()
+    secret_handling: tuple[str, ...] = ()
+    audit_requirements: tuple[str, ...] = ()
+    existing_authorization_behavior: tuple[str, ...] = ()
+    regression_risks: tuple[str, ...] = ()
+    success_conditions: tuple[str, ...] = ()
+    failure_conditions: tuple[str, ...] = ()
+    rollback_boundary: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     authorization_scope_definition_only: bool = True
     implementation_execution: bool = False
     credential_change: bool = False
