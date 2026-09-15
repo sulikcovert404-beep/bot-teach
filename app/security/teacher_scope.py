@@ -1,9 +1,11 @@
 from dataclasses import dataclass
+
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Classroom, TeacherProfile
+
 
 @dataclass(frozen=True)
 class TeacherClassScope:
