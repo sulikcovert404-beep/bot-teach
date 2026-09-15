@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 import hashlib, json, unicodedata
-from typing import Mapping
+from collections.abc import Mapping
 
 class JobStatus(StrEnum):
     CREATED='CREATED'; QUEUED='QUEUED'; RUNNING='RUNNING'; COMPLETED='COMPLETED'; FAILED='FAILED'; CANCELLED='CANCELLED'; BLOCKED='BLOCKED'; AMBIGUOUS='AMBIGUOUS'
