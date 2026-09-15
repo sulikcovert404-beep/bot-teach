@@ -1,7 +1,7 @@
 """Readiness state design only; it never manages runtime or permission state."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping
+from collections.abc import Mapping
 
 class StateOutcome(str, Enum):
     STATE_MODEL_DEFINED="STATE_MODEL_DEFINED"; STATE_MODEL_DEFINED_WITH_WARNINGS="STATE_MODEL_DEFINED_WITH_WARNINGS"; STATE_MODEL_INCOMPLETE="STATE_MODEL_INCOMPLETE"; STATE_MODEL_BLOCKED="STATE_MODEL_BLOCKED"; UNKNOWN="UNKNOWN"
