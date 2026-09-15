@@ -1,4 +1,7 @@
-from app.services.content_integration_implementation_authorization_review import Outcome, ContentIntegrationImplementationAuthorizationReview
+from app.services.content_integration_implementation_authorization_review import (
+    ContentIntegrationImplementationAuthorizationReview,
+    Outcome,
+)
 
 
 def make(**overrides):
