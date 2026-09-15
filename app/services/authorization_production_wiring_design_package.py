@@ -1,7 +1,6 @@
 """Immutable design package for production authorization wiring."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,23 +12,23 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class AuthorizationProductionWiringDesignPackage:
-    identity_flow: Tuple[str, ...] = ()
-    identity_contract: Tuple[str, ...] = ()
-    ownership_resolution: Tuple[str, ...] = ()
-    permission_evaluation: Tuple[str, ...] = ()
-    access_matrix: Tuple[str, ...] = ()
-    role_enforcement: Tuple[str, ...] = ()
-    credential_boundary: Tuple[str, ...] = ()
-    secret_handling: Tuple[str, ...] = ()
-    audit_trail: Tuple[str, ...] = ()
-    existing_behavior_preservation: Tuple[str, ...] = ()
-    migration_risks: Tuple[str, ...] = ()
-    security_validation: Tuple[str, ...] = ()
-    failure_handling: Tuple[str, ...] = ()
-    rollback_strategy: Tuple[str, ...] = ()
+    identity_flow: tuple[str, ...] = ()
+    identity_contract: tuple[str, ...] = ()
+    ownership_resolution: tuple[str, ...] = ()
+    permission_evaluation: tuple[str, ...] = ()
+    access_matrix: tuple[str, ...] = ()
+    role_enforcement: tuple[str, ...] = ()
+    credential_boundary: tuple[str, ...] = ()
+    secret_handling: tuple[str, ...] = ()
+    audit_trail: tuple[str, ...] = ()
+    existing_behavior_preservation: tuple[str, ...] = ()
+    migration_risks: tuple[str, ...] = ()
+    security_validation: tuple[str, ...] = ()
+    failure_handling: tuple[str, ...] = ()
+    rollback_strategy: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     authorization_design_only: bool = True
     implementation_execution: bool = False
     credential_change: bool = False
