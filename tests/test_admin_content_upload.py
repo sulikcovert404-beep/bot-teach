@@ -4,7 +4,6 @@ import pytest
 
 from app.api.routes.admin_content import _extract_docx, _extract_pdf
 
-
 FIXTURES = Path(__file__).parent / "fixtures"
 
 
