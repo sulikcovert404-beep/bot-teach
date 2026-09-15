@@ -4,7 +4,8 @@ from __future__ import annotations
 import hashlib, json, re, unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
 
 
