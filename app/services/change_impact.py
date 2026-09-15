@@ -7,7 +7,8 @@ import hashlib
 import json
 import re
 import unicodedata
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 
 
 class ChangeType(str, Enum):
