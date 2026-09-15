@@ -1,5 +1,6 @@
 from app.services.baseline_change_control import *
-from app.services.runtime_admission_bundle import ReferenceToken, ReferenceStatus
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
 
 def r(name, status=ReferenceStatus.VALID): return ReferenceToken(name, 'a'*64, status)
 def c(**kw):
