@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib,json,re,unicodedata
 from dataclasses import dataclass,field
 from enum import StrEnum
-from typing import Any,Mapping,Iterable
+from collections.abc import Mapping, Iterable
+from typing import Any
 from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
 class ClosureOutcome(StrEnum):
  CLOSED="CLOSED"; CLOSED_WITH_WARNINGS="CLOSED_WITH_WARNINGS"; OPEN="OPEN"; BLOCKED="BLOCKED"; UNKNOWN="UNKNOWN"
