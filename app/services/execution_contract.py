@@ -6,7 +6,8 @@ from enum import StrEnum
 import hashlib
 import json
 import unicodedata
-from typing import Any, Mapping
+from collections.abc import Mapping
+from typing import Any
 from uuid import uuid4
 
 
