@@ -1,7 +1,6 @@
 """Immutable execution plan for a development wave; it performs no execution."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,21 +13,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class DevelopmentWaveExecutionPlan:
-    selected_work_packages: Tuple[str, ...] = ()
-    implementation_sequence: Tuple[str, ...] = ()
-    milestones: Tuple[str, ...] = ()
-    technical_tasks: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
-    expected_outputs: Tuple[str, ...] = ()
-    unit_test_expectations: Tuple[str, ...] = ()
-    review_checkpoints: Tuple[str, ...] = ()
-    acceptance_flow: Tuple[str, ...] = ()
-    implementation_risks: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
-    mitigation_actions: Tuple[str, ...] = ()
-    completion_criteria: Tuple[str, ...] = ()
-    handoff_requirements: Tuple[str, ...] = ()
-    closure_conditions: Tuple[str, ...] = ()
+    selected_work_packages: tuple[str, ...] = ()
+    implementation_sequence: tuple[str, ...] = ()
+    milestones: tuple[str, ...] = ()
+    technical_tasks: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
+    expected_outputs: tuple[str, ...] = ()
+    unit_test_expectations: tuple[str, ...] = ()
+    review_checkpoints: tuple[str, ...] = ()
+    acceptance_flow: tuple[str, ...] = ()
+    implementation_risks: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    mitigation_actions: tuple[str, ...] = ()
+    completion_criteria: tuple[str, ...] = ()
+    handoff_requirements: tuple[str, ...] = ()
+    closure_conditions: tuple[str, ...] = ()
     trace_reference: str = ""
     wave_execution_planning_only: bool = True
     implementation_execution: bool = False
