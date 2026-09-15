@@ -1,7 +1,6 @@
 """Immutable final implementation gate for production enablement."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,18 +12,18 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionEnablementFinalImplementationGate:
-    approved_changes: Tuple[str, ...] = ()
-    excluded_changes: Tuple[str, ...] = ()
-    readiness: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
-    data_risks: Tuple[str, ...] = ()
-    security_risks: Tuple[str, ...] = ()
-    operational_risks: Tuple[str, ...] = ()
+    approved_changes: tuple[str, ...] = ()
+    excluded_changes: tuple[str, ...] = ()
+    readiness: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    data_risks: tuple[str, ...] = ()
+    security_risks: tuple[str, ...] = ()
+    operational_risks: tuple[str, ...] = ()
     rollback_ownership: str = ""
-    recovery_readiness: Tuple[str, ...] = ()
+    recovery_readiness: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    conditions: Tuple[str, ...] = ()
+    conditions: tuple[str, ...] = ()
     final_implementation_gate_only: bool = True
     implementation_permission: bool = False
     migration_execution: bool = False
