@@ -3,7 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 import json, unicodedata
-from typing import Any, Iterable
+from collections.abc import Iterable
+from typing import Any
 
 @dataclass(frozen=True, slots=True)
 class ContractSpec:
