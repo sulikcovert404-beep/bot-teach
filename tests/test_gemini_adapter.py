@@ -1,5 +1,7 @@
 import pytest
+
 from app.services.gemini_adapter import GeminiAdapter
+
 
 @pytest.mark.asyncio
 async def test_gemini_adapter_keeps_secret_out_of_public_state():
