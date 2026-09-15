@@ -1,7 +1,6 @@
 """Immutable scope definition for production enablement."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,21 +12,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionEnablementScopeDefinition:
-    production_capability: Tuple[str, ...] = ()
-    out_of_scope: Tuple[str, ...] = ()
-    storage_target: Tuple[str, ...] = ()
-    migration_boundary: Tuple[str, ...] = ()
-    rollback_requirements: Tuple[str, ...] = ()
-    identity_integration: Tuple[str, ...] = ()
-    permission_rollout: Tuple[str, ...] = ()
-    activation_boundary: Tuple[str, ...] = ()
-    operational_ownership: Tuple[str, ...] = ()
-    success_criteria: Tuple[str, ...] = ()
-    safety_gates: Tuple[str, ...] = ()
-    stop_conditions: Tuple[str, ...] = ()
+    production_capability: tuple[str, ...] = ()
+    out_of_scope: tuple[str, ...] = ()
+    storage_target: tuple[str, ...] = ()
+    migration_boundary: tuple[str, ...] = ()
+    rollback_requirements: tuple[str, ...] = ()
+    identity_integration: tuple[str, ...] = ()
+    permission_rollout: tuple[str, ...] = ()
+    activation_boundary: tuple[str, ...] = ()
+    operational_ownership: tuple[str, ...] = ()
+    success_criteria: tuple[str, ...] = ()
+    safety_gates: tuple[str, ...] = ()
+    stop_conditions: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     production_enablement_scope_only: bool = True
     execution_permission: bool = False
     production_execution: bool = False
