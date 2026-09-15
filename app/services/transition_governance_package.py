@@ -1,7 +1,7 @@
 """Phase-level governance package for transition planning; no runtime side effects."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping, Tuple
+from collections.abc import Mapping
 
 class TransitionGovernanceOutcome(str, Enum):
     TRANSITION_GOVERNANCE_READY="TRANSITION_GOVERNANCE_READY"
@@ -14,20 +14,20 @@ class TransitionGovernanceOutcome(str, Enum):
 class TransitionGovernancePackage:
     package_id: str
     ownership_model: Mapping[str,str]
-    decision_authority_boundary: Tuple[str,...]
-    review_lifecycle: Tuple[str,...]
+    decision_authority_boundary: tuple[str,...]
+    review_lifecycle: tuple[str,...]
     change_classification: Mapping[str,str]
-    risk_acceptance_semantics: Tuple[str,...]
-    impact_review: Tuple[str,...]
-    sender_receiver_boundary: Tuple[str,...]
-    responsibility_transfer_rules: Tuple[str,...]
-    evidence_expectations: Tuple[str,...]
-    rollback_decision_semantics: Tuple[str,...]
-    failure_escalation: Tuple[str,...]
-    recovery_boundary: Tuple[str,...]
-    completeness_check: Tuple[str,...]
-    consistency_review: Tuple[str,...]
-    unresolved_risks: Tuple[str,...]
+    risk_acceptance_semantics: tuple[str,...]
+    impact_review: tuple[str,...]
+    sender_receiver_boundary: tuple[str,...]
+    responsibility_transfer_rules: tuple[str,...]
+    evidence_expectations: tuple[str,...]
+    rollback_decision_semantics: tuple[str,...]
+    failure_escalation: tuple[str,...]
+    recovery_boundary: tuple[str,...]
+    completeness_check: tuple[str,...]
+    consistency_review: tuple[str,...]
+    unresolved_risks: tuple[str,...]
     trace_reference: str
     package_digest: str
     transition_governance_only: bool = True
