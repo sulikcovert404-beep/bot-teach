@@ -7,7 +7,8 @@ import hashlib
 import json
 import re
 import unicodedata
-from typing import Any, Iterable, Mapping
+from collections.abc import Iterable, Mapping
+from typing import Any
 
 
 class CompatibilityClass(str, Enum):
