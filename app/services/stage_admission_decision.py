@@ -6,7 +6,8 @@ from enum import Enum
 import hashlib
 import json
 import unicodedata
-from typing import Any, Mapping
+from typing import Any
+from collections.abc import Mapping
 
 from .environment_readiness import CapabilityStatus, EnvironmentReadinessReport
 from .readiness_evidence_gate import GateName, GateStatus, ReadinessDecision, ReadinessReport
