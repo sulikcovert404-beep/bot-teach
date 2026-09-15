@@ -16,8 +16,6 @@ from app.api.routes.auth import router as auth_router
 from app.api.routes.collaboration import parent_router, school_router
 from app.api.routes.collaborative_network import collaborative_admin_router, collaborative_router
 from app.api.routes.controlled_beta_cohort import cohort_admin_router, cohort_router
-from app.api.routes.scale_operations_intelligence import scale_ops_admin_router, scale_ops_router
-from app.api.routes.market_validation import market_val_admin_router, market_val_router
 from app.api.routes.curriculum import router as curriculum_router
 from app.api.routes.customer_success import customer_success_router, support_ticket_router
 from app.api.routes.data_governance import data_governance_admin_router, data_governance_router
@@ -32,17 +30,19 @@ from app.api.routes.go_to_market import gtm_admin_router, gtm_router
 from app.api.routes.growth import router as growth_router
 from app.api.routes.health import router as health_router
 from app.api.routes.knowledge_graph import knowledge_admin_router, knowledge_graph_router
+from app.api.routes.market_validation import market_val_admin_router, market_val_router
 from app.api.routes.metrics import router as metrics_router
 from app.api.routes.observability import router as observability_router
 from app.api.routes.operations_autonomy import operations_autonomy_router
 from app.api.routes.outcome_prediction import prediction_admin_router, prediction_router
 from app.api.routes.payments import router as payments_router
 from app.api.routes.pilot_preparation import pilot_admin_router, pilot_router
-from app.api.routes.production_transition import transition_admin_router
 from app.api.routes.product_decision_engine import decision_engine_admin_router
 from app.api.routes.product_market_fit import pmf_admin_router, pmf_router
+from app.api.routes.production_transition import transition_admin_router
 from app.api.routes.resilience_hardening import resilience_admin_router
 from app.api.routes.revenue_intelligence import revenue_admin_router, revenue_router
+from app.api.routes.scale_operations_intelligence import scale_ops_admin_router, scale_ops_router
 from app.api.routes.school_operations import school_ops_router
 from app.api.routes.self_optimizing import self_optimizing_admin_router, self_optimizing_router
 from app.api.routes.sources import router as sources_router
@@ -187,7 +187,10 @@ from app.api.routes.public_launch_readiness import public_launch_admin_router, p
 
 app.include_router(public_launch_router, prefix="/api/v1")
 app.include_router(public_launch_admin_router, prefix="/api/v1")
-from app.api.routes.controlled_public_release import controlled_release_admin_router, controlled_release_router
+from app.api.routes.controlled_public_release import (
+    controlled_release_admin_router,
+    controlled_release_router,
+)
 
 app.include_router(controlled_release_router, prefix="/api/v1")
 app.include_router(controlled_release_admin_router, prefix="/api/v1")
@@ -195,7 +198,10 @@ from app.api.routes.growth_scale_operations import growth_scale_admin_router, gr
 
 app.include_router(growth_scale_router, prefix="/api/v1")
 app.include_router(growth_scale_admin_router, prefix="/api/v1")
-from app.api.routes.business_revenue_readiness import biz_readiness_admin_router, biz_readiness_router
+from app.api.routes.business_revenue_readiness import (
+    biz_readiness_admin_router,
+    biz_readiness_router,
+)
 
 app.include_router(biz_readiness_router, prefix="/api/v1")
 app.include_router(biz_readiness_admin_router, prefix="/api/v1")
@@ -231,7 +237,10 @@ from app.api.routes.stage5_controlled_validation import stage5_admin_router, sta
 
 app.include_router(stage5_router, prefix="/api/v1")
 app.include_router(stage5_admin_router, prefix="/api/v1")
-from app.api.routes.public_beta_preparation import public_beta_prep_admin_router, public_beta_prep_router
+from app.api.routes.public_beta_preparation import (
+    public_beta_prep_admin_router,
+    public_beta_prep_router,
+)
 
 app.include_router(public_beta_prep_router, prefix="/api/v1")
 app.include_router(public_beta_prep_admin_router, prefix="/api/v1")
@@ -243,7 +252,10 @@ from app.api.routes.commercial_readiness import commercial_prep_admin_router, co
 
 app.include_router(commercial_prep_router, prefix="/api/v1")
 app.include_router(commercial_prep_admin_router, prefix="/api/v1")
-from app.api.routes.public_beta_operational_monitoring import ops_monitoring_admin_router, ops_monitoring_router
+from app.api.routes.public_beta_operational_monitoring import (
+    ops_monitoring_admin_router,
+    ops_monitoring_router,
+)
 
 app.include_router(ops_monitoring_router, prefix="/api/v1")
 app.include_router(ops_monitoring_admin_router, prefix="/api/v1")
