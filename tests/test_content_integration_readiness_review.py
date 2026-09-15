@@ -1,4 +1,7 @@
-from app.services.content_integration_readiness_review import Outcome, ContentIntegrationReadinessReview
+from app.services.content_integration_readiness_review import (
+    ContentIntegrationReadinessReview,
+    Outcome,
+)
 
 
 def make(**overrides):
