@@ -6,9 +6,9 @@ import argparse
 import json
 import subprocess
 from collections import Counter
+from collections.abc import Iterable
 from datetime import datetime, timedelta, timezone
 from statistics import mean
-from typing import Iterable
 
 MARKER = "ai_provider_event="
 DEFAULT_MIN_TERMINAL_REQUESTS = 100
