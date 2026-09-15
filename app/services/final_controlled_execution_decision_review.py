@@ -1,7 +1,6 @@
 """Immutable final decision record for controlled execution."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,22 +12,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class FinalControlledExecutionDecisionReview:
-    preparation_artifacts: Tuple[str, ...] = ()
-    runbook: Tuple[str, ...] = ()
-    rollback: Tuple[str, ...] = ()
-    evidence: Tuple[str, ...] = ()
-    residual_risks: Tuple[str, ...] = ()
-    deferred_items: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
+    preparation_artifacts: tuple[str, ...] = ()
+    runbook: tuple[str, ...] = ()
+    rollback: tuple[str, ...] = ()
+    evidence: tuple[str, ...] = ()
+    residual_risks: tuple[str, ...] = ()
+    deferred_items: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     execution_owner: str = ""
     approval_owner: str = ""
     incident_owner: str = ""
-    rollback_safety: Tuple[str, ...] = ()
-    recovery_safety: Tuple[str, ...] = ()
-    monitoring_safety: Tuple[str, ...] = ()
+    rollback_safety: tuple[str, ...] = ()
+    recovery_safety: tuple[str, ...] = ()
+    monitoring_safety: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    conditions: Tuple[str, ...] = ()
+    conditions: tuple[str, ...] = ()
     final_execution_decision_review_only: bool = True
     execution_permission: bool = False
     production_execution: bool = False
