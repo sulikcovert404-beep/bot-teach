@@ -12,20 +12,20 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionEnablementImplementationPreparation:
-    change_list: Tuple[str, ...] = ()
-    module_boundaries: Tuple[str, ...] = ()
-    dependency_order: Tuple[str, ...] = ()
-    migration_steps_draft: Tuple[str, ...] = ()
-    validation_checkpoints: Tuple[str, ...] = ()
-    rollback_checkpoints: Tuple[str, ...] = ()
-    identity_integration_tasks: Tuple[str, ...] = ()
-    permission_mapping_tasks: Tuple[str, ...] = ()
-    deployment_sequence: Tuple[str, ...] = ()
-    verification_steps: Tuple[str, ...] = ()
-    stop_conditions: Tuple[str, ...] = ()
+    change_list: tuple[str, ...] = ()
+    module_boundaries: tuple[str, ...] = ()
+    dependency_order: tuple[str, ...] = ()
+    migration_steps_draft: tuple[str, ...] = ()
+    validation_checkpoints: tuple[str, ...] = ()
+    rollback_checkpoints: tuple[str, ...] = ()
+    identity_integration_tasks: tuple[str, ...] = ()
+    permission_mapping_tasks: tuple[str, ...] = ()
+    deployment_sequence: tuple[str, ...] = ()
+    verification_steps: tuple[str, ...] = ()
+    stop_conditions: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     production_enablement_preparation_only: bool = True
     implementation_execution: bool = False
     migration_execution: bool = False
