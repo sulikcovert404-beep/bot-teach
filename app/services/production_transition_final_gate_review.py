@@ -1,7 +1,6 @@
 """Immutable final gate review before any production transition execution."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,21 +12,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionTransitionFinalGateReview:
-    transition_plan: Tuple[str, ...] = ()
-    rollback_plan: Tuple[str, ...] = ()
-    validation_plan: Tuple[str, ...] = ()
-    remaining_risks: Tuple[str, ...] = ()
-    deferred_items: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
-    authorization_readiness: Tuple[str, ...] = ()
-    identity_boundaries: Tuple[str, ...] = ()
-    credential_impact: Tuple[str, ...] = ()
-    monitoring_readiness: Tuple[str, ...] = ()
-    incident_response: Tuple[str, ...] = ()
-    recovery_readiness: Tuple[str, ...] = ()
+    transition_plan: tuple[str, ...] = ()
+    rollback_plan: tuple[str, ...] = ()
+    validation_plan: tuple[str, ...] = ()
+    remaining_risks: tuple[str, ...] = ()
+    deferred_items: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    authorization_readiness: tuple[str, ...] = ()
+    identity_boundaries: tuple[str, ...] = ()
+    credential_impact: tuple[str, ...] = ()
+    monitoring_readiness: tuple[str, ...] = ()
+    incident_response: tuple[str, ...] = ()
+    recovery_readiness: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    conditions: Tuple[str, ...] = ()
+    conditions: tuple[str, ...] = ()
     final_gate_review_only: bool = True
     production_execution: bool = False
     deployment: bool = False
