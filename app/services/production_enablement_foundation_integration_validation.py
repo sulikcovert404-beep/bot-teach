@@ -1,7 +1,6 @@
 """Pure, immutable validation contract for persistence + authorization integration."""
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Tuple
 
 
 class IntegrationOutcome(StrEnum):
@@ -13,25 +12,25 @@ class IntegrationOutcome(StrEnum):
 
 @dataclass(frozen=True)
 class FoundationIntegrationValidation:
-    creator_ownership: Tuple[str, ...] = ()
-    authorization_enforcement: Tuple[str, ...] = ()
-    data_access_boundaries: Tuple[str, ...] = ()
-    create_authorize_persist: Tuple[str, ...] = ()
-    update_authorize_version_check: Tuple[str, ...] = ()
-    deny_no_mutation: Tuple[str, ...] = ()
-    unauthorized_access: Tuple[str, ...] = ()
-    conflict_handling: Tuple[str, ...] = ()
-    data_integrity: Tuple[str, ...] = ()
-    content_regression: Tuple[str, ...] = ()
-    commands_regression: Tuple[str, ...] = ()
-    admin_authorization_regression: Tuple[str, ...] = ()
-    curriculum_pipeline_regression: Tuple[str, ...] = ()
-    identity_provider_gap: Tuple[str, ...] = ()
-    credential_gap: Tuple[str, ...] = ()
-    runtime_activation_gap: Tuple[str, ...] = ()
+    creator_ownership: tuple[str, ...] = ()
+    authorization_enforcement: tuple[str, ...] = ()
+    data_access_boundaries: tuple[str, ...] = ()
+    create_authorize_persist: tuple[str, ...] = ()
+    update_authorize_version_check: tuple[str, ...] = ()
+    deny_no_mutation: tuple[str, ...] = ()
+    unauthorized_access: tuple[str, ...] = ()
+    conflict_handling: tuple[str, ...] = ()
+    data_integrity: tuple[str, ...] = ()
+    content_regression: tuple[str, ...] = ()
+    commands_regression: tuple[str, ...] = ()
+    admin_authorization_regression: tuple[str, ...] = ()
+    curriculum_pipeline_regression: tuple[str, ...] = ()
+    identity_provider_gap: tuple[str, ...] = ()
+    credential_gap: tuple[str, ...] = ()
+    runtime_activation_gap: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     integration_validation_only: bool = True
     identity_provider_change: bool = False
     credential_change: bool = False
