@@ -1,7 +1,6 @@
 """Pure validation record for the third-wave content capability."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,16 +13,16 @@ class Outcome(str, Enum):
 @dataclass(frozen=True)
 class ThirdDevelopmentWaveValidation:
     implementation_outcome: str = ""
-    acceptance_criteria: Tuple[str, ...] = ()
-    behavior_correctness: Tuple[str, ...] = ()
-    test_coverage: Tuple[str, ...] = ()
+    acceptance_criteria: tuple[str, ...] = ()
+    behavior_correctness: tuple[str, ...] = ()
+    test_coverage: tuple[str, ...] = ()
     regression_status: str = ""
-    compatibility: Tuple[str, ...] = ()
-    typed_result_consistency: Tuple[str, ...] = ()
-    deterministic_reasons: Tuple[str, ...] = ()
-    preserved_behavior: Tuple[str, ...] = ()
-    risks: Tuple[str, ...] = ()
-    warnings: Tuple[str, ...] = ()
+    compatibility: tuple[str, ...] = ()
+    typed_result_consistency: tuple[str, ...] = ()
+    deterministic_reasons: tuple[str, ...] = ()
+    preserved_behavior: tuple[str, ...] = ()
+    risks: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     trace_reference: str = ""
     validation_only: bool = True
     new_feature_execution: bool = False
@@ -48,3 +47,4 @@ class ThirdDevelopmentWaveValidation:
         if any(not value for value in required):
             return Outcome.FAILED
         return Outcome.VALIDATED_WITH_WARNINGS if self.warnings else Outcome.VALIDATED
+
