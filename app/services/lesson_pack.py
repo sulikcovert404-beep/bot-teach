@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import StrEnum
 from hashlib import sha256
 import json
-from typing import Mapping
+from collections.abc import Mapping
 
 
 class SchoolStage(StrEnum):
