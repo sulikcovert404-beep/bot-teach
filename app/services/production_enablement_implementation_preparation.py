@@ -1,7 +1,6 @@
 """Immutable preparation record for production enablement implementation."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
