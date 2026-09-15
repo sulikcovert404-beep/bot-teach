@@ -1,7 +1,6 @@
 """Immutable gate describing readiness to begin development; no permission is granted."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,20 +13,20 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class DevelopmentReadinessGatePackage:
-    tooling_assumptions: Tuple[str, ...] = ()
-    workspace_requirements: Tuple[str, ...] = ()
-    dependency_readiness: Tuple[str, ...] = ()
-    coding_workflow: Tuple[str, ...] = ()
-    review_process: Tuple[str, ...] = ()
-    validation_process: Tuple[str, ...] = ()
-    test_readiness: Tuple[str, ...] = ()
-    acceptance_readiness: Tuple[str, ...] = ()
-    defect_handling_model: Tuple[str, ...] = ()
-    ownership: Tuple[str, ...] = ()
-    responsibility: Tuple[str, ...] = ()
-    escalation: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
-    prerequisites: Tuple[str, ...] = ()
+    tooling_assumptions: tuple[str, ...] = ()
+    workspace_requirements: tuple[str, ...] = ()
+    dependency_readiness: tuple[str, ...] = ()
+    coding_workflow: tuple[str, ...] = ()
+    review_process: tuple[str, ...] = ()
+    validation_process: tuple[str, ...] = ()
+    test_readiness: tuple[str, ...] = ()
+    acceptance_readiness: tuple[str, ...] = ()
+    defect_handling_model: tuple[str, ...] = ()
+    ownership: tuple[str, ...] = ()
+    responsibility: tuple[str, ...] = ()
+    escalation: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
     trace_reference: str = ""
     development_readiness_only: bool = True
     feature_implementation: bool = False
