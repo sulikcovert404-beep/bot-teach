@@ -1,4 +1,10 @@
-from app.db.models import Assignment, AssignmentSnapshot, AssignmentTarget, StudentSubmission, SubmissionReview
+from app.db.models import (
+    Assignment,
+    AssignmentSnapshot,
+    AssignmentTarget,
+    StudentSubmission,
+    SubmissionReview,
+)
 
 
 def test_assignment_persistence_tables_and_constraints():
