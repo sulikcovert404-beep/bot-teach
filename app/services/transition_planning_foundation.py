@@ -2,7 +2,7 @@
 from dataclasses import dataclass
 from enum import Enum
 import hashlib, json
-from typing import Mapping, Tuple
+from collections.abc import Mapping
 
 class TransitionOutcome(str, Enum):
     TRANSITION_READY = "TRANSITION_READY"
@@ -16,22 +16,22 @@ class TransitionPlanningFoundation:
     foundation_id: str
     current_phase_reference: str
     future_phase_boundary: str
-    transition_objectives: Tuple[str, ...]
-    dependency_assumptions: Tuple[str, ...]
-    change_categories: Tuple[str, ...]
+    transition_objectives: tuple[str, ...]
+    dependency_assumptions: tuple[str, ...]
+    change_categories: tuple[str, ...]
     impact_classification: Mapping[str, str]
     risk_levels: Mapping[str, str]
-    required_review_boundaries: Tuple[str, ...]
-    rollback_scenarios: Tuple[str, ...]
-    failure_categories: Tuple[str, ...]
-    recovery_constraints: Tuple[str, ...]
-    restore_boundaries: Tuple[str, ...]
+    required_review_boundaries: tuple[str, ...]
+    rollback_scenarios: tuple[str, ...]
+    failure_categories: tuple[str, ...]
+    recovery_constraints: tuple[str, ...]
+    restore_boundaries: tuple[str, ...]
     ownership_boundary: str
     responsibility_transition: str
-    handoff_evidence_requirements: Tuple[str, ...]
-    review_package_scope: Tuple[str, ...]
-    review_inputs: Tuple[str, ...]
-    unresolved_items: Tuple[str, ...]
+    handoff_evidence_requirements: tuple[str, ...]
+    review_package_scope: tuple[str, ...]
+    review_inputs: tuple[str, ...]
+    unresolved_items: tuple[str, ...]
     trace_reference: str
     foundation_digest: str
     execution: bool = False
