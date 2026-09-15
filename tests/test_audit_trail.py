@@ -1,5 +1,7 @@
 from datetime import datetime, timezone
+
 from app.services.audit_trail import AuditHook, InMemoryAuditSink
+
 
 def test_audit_event_serialization_preserves_persian_zwnj_and_rtl():
     sink=InMemoryAuditSink(); hook=AuditHook(sink, lambda: datetime(2026,1,1,tzinfo=timezone.utc))
