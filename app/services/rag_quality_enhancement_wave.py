@@ -1,7 +1,6 @@
 """Pure quality contract for conflict-aware, calibrated RAG grounding."""
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Tuple
 
 
 class QualityOutcome(StrEnum):
@@ -14,17 +13,17 @@ class QualityOutcome(StrEnum):
 
 @dataclass(frozen=True)
 class RAGQualityEnhancementWave:
-    conflict_categories: Tuple[str, ...] = ()
-    resolution_rules: Tuple[str, ...] = ()
-    precedence_model: Tuple[str, ...] = ()
-    threshold_strategy: Tuple[str, ...] = ()
-    confidence_levels: Tuple[str, ...] = ()
-    scoring_interpretation: Tuple[str, ...] = ()
-    grounding_state_rules: Tuple[str, ...] = ()
-    explainability_metadata: Tuple[str, ...] = ()
-    compatibility_rules: Tuple[str, ...] = ()
-    validation_scenarios: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
+    conflict_categories: tuple[str, ...] = ()
+    resolution_rules: tuple[str, ...] = ()
+    precedence_model: tuple[str, ...] = ()
+    threshold_strategy: tuple[str, ...] = ()
+    confidence_levels: tuple[str, ...] = ()
+    scoring_interpretation: tuple[str, ...] = ()
+    grounding_state_rules: tuple[str, ...] = ()
+    explainability_metadata: tuple[str, ...] = ()
+    compatibility_rules: tuple[str, ...] = ()
+    validation_scenarios: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     rag_quality_design_and_contract_only: bool = True
     runtime_execution: bool = False
