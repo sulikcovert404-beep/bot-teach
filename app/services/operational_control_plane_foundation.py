@@ -1,7 +1,6 @@
 """Pure design contract for a future operational control plane."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,13 +13,13 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class OperationalControlPlaneFoundation:
-    control_architecture: Tuple[str, ...] = ()
-    policy_evaluation_semantics: Tuple[str, ...] = ()
-    command_ownership: Tuple[str, ...] = ()
-    workflow_boundaries: Tuple[str, ...] = ()
-    escalation_model: Tuple[str, ...] = ()
-    audit_boundary: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
+    control_architecture: tuple[str, ...] = ()
+    policy_evaluation_semantics: tuple[str, ...] = ()
+    command_ownership: tuple[str, ...] = ()
+    workflow_boundaries: tuple[str, ...] = ()
+    escalation_model: tuple[str, ...] = ()
+    audit_boundary: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     control_plane_design_only: bool = True
     runtime_control: bool = False
