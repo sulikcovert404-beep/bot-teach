@@ -1,7 +1,6 @@
 """Immutable prioritization record for the next development capability."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,22 +13,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class NextCapabilityPrioritization:
-    available_capabilities: Tuple[str, ...] = ()
-    business_technical_value: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
-    impact: Tuple[str, ...] = ()
-    complexity: Tuple[str, ...] = ()
-    risk: Tuple[str, ...] = ()
-    dependency_weight: Tuple[str, ...] = ()
-    rag_dependency: Tuple[str, ...] = ()
-    architecture_fit: Tuple[str, ...] = ()
-    existing_contracts: Tuple[str, ...] = ()
+    available_capabilities: tuple[str, ...] = ()
+    business_technical_value: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
+    impact: tuple[str, ...] = ()
+    complexity: tuple[str, ...] = ()
+    risk: tuple[str, ...] = ()
+    dependency_weight: tuple[str, ...] = ()
+    rag_dependency: tuple[str, ...] = ()
+    architecture_fit: tuple[str, ...] = ()
+    existing_contracts: tuple[str, ...] = ()
     selected_capability: str = ""
-    rejected_candidates: Tuple[str, ...] = ()
+    rejected_candidates: tuple[str, ...] = ()
     rationale: str = ""
     approved_next_wave: str = ""
-    blockers: Tuple[str, ...] = ()
-    prerequisites: Tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
     trace_reference: str = ""
     capability_selection_only: bool = True
     new_capability_execution: bool = False
