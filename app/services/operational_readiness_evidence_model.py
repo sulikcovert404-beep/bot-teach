@@ -1,7 +1,7 @@
 """Evidence semantics for readiness governance; collection and storage are prohibited."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping
+from collections.abc import Mapping
 
 class EvidenceOutcome(str, Enum):
     EVIDENCE_MODEL_DEFINED="EVIDENCE_MODEL_DEFINED"; EVIDENCE_MODEL_DEFINED_WITH_WARNINGS="EVIDENCE_MODEL_DEFINED_WITH_WARNINGS"; EVIDENCE_MODEL_INCOMPLETE="EVIDENCE_MODEL_INCOMPLETE"; EVIDENCE_MODEL_BLOCKED="EVIDENCE_MODEL_BLOCKED"; UNKNOWN="UNKNOWN"
