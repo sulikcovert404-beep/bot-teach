@@ -1,7 +1,6 @@
 """Pure authorization readiness review for the third development wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,18 +13,18 @@ class Outcome(str, Enum):
 class ThirdDevelopmentWaveAuthorizationReview:
     capability: str = ""
     objective: str = ""
-    boundaries: Tuple[str, ...] = ()
-    exclusions: Tuple[str, ...] = ()
-    existing_modules: Tuple[str, ...] = ()
-    contracts: Tuple[str, ...] = ()
-    external_dependencies: Tuple[str, ...] = ()
-    expected_files: Tuple[str, ...] = ()
+    boundaries: tuple[str, ...] = ()
+    exclusions: tuple[str, ...] = ()
+    existing_modules: tuple[str, ...] = ()
+    contracts: tuple[str, ...] = ()
+    external_dependencies: tuple[str, ...] = ()
+    expected_files: tuple[str, ...] = ()
     complexity: str = ""
     risk: str = ""
-    acceptance_criteria: Tuple[str, ...] = ()
-    test_strategy: Tuple[str, ...] = ()
-    validation_requirements: Tuple[str, ...] = ()
-    warnings: Tuple[str, ...] = ()
+    acceptance_criteria: tuple[str, ...] = ()
+    test_strategy: tuple[str, ...] = ()
+    validation_requirements: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     trace_reference: str = ""
     authorization_review_only: bool = True
     implementation_permission: bool = False
