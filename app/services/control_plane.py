@@ -5,7 +5,8 @@ from dataclasses import dataclass, field, replace
 from enum import StrEnum
 import json
 import unicodedata
-from typing import Any, Callable, Mapping, Protocol
+from collections.abc import Callable, Mapping
+from typing import Any, Protocol
 from uuid import uuid4
 
 
