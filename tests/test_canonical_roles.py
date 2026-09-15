@@ -1,6 +1,8 @@
-from app.security.canonical import canonical_role
 import pytest
 from fastapi import HTTPException
+
+from app.security.canonical import canonical_role
+
 
 def test_canonical_role_accepts_target_roles():
     for role in ("SUPER_ADMIN", "SCHOOL_ADMIN", "TEACHER", "STUDENT"):
