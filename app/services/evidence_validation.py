@@ -7,7 +7,8 @@ provider.  Runtime integration is gated separately.
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from json import dumps
-from typing import Any, Sequence
+from collections.abc import Sequence
+from typing import Any
 
 from app.services.rag import GroundingState, RetrievedChunk
 
