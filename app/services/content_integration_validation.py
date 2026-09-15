@@ -1,7 +1,6 @@
 """Immutable validation record for the content integration boundary."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,22 +12,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ContentIntegrationValidation:
-    create_flow: Tuple[str, ...] = ()
-    update_flow: Tuple[str, ...] = ()
-    ownership_enforcement: Tuple[str, ...] = ()
-    conflict_handling: Tuple[str, ...] = ()
-    persistence_adapter_contract: Tuple[str, ...] = ()
-    authorization_contract: Tuple[str, ...] = ()
-    typed_result_behavior: Tuple[str, ...] = ()
-    existing_content_behavior: Tuple[str, ...] = ()
-    command_compatibility: Tuple[str, ...] = ()
-    api_compatibility: Tuple[str, ...] = ()
-    in_memory_limitation: Tuple[str, ...] = ()
-    migration_readiness: Tuple[str, ...] = ()
-    production_gap: Tuple[str, ...] = ()
+    create_flow: tuple[str, ...] = ()
+    update_flow: tuple[str, ...] = ()
+    ownership_enforcement: tuple[str, ...] = ()
+    conflict_handling: tuple[str, ...] = ()
+    persistence_adapter_contract: tuple[str, ...] = ()
+    authorization_contract: tuple[str, ...] = ()
+    typed_result_behavior: tuple[str, ...] = ()
+    existing_content_behavior: tuple[str, ...] = ()
+    command_compatibility: tuple[str, ...] = ()
+    api_compatibility: tuple[str, ...] = ()
+    in_memory_limitation: tuple[str, ...] = ()
+    migration_readiness: tuple[str, ...] = ()
+    production_gap: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     validation_only: bool = True
     new_integration_execution: bool = False
     database_change: bool = False
