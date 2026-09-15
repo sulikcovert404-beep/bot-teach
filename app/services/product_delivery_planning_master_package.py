@@ -1,7 +1,6 @@
 """Immutable, advisory product delivery plan."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,21 +13,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductDeliveryPlanningMasterPackage:
-    capability_priorities: Tuple[str, ...] = ()
-    delivery_sequence: Tuple[str, ...] = ()
-    milestone_grouping: Tuple[str, ...] = ()
-    workstreams: Tuple[str, ...] = ()
-    dependency_ordering: Tuple[str, ...] = ()
-    technical_ownership: Tuple[str, ...] = ()
-    release_boundaries: Tuple[str, ...] = ()
-    acceptance_gates: Tuple[str, ...] = ()
-    quality_checkpoints: Tuple[str, ...] = ()
-    complexity_classification: Tuple[str, ...] = ()
-    delivery_risks: Tuple[str, ...] = ()
-    mitigation_planning: Tuple[str, ...] = ()
+    capability_priorities: tuple[str, ...] = ()
+    delivery_sequence: tuple[str, ...] = ()
+    milestone_grouping: tuple[str, ...] = ()
+    workstreams: tuple[str, ...] = ()
+    dependency_ordering: tuple[str, ...] = ()
+    technical_ownership: tuple[str, ...] = ()
+    release_boundaries: tuple[str, ...] = ()
+    acceptance_gates: tuple[str, ...] = ()
+    quality_checkpoints: tuple[str, ...] = ()
+    complexity_classification: tuple[str, ...] = ()
+    delivery_risks: tuple[str, ...] = ()
+    mitigation_planning: tuple[str, ...] = ()
     recommended_next_phase: str = ""
-    unresolved_decisions: Tuple[str, ...] = ()
-    warnings: Tuple[str, ...] = ()
+    unresolved_decisions: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     trace_reference: str = ""
     delivery_planning_only: bool = True
     implementation_execution: bool = False
