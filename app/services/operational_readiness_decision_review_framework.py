@@ -1,7 +1,7 @@
 """Review design for readiness decisions; it cannot approve or execute anything."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping
+from collections.abc import Mapping
 
 class ReviewOutcome(str, Enum):
     REVIEW_FRAMEWORK_DEFINED="REVIEW_FRAMEWORK_DEFINED"; REVIEW_FRAMEWORK_DEFINED_WITH_WARNINGS="REVIEW_FRAMEWORK_DEFINED_WITH_WARNINGS"; REVIEW_FRAMEWORK_INCOMPLETE="REVIEW_FRAMEWORK_INCOMPLETE"; REVIEW_FRAMEWORK_BLOCKED="REVIEW_FRAMEWORK_BLOCKED"; UNKNOWN="UNKNOWN"
