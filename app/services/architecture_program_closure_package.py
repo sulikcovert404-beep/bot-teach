@@ -1,7 +1,6 @@
 """Immutable closure record for the architecture program."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,13 +13,13 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ArchitectureProgramClosurePackage:
-    final_architecture_summary: Tuple[str, ...] = ()
-    artifact_inventory: Tuple[str, ...] = ()
-    dependency_closure: Tuple[str, ...] = ()
-    risk_closure: Tuple[str, ...] = ()
-    final_boundary_register: Tuple[str, ...] = ()
-    future_phase_entry_criteria: Tuple[str, ...] = ()
-    warnings: Tuple[str, ...] = ()
+    final_architecture_summary: tuple[str, ...] = ()
+    artifact_inventory: tuple[str, ...] = ()
+    dependency_closure: tuple[str, ...] = ()
+    risk_closure: tuple[str, ...] = ()
+    final_boundary_register: tuple[str, ...] = ()
+    future_phase_entry_criteria: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     trace_reference: str = ""
     program_closure_only: bool = True
     runtime_execution: bool = False
