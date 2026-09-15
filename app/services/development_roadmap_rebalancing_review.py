@@ -1,7 +1,6 @@
 """Immutable roadmap rebalancing review after completed capability waves."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,17 +12,17 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class DevelopmentRoadmapRebalancingReview:
-    completed_capabilities: Tuple[str, ...] = ()
-    delivered_value: Tuple[str, ...] = ()
-    remaining_risks: Tuple[str, ...] = ()
-    pending_capabilities: Tuple[str, ...] = ()
-    pending_dependencies: Tuple[str, ...] = ()
-    pending_priorities: Tuple[str, ...] = ()
-    continue_rag_runtime: Tuple[str, ...] = ()
-    start_new_capability: Tuple[str, ...] = ()
-    complexity: Tuple[str, ...] = ()
-    risk: Tuple[str, ...] = ()
-    expected_value: Tuple[str, ...] = ()
+    completed_capabilities: tuple[str, ...] = ()
+    delivered_value: tuple[str, ...] = ()
+    remaining_risks: tuple[str, ...] = ()
+    pending_capabilities: tuple[str, ...] = ()
+    pending_dependencies: tuple[str, ...] = ()
+    pending_priorities: tuple[str, ...] = ()
+    continue_rag_runtime: tuple[str, ...] = ()
+    start_new_capability: tuple[str, ...] = ()
+    complexity: tuple[str, ...] = ()
+    risk: tuple[str, ...] = ()
+    expected_value: tuple[str, ...] = ()
     recommendation: str = ""
     trace_reference: str = ""
     roadmap_review_only: bool = True
