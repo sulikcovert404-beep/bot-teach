@@ -1,12 +1,11 @@
 """Immutable transition assurance and certification evidence."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 class TransitionCertificationOutcome(str,Enum):
  TRANSITION_CERTIFIED="TRANSITION_CERTIFIED"; TRANSITION_CERTIFIED_WITH_WARNINGS="TRANSITION_CERTIFIED_WITH_WARNINGS"; TRANSITION_NOT_CERTIFIED="TRANSITION_NOT_CERTIFIED"; TRANSITION_BLOCKED="TRANSITION_BLOCKED"; UNKNOWN="UNKNOWN"
 @dataclass(frozen=True)
 class TransitionAssuranceCertificationPackage:
- package_id:str; planning_reference:str; governance_reference:str; completeness_findings:Tuple[str,...]; integrity_findings:Tuple[str,...]; boundary_findings:Tuple[str,...]; risk_model:Tuple[str,...]; unresolved_risks:Tuple[str,...]; escalation_readiness:Tuple[str,...]; rollback_semantics:Tuple[str,...]; recovery_boundary:Tuple[str,...]; ownership_transfer:Tuple[str,...]; responsibility_consistency:Tuple[str,...]; certification_record:str; trace_reference:str; package_digest:str; transition_assurance_only:bool=True; execution:bool=False; certification_is_execution_permission:bool=False
+ package_id:str; planning_reference:str; governance_reference:str; completeness_findings:tuple[str,...]; integrity_findings:tuple[str,...]; boundary_findings:tuple[str,...]; risk_model:tuple[str,...]; unresolved_risks:tuple[str,...]; escalation_readiness:tuple[str,...]; rollback_semantics:tuple[str,...]; recovery_boundary:tuple[str,...]; ownership_transfer:tuple[str,...]; responsibility_consistency:tuple[str,...]; certification_record:str; trace_reference:str; package_digest:str; transition_assurance_only:bool=True; execution:bool=False; certification_is_execution_permission:bool=False
  def outcome(self)->TransitionCertificationOutcome:
   if not all((self.package_id,self.planning_reference,self.governance_reference,self.trace_reference,self.package_digest)): return TransitionCertificationOutcome.TRANSITION_BLOCKED
   if not self.transition_assurance_only or self.execution or self.certification_is_execution_permission: return TransitionCertificationOutcome.TRANSITION_NOT_CERTIFIED
