@@ -1,7 +1,6 @@
 """Provider-neutral design record for future content integration."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,24 +12,24 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ContentIntegrationDesignPackage:
-    data_model_requirements: Tuple[str, ...] = ()
-    storage_contract: Tuple[str, ...] = ()
-    lifecycle_states: Tuple[str, ...] = ()
-    consistency_rules: Tuple[str, ...] = ()
-    migration_impact: Tuple[str, ...] = ()
-    permission_model: Tuple[str, ...] = ()
-    ownership_rules: Tuple[str, ...] = ()
-    access_matrix: Tuple[str, ...] = ()
-    security_boundaries: Tuple[str, ...] = ()
-    component_interaction: Tuple[str, ...] = ()
-    dependency_flow: Tuple[str, ...] = ()
-    interface_contracts: Tuple[str, ...] = ()
-    validation_strategy: Tuple[str, ...] = ()
-    rollback_considerations: Tuple[str, ...] = ()
-    failure_handling: Tuple[str, ...] = ()
+    data_model_requirements: tuple[str, ...] = ()
+    storage_contract: tuple[str, ...] = ()
+    lifecycle_states: tuple[str, ...] = ()
+    consistency_rules: tuple[str, ...] = ()
+    migration_impact: tuple[str, ...] = ()
+    permission_model: tuple[str, ...] = ()
+    ownership_rules: tuple[str, ...] = ()
+    access_matrix: tuple[str, ...] = ()
+    security_boundaries: tuple[str, ...] = ()
+    component_interaction: tuple[str, ...] = ()
+    dependency_flow: tuple[str, ...] = ()
+    interface_contracts: tuple[str, ...] = ()
+    validation_strategy: tuple[str, ...] = ()
+    rollback_considerations: tuple[str, ...] = ()
+    failure_handling: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     integration_design_only: bool = True
     implementation_execution: bool = False
     database_change: bool = False
