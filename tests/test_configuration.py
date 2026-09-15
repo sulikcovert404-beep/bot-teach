@@ -1,8 +1,13 @@
 from dataclasses import FrozenInstanceError
+
 import pytest
+
 from app.services.configuration import (
-    PipelineConfiguration, resolve_configuration, validate_configuration,
+    PipelineConfiguration,
+    resolve_configuration,
+    validate_configuration,
 )
+
 
 def test_defaults_are_valid_and_safe() -> None:
     config = resolve_configuration()
