@@ -4,7 +4,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 import json
-from typing import Any, Callable
+from typing import Any
+from collections.abc import Callable
 
 from .admin_authorization import Actor, AuthorizationContext, authorize
 from .content_commands import _Command
