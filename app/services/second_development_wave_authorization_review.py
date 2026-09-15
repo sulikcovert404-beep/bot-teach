@@ -1,7 +1,6 @@
 """Immutable authorization review for the second development wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,19 +13,19 @@ class Outcome(str, Enum):
 @dataclass(frozen=True)
 class SecondDevelopmentWaveAuthorizationReview:
     capability_confirmation: str = ""
-    scope_boundary: Tuple[str, ...] = ()
-    exclusions: Tuple[str, ...] = ()
-    existing_contracts: Tuple[str, ...] = ()
-    required_prerequisites: Tuple[str, ...] = ()
-    dependency_risks: Tuple[str, ...] = ()
-    expected_modules: Tuple[str, ...] = ()
-    affected_areas: Tuple[str, ...] = ()
-    complexity_assessment: Tuple[str, ...] = ()
-    acceptance_criteria: Tuple[str, ...] = ()
-    test_strategy: Tuple[str, ...] = ()
-    validation_requirements: Tuple[str, ...] = ()
+    scope_boundary: tuple[str, ...] = ()
+    exclusions: tuple[str, ...] = ()
+    existing_contracts: tuple[str, ...] = ()
+    required_prerequisites: tuple[str, ...] = ()
+    dependency_risks: tuple[str, ...] = ()
+    expected_modules: tuple[str, ...] = ()
+    affected_areas: tuple[str, ...] = ()
+    complexity_assessment: tuple[str, ...] = ()
+    acceptance_criteria: tuple[str, ...] = ()
+    test_strategy: tuple[str, ...] = ()
+    validation_requirements: tuple[str, ...] = ()
     decision: str = ""
-    blockers: Tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     second_wave_authorization_review_only: bool = True
     implementation_permission: bool = False
