@@ -1,5 +1,16 @@
 import pytest
-from app.services.ai_gateway import AIRequest, AIResponse, AIGateway, MockProvider, ProviderError, ProviderResponseError, AIProviderEvent, redact_secrets
+
+from app.services.ai_gateway import (
+    AIGateway,
+    AIProviderEvent,
+    AIRequest,
+    AIResponse,
+    MockProvider,
+    ProviderError,
+    ProviderResponseError,
+    redact_secrets,
+)
+
 
 class FailingProvider:
     name = "first"; model = "v1"
