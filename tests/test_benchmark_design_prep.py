@@ -4,7 +4,6 @@ import hashlib
 import json
 from pathlib import Path
 
-
 DATASET = Path("data/rag_eval_v1.json")
 EXPECTED_SHA256 = "4c3f3f6d274ec63b563101b170cefae323680fe0bf336a53dca551b116b01470"
 
