@@ -5,9 +5,10 @@ import hashlib
 import json
 import re
 import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
-from typing import Any, Iterable
+from typing import Any
 
 _DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 _SECRET = re.compile(r"(?i)(api[_-]?key|token|password|secret|credential|authorization|private[_-]?key)")
