@@ -3,7 +3,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import StrEnum
 import json, unicodedata
-from typing import Mapping
+from collections.abc import Mapping
 
 class FailureCategory(StrEnum):
     TRANSIENT="TRANSIENT"; PERMANENT="PERMANENT"; AMBIGUOUS="AMBIGUOUS"; POLICY_BLOCKED="POLICY_BLOCKED"
