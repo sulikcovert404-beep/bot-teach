@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib,json,re,unicodedata
 from dataclasses import dataclass,field
 from enum import StrEnum
-from typing import Any,Mapping
+from collections.abc import Mapping
+from typing import Any
 from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
 class IntegrationOutcome(StrEnum):
  COMPATIBLE="COMPATIBLE"; COMPATIBLE_WITH_WARNINGS="COMPATIBLE_WITH_WARNINGS"; INCOMPATIBLE="INCOMPATIBLE"; BLOCKED="BLOCKED"; UNKNOWN="UNKNOWN"
