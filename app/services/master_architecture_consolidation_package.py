@@ -1,7 +1,6 @@
 """Immutable, non-authoritative inventory of the platform architecture."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,18 +13,18 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class MasterArchitectureConsolidationPackage:
-    architecture_map: Tuple[str, ...] = ()
-    implemented_contracts: Tuple[str, ...] = ()
-    design_artifacts: Tuple[str, ...] = ()
-    prohibited_areas: Tuple[str, ...] = ()
-    dependency_graph: Tuple[str, ...] = ()
-    lineage_summary: Tuple[str, ...] = ()
-    open_risks: Tuple[str, ...] = ()
-    forbidden_transitions: Tuple[str, ...] = ()
-    unresolved_items: Tuple[str, ...] = ()
-    future_entry_conditions: Tuple[str, ...] = ()
-    prerequisites: Tuple[str, ...] = ()
-    restrictions: Tuple[str, ...] = ()
+    architecture_map: tuple[str, ...] = ()
+    implemented_contracts: tuple[str, ...] = ()
+    design_artifacts: tuple[str, ...] = ()
+    prohibited_areas: tuple[str, ...] = ()
+    dependency_graph: tuple[str, ...] = ()
+    lineage_summary: tuple[str, ...] = ()
+    open_risks: tuple[str, ...] = ()
+    forbidden_transitions: tuple[str, ...] = ()
+    unresolved_items: tuple[str, ...] = ()
+    future_entry_conditions: tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
+    restrictions: tuple[str, ...] = ()
     trace_reference: str = ""
     architecture_consolidation_only: bool = True
     runtime_execution: bool = False
