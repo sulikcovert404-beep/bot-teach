@@ -1,4 +1,7 @@
-from app.services.authorization_production_wiring_design_package import Outcome, AuthorizationProductionWiringDesignPackage
+from app.services.authorization_production_wiring_design_package import (
+    AuthorizationProductionWiringDesignPackage,
+    Outcome,
+)
 
 
 def make(**overrides):
