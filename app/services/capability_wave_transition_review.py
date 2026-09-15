@@ -1,7 +1,6 @@
 """Immutable review for transitioning between capability waves."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,17 +13,17 @@ class Outcome(str, Enum):
 @dataclass(frozen=True)
 class CapabilityWaveTransitionReview:
     delivered_capability: str = ""
-    achieved_objectives: Tuple[str, ...] = ()
-    quality_status: Tuple[str, ...] = ()
-    successful_patterns: Tuple[str, ...] = ()
-    reusable_contracts: Tuple[str, ...] = ()
-    discovered_constraints: Tuple[str, ...] = ()
-    deferred_items: Tuple[str, ...] = ()
-    future_decisions: Tuple[str, ...] = ()
-    ownership: Tuple[str, ...] = ()
-    readiness_conditions: Tuple[str, ...] = ()
-    selection_rules: Tuple[str, ...] = ()
-    dependency_check: Tuple[str, ...] = ()
+    achieved_objectives: tuple[str, ...] = ()
+    quality_status: tuple[str, ...] = ()
+    successful_patterns: tuple[str, ...] = ()
+    reusable_contracts: tuple[str, ...] = ()
+    discovered_constraints: tuple[str, ...] = ()
+    deferred_items: tuple[str, ...] = ()
+    future_decisions: tuple[str, ...] = ()
+    ownership: tuple[str, ...] = ()
+    readiness_conditions: tuple[str, ...] = ()
+    selection_rules: tuple[str, ...] = ()
+    dependency_check: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
     capability_transition_review_only: bool = True
