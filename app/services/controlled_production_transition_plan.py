@@ -1,7 +1,6 @@
 """Immutable plan for a controlled production transition."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -12,21 +11,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ControlledProductionTransitionPlan:
-    rollout_model: Tuple[str, ...] = ()
-    entry_criteria: Tuple[str, ...] = ()
-    exit_criteria: Tuple[str, ...] = ()
-    storage_migration: Tuple[str, ...] = ()
-    rollback_strategy: Tuple[str, ...] = ()
-    validation_checkpoints: Tuple[str, ...] = ()
-    identity_integration: Tuple[str, ...] = ()
-    permission_rollout: Tuple[str, ...] = ()
-    security_gates: Tuple[str, ...] = ()
-    monitoring: Tuple[str, ...] = ()
-    incident_handling: Tuple[str, ...] = ()
-    recovery_process: Tuple[str, ...] = ()
+    rollout_model: tuple[str, ...] = ()
+    entry_criteria: tuple[str, ...] = ()
+    exit_criteria: tuple[str, ...] = ()
+    storage_migration: tuple[str, ...] = ()
+    rollback_strategy: tuple[str, ...] = ()
+    validation_checkpoints: tuple[str, ...] = ()
+    identity_integration: tuple[str, ...] = ()
+    permission_rollout: tuple[str, ...] = ()
+    security_gates: tuple[str, ...] = ()
+    monitoring: tuple[str, ...] = ()
+    incident_handling: tuple[str, ...] = ()
+    recovery_process: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     transition_planning_only: bool = True
     production_execution: bool = False
     deployment: bool = False
