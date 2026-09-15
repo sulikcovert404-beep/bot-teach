@@ -3,7 +3,8 @@ from __future__ import annotations
 import hashlib,json,re,unicodedata
 from dataclasses import dataclass,field
 from enum import StrEnum
-from typing import Any,Iterable
+from typing import Any
+from collections.abc import Iterable
 from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
 from .runtime_execution_lifecycle import ExecutionLifecycle,LifecycleState
 from .runtime_execution_result import ExecutionResult,ExecutionResultStatus,validate_execution_result
