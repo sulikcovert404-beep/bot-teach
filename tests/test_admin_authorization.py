@@ -1,7 +1,11 @@
 from app.services.admin_authorization import (
-    Actor, AuthorizationContext, PrincipalType, Role, authorize,
+    Actor,
+    AuthorizationContext,
+    PrincipalType,
+    Role,
+    authorize,
 )
-from app.services.content_commands import SubmitProcessingCommand, PublishRequestContract
+from app.services.content_commands import PublishRequestContract, SubmitProcessingCommand
 
 
 def _submit() -> SubmitProcessingCommand:
