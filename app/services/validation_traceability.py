@@ -6,7 +6,7 @@ from enum import Enum
 import hashlib
 import json
 import re
-from typing import Iterable
+from collections.abc import Iterable
 import unicodedata
 
 
