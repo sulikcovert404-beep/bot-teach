@@ -1,7 +1,6 @@
 """Immutable execution scope for the third development wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,21 +12,21 @@ class Outcome(str, Enum):
 class ThirdDevelopmentWaveExecutionScopeDefinition:
     capability: str = ""
     objective: str = ""
-    inputs: Tuple[str, ...] = ()
-    outputs: Tuple[str, ...] = ()
-    expected_behavior: Tuple[str, ...] = ()
-    allowed_files: Tuple[str, ...] = ()
-    restricted_files: Tuple[str, ...] = ()
-    forbidden_changes: Tuple[str, ...] = ()
-    success_scenarios: Tuple[str, ...] = ()
-    error_scenarios: Tuple[str, ...] = ()
-    regression_scenarios: Tuple[str, ...] = ()
-    edge_cases: Tuple[str, ...] = ()
-    new_tests: Tuple[str, ...] = ()
-    regression_tests: Tuple[str, ...] = ()
-    out_of_scope: Tuple[str, ...] = ()
-    implementation_changes: Tuple[str, ...] = ()
-    preserved_behavior: Tuple[str, ...] = ()
+    inputs: tuple[str, ...] = ()
+    outputs: tuple[str, ...] = ()
+    expected_behavior: tuple[str, ...] = ()
+    allowed_files: tuple[str, ...] = ()
+    restricted_files: tuple[str, ...] = ()
+    forbidden_changes: tuple[str, ...] = ()
+    success_scenarios: tuple[str, ...] = ()
+    error_scenarios: tuple[str, ...] = ()
+    regression_scenarios: tuple[str, ...] = ()
+    edge_cases: tuple[str, ...] = ()
+    new_tests: tuple[str, ...] = ()
+    regression_tests: tuple[str, ...] = ()
+    out_of_scope: tuple[str, ...] = ()
+    implementation_changes: tuple[str, ...] = ()
+    preserved_behavior: tuple[str, ...] = ()
     trace_reference: str = ""
     scope_definition_only: bool = True
     implementation_permission: bool = False
