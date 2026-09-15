@@ -1,7 +1,6 @@
 """Immutable operational-readiness contract; it grants no runtime permission."""
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Tuple
 
 
 class OperationalOutcome(StrEnum):
@@ -13,22 +12,22 @@ class OperationalOutcome(StrEnum):
 
 @dataclass(frozen=True)
 class OperationalReadinessPackage:
-    activation_boundary: Tuple[str, ...] = ()
-    runtime_ownership: Tuple[str, ...] = ()
-    stop_conditions: Tuple[str, ...] = ()
-    identity_provider_path: Tuple[str, ...] = ()
-    credential_lifecycle: Tuple[str, ...] = ()
-    secret_boundaries: Tuple[str, ...] = ()
-    health_signals: Tuple[str, ...] = ()
-    audit_visibility: Tuple[str, ...] = ()
-    failure_detection: Tuple[str, ...] = ()
-    incident_ownership: Tuple[str, ...] = ()
-    recovery_flow: Tuple[str, ...] = ()
-    rollback_triggers: Tuple[str, ...] = ()
-    activation_sequence: Tuple[str, ...] = ()
+    activation_boundary: tuple[str, ...] = ()
+    runtime_ownership: tuple[str, ...] = ()
+    stop_conditions: tuple[str, ...] = ()
+    identity_provider_path: tuple[str, ...] = ()
+    credential_lifecycle: tuple[str, ...] = ()
+    secret_boundaries: tuple[str, ...] = ()
+    health_signals: tuple[str, ...] = ()
+    audit_visibility: tuple[str, ...] = ()
+    failure_detection: tuple[str, ...] = ()
+    incident_ownership: tuple[str, ...] = ()
+    recovery_flow: tuple[str, ...] = ()
+    rollback_triggers: tuple[str, ...] = ()
+    activation_sequence: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     operational_readiness_only: bool = True
     runtime_activation: bool = False
     deployment: bool = False
