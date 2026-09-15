@@ -47,4 +47,3 @@ class ThirdDevelopmentWaveValidation:
         if any(not value for value in required):
             return Outcome.FAILED
         return Outcome.VALIDATED_WITH_WARNINGS if self.warnings else Outcome.VALIDATED
-
