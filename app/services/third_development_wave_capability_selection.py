@@ -1,7 +1,6 @@
 """Immutable capability selection for the third development wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,21 +12,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ThirdDevelopmentWaveCapabilitySelection:
-    available_capabilities: Tuple[str, ...] = ()
-    business_technical_value: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
-    impact: Tuple[str, ...] = ()
-    complexity: Tuple[str, ...] = ()
-    risk: Tuple[str, ...] = ()
-    architectural_fit: Tuple[str, ...] = ()
-    existing_contracts: Tuple[str, ...] = ()
-    rag_dependency: Tuple[str, ...] = ()
-    implementation_isolation: Tuple[str, ...] = ()
+    available_capabilities: tuple[str, ...] = ()
+    business_technical_value: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
+    impact: tuple[str, ...] = ()
+    complexity: tuple[str, ...] = ()
+    risk: tuple[str, ...] = ()
+    architectural_fit: tuple[str, ...] = ()
+    existing_contracts: tuple[str, ...] = ()
+    rag_dependency: tuple[str, ...] = ()
+    implementation_isolation: tuple[str, ...] = ()
     selected_capability: str = ""
-    rejected_capabilities: Tuple[str, ...] = ()
+    rejected_capabilities: tuple[str, ...] = ()
     rationale: str = ""
-    prerequisites: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     capability_selection_only: bool = True
     implementation_execution: bool = False
