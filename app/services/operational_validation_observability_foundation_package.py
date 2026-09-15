@@ -1,7 +1,6 @@
 """Pure, advisory foundation for validation and observability semantics."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,21 +13,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class OperationalValidationObservabilityFoundationPackage:
-    validation_layers: Tuple[str, ...] = ()
-    validation_ownership: Tuple[str, ...] = ()
-    validation_criteria: Tuple[str, ...] = ()
-    metric_semantics: Tuple[str, ...] = ()
-    signal_categories: Tuple[str, ...] = ()
-    event_classification: Tuple[str, ...] = ()
-    health_states: Tuple[str, ...] = ()
-    degradation_semantics: Tuple[str, ...] = ()
-    warning_model: Tuple[str, ...] = ()
-    failure_classification: Tuple[str, ...] = ()
-    finding_lifecycle: Tuple[str, ...] = ()
-    improvement_tracking: Tuple[str, ...] = ()
-    review_cycle: Tuple[str, ...] = ()
-    escalation_model: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
+    validation_layers: tuple[str, ...] = ()
+    validation_ownership: tuple[str, ...] = ()
+    validation_criteria: tuple[str, ...] = ()
+    metric_semantics: tuple[str, ...] = ()
+    signal_categories: tuple[str, ...] = ()
+    event_classification: tuple[str, ...] = ()
+    health_states: tuple[str, ...] = ()
+    degradation_semantics: tuple[str, ...] = ()
+    warning_model: tuple[str, ...] = ()
+    failure_classification: tuple[str, ...] = ()
+    finding_lifecycle: tuple[str, ...] = ()
+    improvement_tracking: tuple[str, ...] = ()
+    review_cycle: tuple[str, ...] = ()
+    escalation_model: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     validation_design_only: bool = True
     observability_design_only: bool = True
