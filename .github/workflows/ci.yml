@@ -108,6 +108,12 @@ jobs:
       image: mcr.microsoft.com/playwright:v1.48.2-noble
     steps:
       - uses: actions/checkout@v4
+      - name: Ensure npm is available in pinned runner
+        run: |
+          if ! command -v npm >/dev/null 2>&1; then
+            apt-get update
+            apt-get install -y --no-install-recommends npm
+          fi
       - name: Install Node dependencies (frozen)
         run: npm ci
       - name: Start disposable fixture server
