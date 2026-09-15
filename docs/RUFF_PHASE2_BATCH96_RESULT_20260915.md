@@ -13,6 +13,7 @@ Validation:
 - Scope diff: import/annotation modernization only; closure contract fields, defaults, ordering, validation, serialization, runtime and introspection unchanged
 - Secret scan: PASS
 
-Commit: pending
+Commit: bbcb1ce
 Production: NONE
 Recovery: SAFE HOLD
+
