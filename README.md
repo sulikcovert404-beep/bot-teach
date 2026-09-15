@@ -22,6 +22,10 @@ Telegram Mini App: `GET /mini-app/` (در محیط Telegram با `initData` مع
 
 Platform API: `GET /api/v1/platform`
 
+برای اجرای Compose، علاوه بر مقادیر بالا باید `APP_RUNTIME_PASSWORD` و
+`EXPECTED_MIGRATION_HEAD` نیز در `.env` تنظیم شوند. برای qualification فعلی، مقدار
+صریح head برابر `20260912_0021` است؛ از `alembic upgrade head` استفاده نکنید.
+
 مسیرهای اصلی فعلی:
 
 - `POST /api/v1/auth/telegram` — اعتبارسنجی Telegram Web App و صدور JWT

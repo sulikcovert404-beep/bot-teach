@@ -3,11 +3,15 @@ param(
     [string]$BaseUrl = "http://localhost:8000",
     [int]$Attempts = 30,
     [int]$DelaySeconds = 2,
-    [string]$ExpectedMigrationHead = $(if ($env:EXPECTED_MIGRATION_HEAD) { $env:EXPECTED_MIGRATION_HEAD } else { "20260909_0015" }),
+    [string]$ExpectedMigrationHead = $(if ($env:EXPECTED_MIGRATION_HEAD) { $env:EXPECTED_MIGRATION_HEAD } else { "" }),
     [switch]$UseExistingRuntime
 )
 
 $ErrorActionPreference = "Stop"
+
+if ([string]::IsNullOrWhiteSpace($ExpectedMigrationHead)) {
+    throw "EXPECTED_MIGRATION_HEAD must be provided; refusing to use a stale fallback."
+}
 
 Write-Host "Starting staging services..."
 if (-not $UseExistingRuntime) {

@@ -1,5 +1,7 @@
 # Adaptive Lesson Pack Hardening Report
 
+> **Historical qualification record:** migration revisions and staging references in this document describe the 2026-09-09/10 qualification wave. They are not the current development target; current CI qualification uses explicit revision `20260912_0021`.
+
 ## Scope
 Controlled hardening after Commander approval. No migration, staging deployment, production, webhook, or external Telegram changes.
 
