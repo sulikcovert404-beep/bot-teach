@@ -1,4 +1,4 @@
-from app.services.content_integration_closure_review import Outcome, ContentIntegrationClosureReview
+from app.services.content_integration_closure_review import ContentIntegrationClosureReview, Outcome
 
 
 def make(**overrides):
