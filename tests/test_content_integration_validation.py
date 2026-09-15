@@ -1,4 +1,4 @@
-from app.services.content_integration_validation import Outcome, ContentIntegrationValidation
+from app.services.content_integration_validation import ContentIntegrationValidation, Outcome
 
 
 def make(**overrides):
