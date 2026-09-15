@@ -1,4 +1,4 @@
-from app.services.content_integration_design_package import Outcome, ContentIntegrationDesignPackage
+from app.services.content_integration_design_package import ContentIntegrationDesignPackage, Outcome
 
 
 def make(**overrides):
