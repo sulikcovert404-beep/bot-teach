@@ -1,5 +1,7 @@
 import pytest
+
 from app.security.admin_scope import AdminScope, authorize_scope, require_scope
+
 
 def test_school_admin_is_limited_to_own_tenant():
     p=AdminScope("a","SCHOOL_ADMIN","school-a")
