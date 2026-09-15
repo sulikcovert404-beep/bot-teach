@@ -1,4 +1,4 @@
-from app.services.authorization_wiring_validation import Outcome, AuthorizationWiringValidation
+from app.services.authorization_wiring_validation import AuthorizationWiringValidation, Outcome
 
 
 def make(**overrides):
