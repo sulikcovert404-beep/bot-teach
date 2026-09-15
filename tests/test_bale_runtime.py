@@ -1,6 +1,8 @@
 import pytest
+
 from app.adapters.bale import BaleAdapter
 from app.core.channels import ChannelResponse
+
 
 @pytest.mark.asyncio
 async def test_bale_runtime_event_reaches_core_handler():
