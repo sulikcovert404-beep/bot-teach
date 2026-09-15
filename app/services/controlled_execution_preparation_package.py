@@ -1,7 +1,6 @@
 """Immutable preparation package for a controlled execution decision."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,20 +12,20 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ControlledExecutionPreparationPackage:
-    action_boundaries: Tuple[str, ...] = ()
-    required_artifacts: Tuple[str, ...] = ()
-    evidence_requirements: Tuple[str, ...] = ()
-    decision_ownership: Tuple[str, ...] = ()
-    approval_dependencies: Tuple[str, ...] = ()
-    required_state: Tuple[str, ...] = ()
-    prerequisites: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
-    rollback_readiness: Tuple[str, ...] = ()
-    failure_handling: Tuple[str, ...] = ()
-    recovery_verification: Tuple[str, ...] = ()
+    action_boundaries: tuple[str, ...] = ()
+    required_artifacts: tuple[str, ...] = ()
+    evidence_requirements: tuple[str, ...] = ()
+    decision_ownership: tuple[str, ...] = ()
+    approval_dependencies: tuple[str, ...] = ()
+    required_state: tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
+    rollback_readiness: tuple[str, ...] = ()
+    failure_handling: tuple[str, ...] = ()
+    recovery_verification: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     controlled_execution_preparation_only: bool = True
     execution_permission: bool = False
     production_execution: bool = False
