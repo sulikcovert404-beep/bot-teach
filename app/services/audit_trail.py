@@ -1,10 +1,12 @@
 """Database-free typed audit contract for admin workflow results."""
 from __future__ import annotations
-from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+
 import json
 from collections.abc import Callable
+from dataclasses import asdict, dataclass
+from datetime import datetime, timezone
 from typing import Any, Protocol
+
 
 @dataclass(frozen=True)
 class AuditEvent:
