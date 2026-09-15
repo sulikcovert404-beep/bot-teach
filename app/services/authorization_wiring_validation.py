@@ -1,7 +1,6 @@
 """Immutable validation record for authorization wiring foundation."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,25 +12,25 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class AuthorizationWiringValidation:
-    allowed_path: Tuple[str, ...] = ()
-    denied_path: Tuple[str, ...] = ()
-    reason_consistency: Tuple[str, ...] = ()
-    command_trace: Tuple[str, ...] = ()
-    actor_trace: Tuple[str, ...] = ()
-    policy_version: Tuple[str, ...] = ()
-    deterministic_output: Tuple[str, ...] = ()
-    existing_policy: Tuple[str, ...] = ()
-    content_integration: Tuple[str, ...] = ()
-    regression: Tuple[str, ...] = ()
-    ownership_boundary: Tuple[str, ...] = ()
-    access_enforcement: Tuple[str, ...] = ()
-    failure_handling: Tuple[str, ...] = ()
-    identity_provider_gap: Tuple[str, ...] = ()
-    credential_gap: Tuple[str, ...] = ()
-    production_permission_gap: Tuple[str, ...] = ()
+    allowed_path: tuple[str, ...] = ()
+    denied_path: tuple[str, ...] = ()
+    reason_consistency: tuple[str, ...] = ()
+    command_trace: tuple[str, ...] = ()
+    actor_trace: tuple[str, ...] = ()
+    policy_version: tuple[str, ...] = ()
+    deterministic_output: tuple[str, ...] = ()
+    existing_policy: tuple[str, ...] = ()
+    content_integration: tuple[str, ...] = ()
+    regression: tuple[str, ...] = ()
+    ownership_boundary: tuple[str, ...] = ()
+    access_enforcement: tuple[str, ...] = ()
+    failure_handling: tuple[str, ...] = ()
+    identity_provider_gap: tuple[str, ...] = ()
+    credential_gap: tuple[str, ...] = ()
+    production_permission_gap: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     validation_only: bool = True
     next_wave_execution: bool = False
     identity_provider_change: bool = False
