@@ -1,7 +1,6 @@
 """Immutable authorization review for production enablement implementation."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,23 +12,23 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductionEnablementImplementationAuthorizationReview:
-    storage_design: Tuple[str, ...] = ()
-    migration_design: Tuple[str, ...] = ()
-    authorization_design: Tuple[str, ...] = ()
-    activation_design: Tuple[str, ...] = ()
-    data_risks: Tuple[str, ...] = ()
-    security_risks: Tuple[str, ...] = ()
-    operational_risks: Tuple[str, ...] = ()
-    rollback_risks: Tuple[str, ...] = ()
-    allowed_actions: Tuple[str, ...] = ()
-    forbidden_actions: Tuple[str, ...] = ()
-    phase_separation: Tuple[str, ...] = ()
+    storage_design: tuple[str, ...] = ()
+    migration_design: tuple[str, ...] = ()
+    authorization_design: tuple[str, ...] = ()
+    activation_design: tuple[str, ...] = ()
+    data_risks: tuple[str, ...] = ()
+    security_risks: tuple[str, ...] = ()
+    operational_risks: tuple[str, ...] = ()
+    rollback_risks: tuple[str, ...] = ()
+    allowed_actions: tuple[str, ...] = ()
+    forbidden_actions: tuple[str, ...] = ()
+    phase_separation: tuple[str, ...] = ()
     execution_ownership: str = ""
     approval_ownership: str = ""
     incident_ownership: str = ""
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     production_enablement_authorization_review_only: bool = True
     implementation_permission: bool = False
     migration_execution: bool = False
