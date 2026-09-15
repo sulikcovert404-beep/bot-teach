@@ -1,7 +1,6 @@
 """Immutable product-delivery planning contract; it grants no execution authority."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,23 +13,23 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ProductDeliveryFoundationPackage:
-    capability_inventory: Tuple[str, ...] = ()
-    feature_boundaries: Tuple[str, ...] = ()
-    business_objectives: Tuple[str, ...] = ()
-    success_criteria: Tuple[str, ...] = ()
-    delivery_streams: Tuple[str, ...] = ()
-    component_ownership: Tuple[str, ...] = ()
-    integration_assumptions: Tuple[str, ...] = ()
-    implementation_roadmap: Tuple[str, ...] = ()
-    dependency_ordering: Tuple[str, ...] = ()
-    milestone_planning: Tuple[str, ...] = ()
-    technical_risks: Tuple[str, ...] = ()
-    testing_strategy: Tuple[str, ...] = ()
-    acceptance_criteria: Tuple[str, ...] = ()
-    review_gates: Tuple[str, ...] = ()
-    constraints: Tuple[str, ...] = ()
-    next_execution_candidates: Tuple[str, ...] = ()
-    warnings: Tuple[str, ...] = ()
+    capability_inventory: tuple[str, ...] = ()
+    feature_boundaries: tuple[str, ...] = ()
+    business_objectives: tuple[str, ...] = ()
+    success_criteria: tuple[str, ...] = ()
+    delivery_streams: tuple[str, ...] = ()
+    component_ownership: tuple[str, ...] = ()
+    integration_assumptions: tuple[str, ...] = ()
+    implementation_roadmap: tuple[str, ...] = ()
+    dependency_ordering: tuple[str, ...] = ()
+    milestone_planning: tuple[str, ...] = ()
+    technical_risks: tuple[str, ...] = ()
+    testing_strategy: tuple[str, ...] = ()
+    acceptance_criteria: tuple[str, ...] = ()
+    review_gates: tuple[str, ...] = ()
+    constraints: tuple[str, ...] = ()
+    next_execution_candidates: tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     trace_reference: str = ""
     product_delivery_planning_only: bool = True
     runtime_execution: bool = False
