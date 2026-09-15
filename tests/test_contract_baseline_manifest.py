@@ -1,4 +1,8 @@
-from app.services.contract_baseline_manifest import ContractBaselineManifest, BaselineOutcome, evaluate_baseline
+from app.services.contract_baseline_manifest import (
+    BaselineOutcome,
+    ContractBaselineManifest,
+    evaluate_baseline,
+)
 from app.services.runtime_admission_bundle import ReferenceToken
 
 
