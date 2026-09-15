@@ -1,7 +1,6 @@
 """Immutable selection record for the first development capability."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -14,13 +13,13 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class FirstDevelopmentWaveScopeSelection:
-    candidate_capabilities: Tuple[str, ...] = ()
+    candidate_capabilities: tuple[str, ...] = ()
     selected_capability: str = ""
-    priority_scoring: Tuple[str, ...] = ()
-    dependency_check: Tuple[str, ...] = ()
-    implementation_boundary: Tuple[str, ...] = ()
-    acceptance_criteria: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
+    priority_scoring: tuple[str, ...] = ()
+    dependency_check: tuple[str, ...] = ()
+    implementation_boundary: tuple[str, ...] = ()
+    acceptance_criteria: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     trace_reference: str = ""
     scope_selection_only: bool = True
     implementation_execution: bool = False
