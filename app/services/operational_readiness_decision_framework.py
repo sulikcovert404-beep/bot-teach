@@ -1,7 +1,7 @@
 """Readiness decision design; decisions never generate permission or execute actions."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Mapping
+from collections.abc import Mapping
 
 class DecisionOutcome(str, Enum):
     DECISION_FRAMEWORK_DEFINED="DECISION_FRAMEWORK_DEFINED"; DECISION_FRAMEWORK_DEFINED_WITH_WARNINGS="DECISION_FRAMEWORK_DEFINED_WITH_WARNINGS"; DECISION_FRAMEWORK_INCOMPLETE="DECISION_FRAMEWORK_INCOMPLETE"; DECISION_FRAMEWORK_BLOCKED="DECISION_FRAMEWORK_BLOCKED"; UNKNOWN="UNKNOWN"
