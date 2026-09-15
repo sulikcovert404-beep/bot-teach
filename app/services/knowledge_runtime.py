@@ -6,8 +6,8 @@ schema, and applies access scope before ranking candidates.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import dataclass
-from typing import Iterable
 
 from app.services.persian_text import normalize_persian_text
 
