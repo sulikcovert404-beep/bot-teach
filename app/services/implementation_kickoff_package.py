@@ -1,7 +1,6 @@
 """Immutable kickoff record for the first implementation wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -15,19 +14,19 @@ class Outcome(str, Enum):
 @dataclass(frozen=True)
 class ImplementationKickoffPackage:
     wave_objective: str = ""
-    scope_boundary: Tuple[str, ...] = ()
-    expected_deliverables: Tuple[str, ...] = ()
-    work_items: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
-    ownership: Tuple[str, ...] = ()
-    prerequisites: Tuple[str, ...] = ()
-    required_reviews: Tuple[str, ...] = ()
-    validation_checkpoints: Tuple[str, ...] = ()
-    done_criteria: Tuple[str, ...] = ()
-    quality_gates: Tuple[str, ...] = ()
-    handoff_conditions: Tuple[str, ...] = ()
+    scope_boundary: tuple[str, ...] = ()
+    expected_deliverables: tuple[str, ...] = ()
+    work_items: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
+    ownership: tuple[str, ...] = ()
+    prerequisites: tuple[str, ...] = ()
+    required_reviews: tuple[str, ...] = ()
+    validation_checkpoints: tuple[str, ...] = ()
+    done_criteria: tuple[str, ...] = ()
+    quality_gates: tuple[str, ...] = ()
+    handoff_conditions: tuple[str, ...] = ()
     decision: str = ""
-    blockers: Tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     next_action: str = ""
     trace_reference: str = ""
     implementation_kickoff_only: bool = True
