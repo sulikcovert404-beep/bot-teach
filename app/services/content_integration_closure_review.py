@@ -1,7 +1,6 @@
 """Immutable closure record for the content integration phase."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -15,9 +14,9 @@ class Outcome(str, Enum):
 class ContentIntegrationClosureReview:
     implementation_outcome: str = ""
     validation_result: str = ""
-    warning_register: Tuple[str, ...] = ()
-    lessons_learned: Tuple[str, ...] = ()
-    future_entry_criteria: Tuple[str, ...] = ()
+    warning_register: tuple[str, ...] = ()
+    lessons_learned: tuple[str, ...] = ()
+    future_entry_criteria: tuple[str, ...] = ()
     trace_reference: str = ""
     closure_review_only: bool = True
     new_feature_execution: bool = False
