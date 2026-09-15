@@ -1,7 +1,6 @@
 """Immutable readiness authorization assessment; execution remains disabled."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,22 +12,22 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ControlledExecutionReadinessAuthorization:
-    allowed_execution_scope: Tuple[str, ...] = ()
-    forbidden_actions: Tuple[str, ...] = ()
-    rollback_authority: Tuple[str, ...] = ()
-    required_environments: Tuple[str, ...] = ()
-    configuration_readiness: Tuple[str, ...] = ()
-    dependency_availability: Tuple[str, ...] = ()
-    credential_requirements: Tuple[str, ...] = ()
-    permission_ownership: Tuple[str, ...] = ()
-    approval_chain: Tuple[str, ...] = ()
-    monitoring_activation: Tuple[str, ...] = ()
-    incident_path: Tuple[str, ...] = ()
-    recovery_ownership: Tuple[str, ...] = ()
+    allowed_execution_scope: tuple[str, ...] = ()
+    forbidden_actions: tuple[str, ...] = ()
+    rollback_authority: tuple[str, ...] = ()
+    required_environments: tuple[str, ...] = ()
+    configuration_readiness: tuple[str, ...] = ()
+    dependency_availability: tuple[str, ...] = ()
+    credential_requirements: tuple[str, ...] = ()
+    permission_ownership: tuple[str, ...] = ()
+    approval_chain: tuple[str, ...] = ()
+    monitoring_activation: tuple[str, ...] = ()
+    incident_path: tuple[str, ...] = ()
+    recovery_ownership: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    conditions: Tuple[str, ...] = ()
-    blockers: Tuple[str, ...] = ()
+    conditions: tuple[str, ...] = ()
+    blockers: tuple[str, ...] = ()
     execution_readiness_review_only: bool = True
     execution_permission: bool = False
     production_execution: bool = False
