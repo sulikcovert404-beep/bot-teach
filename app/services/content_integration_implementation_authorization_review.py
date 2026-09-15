@@ -1,7 +1,6 @@
 """Pure authorization assessment for content integration implementation."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -13,21 +12,21 @@ class Outcome(str, Enum):
 
 @dataclass(frozen=True)
 class ContentIntegrationImplementationAuthorizationReview:
-    persistence_design: Tuple[str, ...] = ()
-    authorization_design: Tuple[str, ...] = ()
-    contracts: Tuple[str, ...] = ()
-    dependencies: Tuple[str, ...] = ()
-    required_changes: Tuple[str, ...] = ()
-    migration_requirements: Tuple[str, ...] = ()
-    data_risks: Tuple[str, ...] = ()
-    security_risks: Tuple[str, ...] = ()
-    compatibility_risks: Tuple[str, ...] = ()
-    allowed_changes: Tuple[str, ...] = ()
-    forbidden_changes: Tuple[str, ...] = ()
-    rollback_requirements: Tuple[str, ...] = ()
+    persistence_design: tuple[str, ...] = ()
+    authorization_design: tuple[str, ...] = ()
+    contracts: tuple[str, ...] = ()
+    dependencies: tuple[str, ...] = ()
+    required_changes: tuple[str, ...] = ()
+    migration_requirements: tuple[str, ...] = ()
+    data_risks: tuple[str, ...] = ()
+    security_risks: tuple[str, ...] = ()
+    compatibility_risks: tuple[str, ...] = ()
+    allowed_changes: tuple[str, ...] = ()
+    forbidden_changes: tuple[str, ...] = ()
+    rollback_requirements: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     integration_authorization_review_only: bool = True
     implementation_permission: bool = False
     database_change: bool = False
