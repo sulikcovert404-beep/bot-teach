@@ -1,6 +1,15 @@
 import unicodedata
+
 import pytest
-from app.services.change_impact import ChangeImpactRecord, ChangeType, ImpactOutcome, ImpactReference, evaluate_impact
+
+from app.services.change_impact import (
+    ChangeImpactRecord,
+    ChangeType,
+    ImpactOutcome,
+    ImpactReference,
+    evaluate_impact,
+)
+
 
 def ref(i="x"):
     return ImpactReference(i, "contract", "sha256:" + "a" * 64, "v1")
