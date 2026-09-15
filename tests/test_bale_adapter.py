@@ -1,5 +1,7 @@
 import pytest
+
 from app.adapters.bale import BaleAdapter
+
 
 @pytest.mark.asyncio
 async def test_bale_adapter_builds_canonical_command():
