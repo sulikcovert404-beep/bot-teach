@@ -1,7 +1,6 @@
 """Immutable closure record for the third development wave."""
 from dataclasses import dataclass
 from enum import Enum
-from typing import Tuple
 
 
 class Outcome(str, Enum):
@@ -15,9 +14,9 @@ class Outcome(str, Enum):
 class ThirdDevelopmentWaveClosureReview:
     implementation_outcome: str = ""
     validation_result: str = ""
-    lessons_learned: Tuple[str, ...] = ()
-    carryover_risks: Tuple[str, ...] = ()
-    next_capability_entry_criteria: Tuple[str, ...] = ()
+    lessons_learned: tuple[str, ...] = ()
+    carryover_risks: tuple[str, ...] = ()
+    next_capability_entry_criteria: tuple[str, ...] = ()
     trace_reference: str = ""
     closure_review_only: bool = True
     new_feature_execution: bool = False
