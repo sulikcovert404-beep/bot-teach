@@ -1,7 +1,6 @@
 """Controlled activation execution plan; planning only, with hard safety guards."""
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Tuple
 
 
 class ActivationPlanOutcome(StrEnum):
@@ -13,22 +12,22 @@ class ActivationPlanOutcome(StrEnum):
 
 @dataclass(frozen=True)
 class ActivationExecutionPlan:
-    activation_sequence: Tuple[str, ...] = ()
-    dependency_order: Tuple[str, ...] = ()
-    checkpoints: Tuple[str, ...] = ()
-    allowed_actions: Tuple[str, ...] = ()
-    forbidden_actions: Tuple[str, ...] = ()
-    stop_conditions: Tuple[str, ...] = ()
-    migration_steps: Tuple[str, ...] = ()
-    validation_checkpoints: Tuple[str, ...] = ()
-    rollback_points: Tuple[str, ...] = ()
-    identity_rollout: Tuple[str, ...] = ()
-    credential_handling: Tuple[str, ...] = ()
-    security_checks: Tuple[str, ...] = ()
-    execution_record_template: Tuple[str, ...] = ()
+    activation_sequence: tuple[str, ...] = ()
+    dependency_order: tuple[str, ...] = ()
+    checkpoints: tuple[str, ...] = ()
+    allowed_actions: tuple[str, ...] = ()
+    forbidden_actions: tuple[str, ...] = ()
+    stop_conditions: tuple[str, ...] = ()
+    migration_steps: tuple[str, ...] = ()
+    validation_checkpoints: tuple[str, ...] = ()
+    rollback_points: tuple[str, ...] = ()
+    identity_rollout: tuple[str, ...] = ()
+    credential_handling: tuple[str, ...] = ()
+    security_checks: tuple[str, ...] = ()
+    execution_record_template: tuple[str, ...] = ()
     decision: str = ""
     trace_reference: str = ""
-    warnings: Tuple[str, ...] = ()
+    warnings: tuple[str, ...] = ()
     activation_execution_plan_only: bool = True
     runtime_activation: bool = False
     production_execution: bool = False
