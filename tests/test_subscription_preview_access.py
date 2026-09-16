@@ -1,5 +1,10 @@
 from datetime import UTC, datetime, timedelta
-from app.domain.entitlements.foundation import ClassroomContentAccess, resolve_classroom_content_access
+
+from app.domain.entitlements.foundation import (
+    ClassroomContentAccess,
+    resolve_classroom_content_access,
+)
+
 
 def test_free_member_gets_preview_and_pro_gets_full() -> None:
     assert resolve_classroom_content_access(is_member=True, plan="STUDENT_FREE") == ClassroomContentAccess.PREVIEW
