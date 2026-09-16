@@ -3,7 +3,14 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.base import Base
-from app.db.models import Classroom, ClassMembership, SchoolTenant, StudentProfile, TeacherProfile, User
+from app.db.models import (
+    ClassMembership,
+    Classroom,
+    SchoolTenant,
+    StudentProfile,
+    TeacherProfile,
+    User,
+)
 
 
 @pytest.mark.asyncio
