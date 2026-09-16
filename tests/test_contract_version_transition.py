@@ -1,6 +1,9 @@
 import unicodedata
+
 import pytest
+
 from app.services.contract_version_transition import *
+
 
 def test_record_is_immutable_and_digest_bound():
     r = ContractVersionRecord("c", "rag", "1", "2", "chg", CompatibilityClass.COMPATIBLE, ("رابط",), "trace")
