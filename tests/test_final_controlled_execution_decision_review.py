@@ -1,4 +1,7 @@
-from app.services.final_controlled_execution_decision_review import Outcome, FinalControlledExecutionDecisionReview
+from app.services.final_controlled_execution_decision_review import (
+    FinalControlledExecutionDecisionReview,
+    Outcome,
+)
 
 
 def make(**overrides):
