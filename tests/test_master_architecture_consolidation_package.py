@@ -1,4 +1,7 @@
-from app.services.master_architecture_consolidation_package import MasterArchitectureConsolidationPackage, Outcome
+from app.services.master_architecture_consolidation_package import (
+    MasterArchitectureConsolidationPackage,
+    Outcome,
+)
 
 
 def make(**kw):
