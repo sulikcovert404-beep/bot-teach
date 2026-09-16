@@ -1,5 +1,6 @@
-from app.services.lesson_pack import LessonPackRequest, LessonPackService, SchoolStage
 import pytest
+
+from app.services.lesson_pack import LessonPackRequest, LessonPackService, SchoolStage
 
 
 def test_profiles_change_pack_style_and_content_hash() -> None:
