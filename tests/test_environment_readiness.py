@@ -1,4 +1,8 @@
-from app.services.environment_readiness import CapabilityStatus, EnvironmentCapability, EnvironmentReadinessReport
+from app.services.environment_readiness import (
+    CapabilityStatus,
+    EnvironmentCapability,
+    EnvironmentReadinessReport,
+)
 
 
 def cap(name="database", status=CapabilityStatus.AVAILABLE, digest="sha256:proof"):
