@@ -1,5 +1,6 @@
 from app.services.governance_handoff import *
-from app.services.runtime_admission_bundle import ReferenceToken,ReferenceStatus
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
 
 def r(i='x',s=ReferenceStatus.VALID): return ReferenceToken(i,'sha256:'+i,s)
 def b(**kw):
