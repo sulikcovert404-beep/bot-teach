@@ -1,5 +1,7 @@
-from app.services.failure_matrix import *
 import unicodedata
+
+from app.services.failure_matrix import *
+
 
 def ctx(source, category, reason="ERR_TEST"):
     return FailureContext(source,"runtime","publish",category,reason)
