@@ -1,4 +1,7 @@
-from app.services.first_development_wave_implementation_authorization_review import FirstDevelopmentWaveImplementationAuthorizationReview, Outcome
+from app.services.first_development_wave_implementation_authorization_review import (
+    FirstDevelopmentWaveImplementationAuthorizationReview,
+    Outcome,
+)
 
 
 def make(**kw):
