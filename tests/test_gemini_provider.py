@@ -3,8 +3,8 @@ from typing import Self
 import pytest
 
 from app.services.ai_gateway import (
-    AIRequest,
     AIProviderEvent,
+    AIRequest,
     GeminiProvider,
     ProviderAuthError,
     ProviderQuotaError,
