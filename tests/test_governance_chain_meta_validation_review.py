@@ -1,5 +1,7 @@
 from app.services.governance_chain_meta_validation_review import *
-from app.services.runtime_admission_bundle import ReferenceToken,ReferenceStatus
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
+
 def ref(i,s=ReferenceStatus.VALID): return ReferenceToken(i,"d-"+i,s)
 def obj(): return StagingActivationGovernanceReleaseReadinessGovernanceChainMetaValidationRecord("r",ref("f"),ref("m"),ref("c"),ref("a"),(),{"deps":"closed","execution":False},trace_reference=ref("t"))
 def test_accept(): assert evaluate_snapshot(obj()) is ChainValidationOutcome.CHAIN_VALIDATED
