@@ -1,5 +1,7 @@
 from app.services.governance_consistency_audit import *
-from app.services.runtime_admission_bundle import ReferenceToken,ReferenceStatus
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
+
 def r(i='x',s=ReferenceStatus.VALID): return ReferenceToken(i,'sha256:'+i,s)
 def a(**kw):
  d=dict(audit_id='a',baseline_reference=r('b'),closure_reference=r('c'),handoff_reference=r('h'),readiness_reference=r('r'),change_control_reference=r('cc'),consistency_findings=(),trace_reference=r('t')); d.update(kw); return GovernanceConsistencyAudit(**d)
