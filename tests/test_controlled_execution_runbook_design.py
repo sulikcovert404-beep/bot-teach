@@ -1,4 +1,7 @@
-from app.services.controlled_execution_runbook_design import Outcome, ControlledExecutionRunbookDesign
+from app.services.controlled_execution_runbook_design import (
+    ControlledExecutionRunbookDesign,
+    Outcome,
+)
 
 
 def make(**overrides):
