@@ -1,4 +1,7 @@
-from app.services.development_roadmap_rebalancing_review import DevelopmentRoadmapRebalancingReview, Outcome
+from app.services.development_roadmap_rebalancing_review import (
+    DevelopmentRoadmapRebalancingReview,
+    Outcome,
+)
 
 
 def make(**kw):
