@@ -1,5 +1,10 @@
 import pytest
-from app.services.governance_freeze_decision import GovernanceFreezeDecision, FreezeOutcome, evaluate_freeze
+
+from app.services.governance_freeze_decision import (
+    FreezeOutcome,
+    GovernanceFreezeDecision,
+    evaluate_freeze,
+)
 from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 
 
