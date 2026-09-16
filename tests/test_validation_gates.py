@@ -1,4 +1,10 @@
-from app.services.validation_gates import GateReasonCode, GateResult, GateStatus, ValidationReport, run_validation_gates
+from app.services.validation_gates import (
+    GateReasonCode,
+    GateResult,
+    GateStatus,
+    ValidationReport,
+    run_validation_gates,
+)
 
 
 def gate(name, status=GateStatus.PASSED, code=GateReasonCode.OK, message="ok"):
