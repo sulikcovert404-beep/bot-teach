@@ -1,4 +1,7 @@
-from app.services.controlled_production_transition_plan import Outcome, ControlledProductionTransitionPlan
+from app.services.controlled_production_transition_plan import (
+    ControlledProductionTransitionPlan,
+    Outcome,
+)
 
 
 def make(**overrides):
