@@ -1,4 +1,11 @@
-from app.services.job_lifecycle import JobStatus, InvalidJobTransition, JobRequest, JobResult, request_cancel, validate_transition
+from app.services.job_lifecycle import (
+    InvalidJobTransition,
+    JobRequest,
+    JobResult,
+    JobStatus,
+    request_cancel,
+    validate_transition,
+)
 
 
 def test_valid_transitions():
