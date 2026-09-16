@@ -1,11 +1,11 @@
-from fastapi import HTTPException
 import pytest
+from fastapi import HTTPException
+from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
+from app.main import app
 from app.security.dependencies import require_roles
 from app.security.tokens import create_access_token
-from app.main import app
-from fastapi.testclient import TestClient
 
 
 def _credentials(token: str):
