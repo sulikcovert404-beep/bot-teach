@@ -1,4 +1,7 @@
-from app.services.controlled_execution_preparation_package import Outcome, ControlledExecutionPreparationPackage
+from app.services.controlled_execution_preparation_package import (
+    ControlledExecutionPreparationPackage,
+    Outcome,
+)
 
 
 def make(**overrides):
