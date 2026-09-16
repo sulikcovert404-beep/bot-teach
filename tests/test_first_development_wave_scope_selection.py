@@ -1,4 +1,7 @@
-from app.services.first_development_wave_scope_selection import FirstDevelopmentWaveScopeSelection, Outcome
+from app.services.first_development_wave_scope_selection import (
+    FirstDevelopmentWaveScopeSelection,
+    Outcome,
+)
 
 
 def make(**kw):
