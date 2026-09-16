@@ -1,13 +1,15 @@
 from pathlib import Path
+
 import pytest
+import sqlalchemy as sa
+from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
-from alembic import command
-import sqlalchemy as sa
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.db.base import Base
-from app.db.models import SchoolTenant, SchoolAdminMembership, User
+from app.db.models import SchoolAdminMembership, SchoolTenant, User
+
 
 @pytest.mark.asyncio
 async def test_migration_roundtrip_0019_0018_0019_and_post_smoke():
