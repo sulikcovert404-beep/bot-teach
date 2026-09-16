@@ -1,4 +1,7 @@
-from app.services.controlled_execution_readiness_authorization import Outcome, ControlledExecutionReadinessAuthorization
+from app.services.controlled_execution_readiness_authorization import (
+    ControlledExecutionReadinessAuthorization,
+    Outcome,
+)
 
 
 def make(**overrides):
