@@ -1,5 +1,6 @@
 from app.services.publication_access import PublicationContext, can_access, can_publish
 
+
 def test_publish_requires_owner_and_same_tenant() -> None:
     assert can_publish(PublicationContext(1, 1, "a", "a"))
     assert not can_publish(PublicationContext(2, 1, "b", "a"))
