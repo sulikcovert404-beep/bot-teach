@@ -1,6 +1,12 @@
 from dataclasses import dataclass
+
 from app.services.contract_conformance import *
-from app.services.failure_matrix import FailureCategory, FailureContext, FailureSource, resolve_failure
+from app.services.failure_matrix import (
+    FailureCategory,
+    FailureContext,
+    FailureSource,
+    resolve_failure,
+)
 
 
 def test_registry_and_vectors_are_closed_and_deterministic():
