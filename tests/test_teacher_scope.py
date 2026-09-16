@@ -1,5 +1,7 @@
 import pytest
+
 from app.security.teacher_scope import TeacherClassScope, can_access_class, require_class
+
 
 def test_teacher_can_access_assigned_class_only():
     s=TeacherClassScope("t1","school-a",frozenset({1,2}))
