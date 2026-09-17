@@ -1,16 +1,13 @@
 import time
 from datetime import UTC, datetime
-from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel
+from fastapi import APIRouter, Depends
 from redis.asyncio import Redis
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
-from app.db.base import build_session_factory
 from app.security.dependencies import require_roles
 
 router = APIRouter(prefix="/admin/observability", tags=["production-observability-reliability"])

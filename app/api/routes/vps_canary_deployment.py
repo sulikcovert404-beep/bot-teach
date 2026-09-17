@@ -1,11 +1,7 @@
-import asyncio
-from datetime import UTC, datetime
-from typing import Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 
 from app.security.dependencies import require_roles, require_user
-from app.db.models import User
 
 vps_deploy_router = APIRouter(prefix="/vps-canary", tags=["VPS Initial Deployment & Internal Canary"])
 vps_deploy_admin_router = APIRouter(prefix="/admin/vps-canary", tags=["VPS Initial Deployment & Internal Canary Admin"])

@@ -1,11 +1,8 @@
-import asyncio
-import time
 from datetime import UTC, datetime
-from typing import Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Any
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from app.security.dependencies import require_roles, require_user
-from app.db.models import User
 
 external_beta_router = APIRouter(prefix="/external-beta", tags=["Controlled External Beta"])
 external_beta_admin_router = APIRouter(prefix="/admin/external-beta", tags=["Controlled External Beta Admin"])

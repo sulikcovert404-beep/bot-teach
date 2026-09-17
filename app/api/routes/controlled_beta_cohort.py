@@ -2,19 +2,9 @@ import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
-from sqlalchemy import func, select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.routes.auth import get_session
-from app.db.models import (
-    PilotAccessWaitlist,
-    PilotCohortGroup,
-    PilotIncidentLog,
-    PilotParticipant,
-    User,
-)
 from app.security.dependencies import require_roles, require_user
 
 cohort_admin_router = APIRouter(prefix="/admin/cohort", tags=["controlled-beta-cohort"])

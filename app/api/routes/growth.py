@@ -1,14 +1,11 @@
-import uuid
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
-from sqlalchemy import desc, func, select
+from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.db.models import AuditLog, User
 from app.security.dependencies import require_roles, require_user
 from app.services.audit_repository import record_audit_log
 

@@ -1,11 +1,7 @@
-import asyncio
-from datetime import UTC, datetime
-from typing import Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app.security.dependencies import require_roles, require_user
-from app.db.models import User
 
 preprod_audit_router = APIRouter(prefix="/preprod-audit", tags=["Pre-Production Gate Audit & Security"])
 preprod_audit_admin_router = APIRouter(prefix="/admin/preprod-audit", tags=["Pre-Production Gate Audit & Security Admin"])

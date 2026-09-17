@@ -1,11 +1,8 @@
-import asyncio
-from datetime import UTC, datetime
-from typing import Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from app.security.dependencies import require_roles, require_user
-from app.db.models import User
 
 commercial_prep_router = APIRouter(prefix="/commercial-readiness", tags=["Commercial Readiness Pre-Billing Activation"])
 commercial_prep_admin_router = APIRouter(prefix="/admin/commercial", tags=["Commercial Readiness Admin"])

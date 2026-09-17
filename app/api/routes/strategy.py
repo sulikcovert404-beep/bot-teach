@@ -1,19 +1,10 @@
-import json
 from datetime import UTC, datetime
-from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from pydantic import BaseModel, Field
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.db.models import (
-    ScaleScenarioResult,
-    SchoolExpansionScenario,
-    User,
-)
-from app.security.dependencies import require_roles, require_user
+from app.security.dependencies import require_roles
 
 strategy_router = APIRouter(prefix="/admin/strategy", tags=["business-scale-simulation"])
 

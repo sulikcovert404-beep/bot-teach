@@ -1,11 +1,9 @@
-import asyncio
 from datetime import UTC, datetime
-from typing import Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from typing import Optional
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
 from app.security.dependencies import require_roles, require_user
-from app.db.models import User
 
 controlled_release_router = APIRouter(prefix="/controlled-release", tags=["Controlled Public Release"])
 controlled_release_admin_router = APIRouter(prefix="/admin/controlled-release", tags=["Controlled Public Release Admin"])

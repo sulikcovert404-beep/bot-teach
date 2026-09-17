@@ -1,8 +1,6 @@
-import json
 from datetime import UTC, datetime
-from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -11,7 +9,6 @@ from app.api.routes.auth import get_session
 from app.db.models import (
     ModelRoutingLog,
     TeachingStrategyExperiment,
-    User,
 )
 from app.security.dependencies import require_roles, require_user
 

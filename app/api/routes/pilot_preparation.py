@@ -1,6 +1,5 @@
 import uuid
 from datetime import UTC, datetime
-from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -22,7 +21,6 @@ from app.db.models import (
     ProductFeatureROI,
     ScaleReadinessProjection,
     TeacherPilotFeedback,
-    User,
 )
 from app.security.dependencies import require_roles, require_user
 

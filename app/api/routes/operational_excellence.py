@@ -1,11 +1,8 @@
-import asyncio
 from datetime import UTC, datetime
-from typing import Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from app.security.dependencies import require_roles, require_user
-from app.db.models import User
 
 ops_excellence_router = APIRouter(prefix="/operational-excellence", tags=["Operational Excellence & Autonomous Growth"])
 ops_excellence_admin_router = APIRouter(prefix="/admin/operational-excellence", tags=["Operational Excellence & Autonomous Growth Admin"])

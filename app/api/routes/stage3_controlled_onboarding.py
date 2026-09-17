@@ -1,11 +1,7 @@
-import asyncio
-from datetime import UTC, datetime
-from typing import Any, Optional
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
 from app.security.dependencies import require_roles, require_user
-from app.db.models import User
 
 stage3_router = APIRouter(prefix="/stage3-onboarding", tags=["Stage-3 Controlled 50 Users Onboarding & Production Observability"])
 stage3_admin_router = APIRouter(prefix="/admin/stage3-onboarding", tags=["Stage-3 Controlled 50 Users Admin"])
