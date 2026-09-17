@@ -1,11 +1,11 @@
 """Pure, immutable foundation for post-governance operational readiness design."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import hashlib
 import json
 from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from enum import Enum
 
 
 class DesignOutcome(str, Enum):

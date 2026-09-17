@@ -1,14 +1,15 @@
 """Application orchestration for generating, reusing, and delivering lesson packs."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from typing import Protocol
 import asyncio
 import json
+from dataclasses import dataclass
+from typing import Protocol
+
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
-from app.db.models import GeneratedAsset
 
+from app.db.models import GeneratedAsset
 from app.services.lesson_pack import LessonPack, LessonPackRequest, LessonPackService, SchoolStage
 
 

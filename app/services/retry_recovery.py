@@ -1,9 +1,12 @@
 """Provider-neutral retry and recovery contracts (contract-only)."""
 from __future__ import annotations
+
+import json
+import unicodedata
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-import json, unicodedata
-from collections.abc import Mapping
+
 
 class FailureCategory(StrEnum):
     TRANSIENT="TRANSIENT"; PERMANENT="PERMANENT"; AMBIGUOUS="AMBIGUOUS"; POLICY_BLOCKED="POLICY_BLOCKED"

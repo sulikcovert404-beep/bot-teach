@@ -1,7 +1,8 @@
 """Immutable contract matrix; descriptive only and grants no operational authority."""
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-from collections.abc import Mapping
+
 
 class MatrixOutcome(str, Enum):
     MATRIX_READY="MATRIX_READY"; MATRIX_READY_WITH_WARNINGS="MATRIX_READY_WITH_WARNINGS"; MATRIX_INCOMPLETE="MATRIX_INCOMPLETE"; MATRIX_BLOCKED="MATRIX_BLOCKED"; UNKNOWN="UNKNOWN"

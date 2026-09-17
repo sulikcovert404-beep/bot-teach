@@ -1,7 +1,8 @@
 """Trace design contract; storage, monitoring and execution tracking are prohibited."""
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-from collections.abc import Mapping
+
 
 class TraceOutcome(str, Enum):
     TRACE_CONTRACT_DEFINED="TRACE_CONTRACT_DEFINED"; TRACE_CONTRACT_DEFINED_WITH_WARNINGS="TRACE_CONTRACT_DEFINED_WITH_WARNINGS"; TRACE_CONTRACT_INCOMPLETE="TRACE_CONTRACT_INCOMPLETE"; TRACE_CONTRACT_BLOCKED="TRACE_CONTRACT_BLOCKED"; UNKNOWN="UNKNOWN"

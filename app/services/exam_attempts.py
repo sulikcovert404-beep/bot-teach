@@ -9,7 +9,15 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.db.models import Assignment, Exam, ExamAttempt, ExamResult, ClassMembership, Classroom, StudentProfile
+from app.db.models import (
+    Assignment,
+    ClassMembership,
+    Classroom,
+    Exam,
+    ExamAttempt,
+    ExamResult,
+    StudentProfile,
+)
 
 
 class ExamAccessError(Exception):

@@ -4,10 +4,10 @@ This module is intentionally pure: it does not call a retriever or an AI
 provider.  Runtime integration is gated separately.
 """
 
+from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from json import dumps
-from collections.abc import Sequence
 from typing import Any
 
 from app.services.rag import GroundingState, RetrievedChunk

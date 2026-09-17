@@ -1,6 +1,8 @@
 """Immutable phase closure and handoff record."""
 from dataclasses import dataclass
 from enum import Enum
+
+
 class PhaseClosureOutcome(str,Enum):
  PHASE_CLOSED="PHASE_CLOSED"; PHASE_CLOSED_WITH_WARNINGS="PHASE_CLOSED_WITH_WARNINGS"; PHASE_OPEN="PHASE_OPEN"; PHASE_BLOCKED="PHASE_BLOCKED"; UNKNOWN="UNKNOWN"
 @dataclass(frozen=True)

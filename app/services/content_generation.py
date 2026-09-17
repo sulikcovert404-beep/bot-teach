@@ -10,7 +10,7 @@ from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import ContentGenerationJob, GeneratedAsset, GenerationAttempt
-from app.services.ai_gateway import AIRequest, AIGateway
+from app.services.ai_gateway import AIGateway, AIRequest
 
 
 class GenerationProvider(Protocol):

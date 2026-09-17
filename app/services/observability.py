@@ -5,12 +5,12 @@ does not import a metrics, tracing, logging, or persistence vendor.
 """
 from __future__ import annotations
 
+import json
+import uuid
+from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass, field
 from datetime import datetime, timezone
-import json
 from typing import Any, Protocol
-from collections.abc import Callable, Mapping
-import uuid
 
 
 def _timestamp(value: datetime | None = None) -> str:

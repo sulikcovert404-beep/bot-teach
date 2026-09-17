@@ -1,6 +1,8 @@
 """Immutable governance and safety gate evidence; no execution authority."""
 from dataclasses import dataclass
 from enum import Enum
+
+
 class ExecutionGateOutcome(str,Enum):
  EXECUTION_GATE_READY="EXECUTION_GATE_READY"; EXECUTION_GATE_READY_WITH_WARNINGS="EXECUTION_GATE_READY_WITH_WARNINGS"; EXECUTION_GATE_INCOMPLETE="EXECUTION_GATE_INCOMPLETE"; EXECUTION_GATE_BLOCKED="EXECUTION_GATE_BLOCKED"; UNKNOWN="UNKNOWN"
 @dataclass(frozen=True)

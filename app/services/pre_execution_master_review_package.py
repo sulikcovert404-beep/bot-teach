@@ -1,6 +1,8 @@
 """Read-only master review over governance, readiness and transition evidence."""
 from dataclasses import dataclass
 from enum import Enum
+
+
 class MasterReviewOutcome(str,Enum):
  PRE_EXECUTION_REVIEW_READY="PRE_EXECUTION_REVIEW_READY"; PRE_EXECUTION_REVIEW_READY_WITH_WARNINGS="PRE_EXECUTION_REVIEW_READY_WITH_WARNINGS"; PRE_EXECUTION_REVIEW_NOT_READY="PRE_EXECUTION_REVIEW_NOT_READY"; PRE_EXECUTION_REVIEW_BLOCKED="PRE_EXECUTION_REVIEW_BLOCKED"; UNKNOWN="UNKNOWN"
 @dataclass(frozen=True)

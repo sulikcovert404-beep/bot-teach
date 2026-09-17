@@ -1,13 +1,13 @@
 """Pure, immutable change-impact contract; no persistence or runtime mutation."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import Enum
 import hashlib
 import json
 import re
 import unicodedata
 from collections.abc import Mapping
+from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any
 
 

@@ -1,7 +1,8 @@
 """Pure assessment artifact for future operational readiness; no execution authority."""
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-from collections.abc import Mapping
+
 
 class AssessmentOutcome(str, Enum):
     ASSESSMENT_READY="ASSESSMENT_READY"; ASSESSMENT_READY_WITH_WARNINGS="ASSESSMENT_READY_WITH_WARNINGS"; ASSESSMENT_NOT_READY="ASSESSMENT_NOT_READY"; ASSESSMENT_BLOCKED="ASSESSMENT_BLOCKED"; UNKNOWN="UNKNOWN"

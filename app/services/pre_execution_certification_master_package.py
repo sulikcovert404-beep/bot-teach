@@ -1,6 +1,8 @@
 """Immutable final certification evidence before any future execution phase."""
 from dataclasses import dataclass
 from enum import Enum
+
+
 class PreExecutionCertificationOutcome(str,Enum):
  PRE_EXECUTION_CERTIFIED="PRE_EXECUTION_CERTIFIED"; PRE_EXECUTION_CERTIFIED_WITH_WARNINGS="PRE_EXECUTION_CERTIFIED_WITH_WARNINGS"; PRE_EXECUTION_NOT_CERTIFIED="PRE_EXECUTION_NOT_CERTIFIED"; PRE_EXECUTION_BLOCKED="PRE_EXECUTION_BLOCKED"; UNKNOWN="UNKNOWN"
 @dataclass(frozen=True)

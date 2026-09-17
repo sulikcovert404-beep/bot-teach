@@ -1,11 +1,15 @@
 """Pure change-control contract applied after a baseline is frozen."""
 from __future__ import annotations
 
-import hashlib, json, re, unicodedata
+import hashlib
+import json
+import re
+import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
-from collections.abc import Iterable
 from typing import Any
+
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
 
 

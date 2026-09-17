@@ -1,7 +1,8 @@
 """Governance design model for readiness decisions; never grants execution authority."""
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-from collections.abc import Mapping
+
 
 class GovernanceOutcome(str, Enum):
     GOVERNANCE_DEFINED="GOVERNANCE_DEFINED"; GOVERNANCE_DEFINED_WITH_WARNINGS="GOVERNANCE_DEFINED_WITH_WARNINGS"; GOVERNANCE_INCOMPLETE="GOVERNANCE_INCOMPLETE"; GOVERNANCE_BLOCKED="GOVERNANCE_BLOCKED"; UNKNOWN="UNKNOWN"

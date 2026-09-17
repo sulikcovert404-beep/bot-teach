@@ -5,9 +5,9 @@ from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from hashlib import sha256
 from json import dumps
-from uuid import uuid4
 from time import perf_counter
 from typing import Any
+from uuid import uuid4
 
 from app.services.rag import SourceChunk
 from app.services.retrieval_evaluation import (

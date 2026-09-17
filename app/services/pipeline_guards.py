@@ -6,9 +6,9 @@ owned by the caller so the module is safe to exercise without PostgreSQL.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from collections.abc import Mapping
 
 
 class GuardViolation(ValueError):
