@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import UTC, datetime
 import json
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -495,7 +495,7 @@ async def publish_assignment_v1(assignment_id: int, subject: str = Depends(requi
         return {"assignment": _assignment_payload(a), "snapshot_id": existing.id, "replayed": True}
     payload = json.dumps(_assignment_payload(a), ensure_ascii=False, sort_keys=True, separators=(",", ":"))
     snap = AssignmentSnapshot(assignment_id=a.id, tenant_id=a.tenant_id, version=1, payload_json=payload, content_digest=sha256(payload.encode("utf-8")).hexdigest())
-    a.status = "PUBLISHED"; a.publish_at = datetime.utcnow(); session.add(snap)
+    a.status = "PUBLISHED"; a.publish_at = datetime.now(UTC); session.add(snap)
     await record_audit_log(session, actor_user_id=int(subject), action="ASSIGNMENT_PUBLISHED", resource_type="assignment", resource_id=str(a.id), metadata={"snapshot_version": 1, "content_digest": snap.content_digest})
     await session.commit(); await session.refresh(snap)
     return {"assignment": _assignment_payload(a), "snapshot_id": snap.id, "replayed": False}
@@ -505,7 +505,7 @@ async def close_assignment_v1(assignment_id: int, subject: str = Depends(require
     allowed_ids = await _teacher_scope_ids(session, int(subject))
     a = await session.scalar(select(Assignment).where(Assignment.id == assignment_id, Assignment.teacher_id == int(subject), Assignment.classroom_id.in_(allowed_ids))) if allowed_ids else None
     if a is None: raise HTTPException(status_code=404, detail="Assignment not found")
-    a.status = "CLOSED"; a.close_at = datetime.utcnow()
+    a.status = "CLOSED"; a.close_at = datetime.now(UTC)
     await record_audit_log(session, actor_user_id=int(subject), action="ASSIGNMENT_CLOSED", resource_type="assignment", resource_id=str(a.id), metadata={"status": a.status})
     await session.commit(); await session.refresh(a)
     return {"assignment": _assignment_payload(a)}
@@ -751,6 +751,7 @@ async def publish_teacher_content(
 async def list_teacher_publications(subject: str = Depends(require_roles("TEACHER", "ADMIN")), session: AsyncSession = Depends(get_session)):
     rows = (await session.execute(select(TeacherContentPublication).where(TeacherContentPublication.teacher_id == int(subject)))).scalars().all()
     return {"publications": [{"id": p.id, "content_version_id": p.content_version_id, "classroom_id": p.classroom_id, "status": p.status} for p in rows]}
+
 
 
 
