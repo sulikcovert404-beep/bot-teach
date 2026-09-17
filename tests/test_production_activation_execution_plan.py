@@ -1,5 +1,6 @@
 from app.services.production_activation_execution_plan import (
-    ActivationExecutionPlan, ActivationPlanOutcome,
+    ActivationExecutionPlan,
+    ActivationPlanOutcome,
 )
 
 

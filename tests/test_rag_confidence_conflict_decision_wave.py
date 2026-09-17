@@ -1,4 +1,7 @@
-from app.services.rag_confidence_conflict_decision_wave import RAGConfidenceConflictDecisionWave, Outcome
+from app.services.rag_confidence_conflict_decision_wave import (
+    Outcome,
+    RAGConfidenceConflictDecisionWave,
+)
 
 
 def make(**kw):

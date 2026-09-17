@@ -1,4 +1,7 @@
-from app.services.operational_control_plane_foundation import OperationalControlPlaneFoundation, Outcome
+from app.services.operational_control_plane_foundation import (
+    OperationalControlPlaneFoundation,
+    Outcome,
+)
 
 
 def make(**kw):

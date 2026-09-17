@@ -1,4 +1,7 @@
-from app.services.operational_readiness_design_foundation import DesignOutcome, OperationalReadinessDesignFoundation
+from app.services.operational_readiness_design_foundation import (
+    DesignOutcome,
+    OperationalReadinessDesignFoundation,
+)
 
 
 def make(**kw):

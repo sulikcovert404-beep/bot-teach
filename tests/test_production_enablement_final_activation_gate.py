@@ -1,5 +1,6 @@
 from app.services.production_enablement_final_activation_gate import (
-    ActivationOutcome, FinalActivationGateReview,
+    ActivationOutcome,
+    FinalActivationGateReview,
 )
 
 

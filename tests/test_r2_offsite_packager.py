@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-
 MODULE_PATH = Path(__file__).parents[1] / "scripts" / "r2_offsite_packager.py"
 spec = importlib.util.spec_from_file_location("r2_offsite_packager", MODULE_PATH)
 assert spec and spec.loader

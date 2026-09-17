@@ -1,4 +1,7 @@
-from app.services.production_enablement_implementation_preparation import Outcome, ProductionEnablementImplementationPreparation
+from app.services.production_enablement_implementation_preparation import (
+    Outcome,
+    ProductionEnablementImplementationPreparation,
+)
 
 
 def make(**overrides):

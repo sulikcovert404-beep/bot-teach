@@ -1,4 +1,7 @@
-from app.services.production_transition_final_gate_review import Outcome, ProductionTransitionFinalGateReview
+from app.services.production_transition_final_gate_review import (
+    Outcome,
+    ProductionTransitionFinalGateReview,
+)
 
 
 def make(**overrides):

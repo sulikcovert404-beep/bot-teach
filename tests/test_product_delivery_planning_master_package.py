@@ -1,4 +1,7 @@
-from app.services.product_delivery_planning_master_package import ProductDeliveryPlanningMasterPackage, Outcome
+from app.services.product_delivery_planning_master_package import (
+    Outcome,
+    ProductDeliveryPlanningMasterPackage,
+)
 
 
 def make(**kw):

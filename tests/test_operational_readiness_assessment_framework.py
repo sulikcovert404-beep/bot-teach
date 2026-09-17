@@ -1,4 +1,8 @@
-from app.services.operational_readiness_assessment_framework import AssessmentOutcome, OperationalReadinessAssessmentFramework
+from app.services.operational_readiness_assessment_framework import (
+    AssessmentOutcome,
+    OperationalReadinessAssessmentFramework,
+)
+
 
 def make(**overrides):
     d=dict(assessment_id='a', contract_matrix_reference='m', capability_assessments={'c':'ready'}, dependency_findings=('ok',), readiness_gaps=(), risk_summary=(), assessment_constraints=('approval',), boundary_assertions={'runtime_activation':'PROHIBITED','execution':False}, trace_reference='t', assessment_digest='d')

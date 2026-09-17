@@ -1,5 +1,6 @@
 from app.services.operational_validation_observability_foundation_package import (
-    OperationalValidationObservabilityFoundationPackage, Outcome,
+    OperationalValidationObservabilityFoundationPackage,
+    Outcome,
 )
 
 

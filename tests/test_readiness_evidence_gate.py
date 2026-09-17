@@ -2,7 +2,6 @@ import json
 
 from app.services.readiness_evidence_gate import *
 
-
 GATES = tuple(GateDefinition(g, (g.value.lower(),), required_kind=EvidenceKind.STATIC)
               for g in GateName)
 

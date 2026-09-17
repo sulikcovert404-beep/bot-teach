@@ -1,4 +1,4 @@
-from app.services.rag_quality_enhancement_wave import RAGQualityEnhancementWave, QualityOutcome
+from app.services.rag_quality_enhancement_wave import QualityOutcome, RAGQualityEnhancementWave
 
 
 def make(**kw):

@@ -1,17 +1,18 @@
 import os
+
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.base import Base
 from app.db.models import (
-    User,
-    SchoolTenant,
-    SchoolAdminMembership,
-    TeacherProfile,
-    StudentProfile,
-    Classroom,
     ClassMembership,
+    Classroom,
+    SchoolAdminMembership,
+    SchoolTenant,
+    StudentProfile,
+    TeacherProfile,
+    User,
 )
 
 DB_FILE = "d:/project/bot telegram teacher/test_persistence.db"

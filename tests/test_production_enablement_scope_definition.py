@@ -1,4 +1,7 @@
-from app.services.production_enablement_scope_definition import Outcome, ProductionEnablementScopeDefinition
+from app.services.production_enablement_scope_definition import (
+    Outcome,
+    ProductionEnablementScopeDefinition,
+)
 
 
 def make(**overrides):

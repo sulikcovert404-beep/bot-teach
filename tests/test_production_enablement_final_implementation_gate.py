@@ -1,4 +1,7 @@
-from app.services.production_enablement_final_implementation_gate import Outcome, ProductionEnablementFinalImplementationGate
+from app.services.production_enablement_final_implementation_gate import (
+    Outcome,
+    ProductionEnablementFinalImplementationGate,
+)
 
 
 def make(**overrides):

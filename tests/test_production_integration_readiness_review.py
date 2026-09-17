@@ -1,4 +1,7 @@
-from app.services.production_integration_readiness_review import Outcome, ProductionIntegrationReadinessReview
+from app.services.production_integration_readiness_review import (
+    Outcome,
+    ProductionIntegrationReadinessReview,
+)
 
 
 def make(**overrides):

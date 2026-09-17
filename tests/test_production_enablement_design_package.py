@@ -1,4 +1,7 @@
-from app.services.production_enablement_design_package import Outcome, ProductionEnablementDesignPackage
+from app.services.production_enablement_design_package import (
+    Outcome,
+    ProductionEnablementDesignPackage,
+)
 
 
 def make(**overrides):

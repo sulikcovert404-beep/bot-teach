@@ -1,5 +1,6 @@
 from app.services.production_enablement_foundation_integration_validation import (
-    FoundationIntegrationValidation, IntegrationOutcome,
+    FoundationIntegrationValidation,
+    IntegrationOutcome,
 )
 
 

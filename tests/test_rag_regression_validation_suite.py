@@ -1,4 +1,4 @@
-from app.services.rag_regression_validation_suite import RAGRegressionValidationSuite, Outcome
+from app.services.rag_regression_validation_suite import Outcome, RAGRegressionValidationSuite
 
 
 def make(**kw):

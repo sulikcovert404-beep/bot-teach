@@ -1,4 +1,7 @@
-from app.services.production_enablement_implementation_authorization_review import Outcome, ProductionEnablementImplementationAuthorizationReview
+from app.services.production_enablement_implementation_authorization_review import (
+    Outcome,
+    ProductionEnablementImplementationAuthorizationReview,
+)
 
 
 def make(**overrides):

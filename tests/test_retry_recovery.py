@@ -1,5 +1,6 @@
 from app.services.retry_recovery import *
 
+
 def c(cat): return FailureClassification(cat,"ERR_TEST","commit","publish",metadata=(("fa","می‌شود"),))
 
 def test_categories_and_actions():

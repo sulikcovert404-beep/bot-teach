@@ -1,4 +1,4 @@
-from app.services.rag_integration_impact_review_wave import RAGIntegrationImpactReviewWave, Outcome
+from app.services.rag_integration_impact_review_wave import Outcome, RAGIntegrationImpactReviewWave
 
 
 def make(**kw):

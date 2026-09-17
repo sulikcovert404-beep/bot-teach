@@ -1,4 +1,7 @@
-from app.services.product_delivery_foundation_package import ProductDeliveryFoundationPackage, Outcome
+from app.services.product_delivery_foundation_package import (
+    Outcome,
+    ProductDeliveryFoundationPackage,
+)
 
 
 def make(**kw):
