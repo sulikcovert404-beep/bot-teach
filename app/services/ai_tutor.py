@@ -1,6 +1,6 @@
 import hashlib
 import time
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 
 from app.services.ai_gateway import AIProvider, AIRequest, AIResponse, ModelRouter
 from app.services.rag import RetrievalRequest, Retriever, SourceGuardian

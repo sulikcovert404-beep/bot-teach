@@ -1,4 +1,3 @@
-from dataclasses import dataclass
 
 from app.services.contract_conformance import *
 from app.services.failure_matrix import (

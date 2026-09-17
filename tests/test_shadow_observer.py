@@ -1,6 +1,6 @@
 import asyncio
 
-from app.services.evidence_validation import EvidenceOutcome, EvidenceProvenance, decide_evidence
+from app.services.evidence_validation import EvidenceProvenance, decide_evidence
 from app.services.rag import GroundingState, RetrievedChunk, SourceChunk
 from app.services.shadow_observer import (
     BoundedShadowQueue,

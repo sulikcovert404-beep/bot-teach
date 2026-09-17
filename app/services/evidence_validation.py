@@ -8,7 +8,6 @@ from collections.abc import Sequence
 from dataclasses import asdict, dataclass
 from enum import StrEnum
 from json import dumps
-from typing import Any
 
 from app.services.rag import GroundingState, RetrievedChunk
 

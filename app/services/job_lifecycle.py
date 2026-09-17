@@ -1,7 +1,6 @@
 """Provider-neutral asynchronous job lifecycle contracts."""
 from __future__ import annotations
 
-import hashlib
 import json
 import unicodedata
 from collections.abc import Mapping

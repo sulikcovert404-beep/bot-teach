@@ -2,7 +2,6 @@ import pytest
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.base import Base
-from app.db.models import ContentGenerationJob
 from app.services.content_generation import GenerationService
 
 

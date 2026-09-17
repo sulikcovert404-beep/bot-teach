@@ -5,7 +5,6 @@ import hashlib
 import json
 import re
 import unicodedata
-from collections.abc import Mapping
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any

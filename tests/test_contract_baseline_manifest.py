@@ -45,12 +45,10 @@ def test_digest_mismatch_not_frozen():
 
 
 def test_incomplete_closure_not_frozen():
-    from app.services.runtime_admission_bundle import ReferenceStatus
     assert evaluate_baseline(manifest(closure_reference=ref('closure','REQUIRES_REVIEW')))==BaselineOutcome.NOT_FROZEN
 
 
 def test_trace_review_unknown_and_secret_rejected():
-    from app.services.runtime_admission_bundle import ReferenceStatus
     assert evaluate_baseline(manifest(trace_reference=ref('trace','REQUIRES_REVIEW')))==BaselineOutcome.UNKNOWN
     try:
         manifest(baseline_id='api_key')

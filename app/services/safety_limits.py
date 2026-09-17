@@ -1,5 +1,5 @@
 import hashlib
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from typing import NamedTuple
 
 from fastapi import HTTPException, status
@@ -7,7 +7,6 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import AIUsageEvent, Subscription, User
-from app.domain.entitlements.models import SubscriptionPlan
 
 
 class QuotaLimit(NamedTuple):

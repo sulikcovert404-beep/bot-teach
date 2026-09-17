@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-from app.services.telegram_navigation import build_role_keyboard, role_menu_labels
+from app.services.telegram_navigation import build_role_keyboard
 
 
 @dataclass(frozen=True)

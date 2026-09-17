@@ -2,7 +2,6 @@ import pytest
 
 from app.services.ai_gateway import (
     AIGateway,
-    AIProviderEvent,
     AIRequest,
     AIResponse,
     MockProvider,

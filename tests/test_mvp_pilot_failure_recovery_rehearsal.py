@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.core.config import get_settings
 from app.db.base import Base
-from app.db.models import ContentGenerationJob, GenerationAttempt
+from app.db.models import GenerationAttempt
 from app.security.dependencies import authorize_role, require_user
 from app.services.content_generation import GenerationService
 
