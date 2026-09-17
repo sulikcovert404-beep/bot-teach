@@ -1,8 +1,17 @@
 import pytest
-from app.services.runtime_execution_attestation import AttestationStatus,build_attestation,validate_attestation
-from app.services.runtime_execution_evidence_projection import EvidenceValidityStatus,build_evidence_projection
+
+from app.services.runtime_execution_attestation import (
+ AttestationStatus,
+ build_attestation,
+ validate_attestation,
+)
+from app.services.runtime_execution_evidence_projection import (
+ EvidenceValidityStatus,
+ build_evidence_projection,
+)
 from app.services.runtime_execution_result import ExecutionResultStatus
-from tests.test_runtime_execution_result import ref,result
+from tests.test_runtime_execution_result import ref, result
+
 
 def att(status=EvidenceValidityStatus.VALID):
  r,_,b=result(ExecutionResultStatus.SUCCEEDED); p=build_evidence_projection(projection_id="p",execution_reference=ref("exec"),result_reference=ref("exec",digest=r.result_digest),evidence_type="validation",evidence_payload_reference=ref("payload"),validity_status=status,trace_reference=ref("trace")); a=build_attestation(attestation_id="a",execution_reference=ref("exec"),result_reference=ref("exec",digest=r.result_digest),projection_references=(ref("p",digest=p.projection_digest),),boundary_reference=ref("boundary"),trace_reference=ref("trace"),validity_period_reference=ref("period")); return a,r,p

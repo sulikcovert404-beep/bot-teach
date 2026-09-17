@@ -1,4 +1,6 @@
 from app.services.staging_readiness_governance_finalization import *
+
+
 def refs(): return tuple(f'ref-{i}' for i in range(7))
 def test_digest_and_immutability():
     x=StagingReadinessGovernanceFinalization('f',*refs(),(),('STAGING_EXECUTION=PROHIBITED','DEPLOYMENT=PROHIBITED','RUNTIME_ACTIVATION=PROHIBITED','RUNTIME_ADMISSION=PROHIBITED','EXECUTION=FALSE'),'trace')

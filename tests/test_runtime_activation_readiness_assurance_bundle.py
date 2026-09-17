@@ -1,6 +1,9 @@
 import pytest
-from app.services.runtime_admission_bundle import ReferenceToken,ReferenceStatus
+
 from app.services.runtime_activation_readiness_assurance_bundle import *
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
+
 def make(**kw):
  r=ReferenceToken("ref","sha256:x"); vals={n:r for n in ("readiness_baseline_freeze_reference","governance_closure_reference","activation_control_plane_reference","activation_decision_reference","trace_reference")}; vals["evidence_references"]=(r,); vals.update(kw); return RuntimeActivationReadinessAssuranceBundle("b1",**vals)
 def test_confirmed_digest_immutable():

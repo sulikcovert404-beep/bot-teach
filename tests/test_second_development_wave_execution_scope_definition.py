@@ -1,4 +1,7 @@
-from app.services.second_development_wave_execution_scope_definition import SecondDevelopmentWaveExecutionScope, Outcome
+from app.services.second_development_wave_execution_scope_definition import (
+    Outcome,
+    SecondDevelopmentWaveExecutionScope,
+)
 
 
 def make(**kw):

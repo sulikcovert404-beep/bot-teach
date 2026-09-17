@@ -1,5 +1,13 @@
 import pytest
-from app.services.runtime_activation_staging_evidence_governance import RuntimeActivationStagingEvidenceGovernance as G, EvidenceGovernanceOutcome as O
+
+from app.services.runtime_activation_staging_evidence_governance import (
+ EvidenceGovernanceOutcome as O,
+)
+from app.services.runtime_activation_staging_evidence_governance import (
+ RuntimeActivationStagingEvidenceGovernance as G,
+)
+
+
 def make(**k):
  d=dict(governance_id="g1",staging_validation_framework_reference="framework:1",final_readiness_review_reference="review:1",activation_decision_reference="decision:1",evidence_requirements=("logs",),evidence_ownership=("ops",),validation_rules=("hash",),trace_reference="trace:1"); d.update(k); return G(**d)
 def test_digest_immutable():

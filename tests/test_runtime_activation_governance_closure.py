@@ -1,7 +1,10 @@
 from dataclasses import replace
+
 import pytest
-from app.services.runtime_admission_bundle import ReferenceToken, ReferenceStatus
+
 from app.services.runtime_activation_governance_closure import *
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
 
 def make(**kw):
     r = ReferenceToken("ref", "sha256:x")

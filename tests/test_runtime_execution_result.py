@@ -1,8 +1,17 @@
 import pytest
 
-from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken, RuntimeAdmissionBundle
+from app.services.runtime_admission_bundle import (
+    ReferenceStatus,
+    ReferenceToken,
+    RuntimeAdmissionBundle,
+)
 from app.services.runtime_execution_boundary import ExecutionBoundaryContract, ExecutionScope
-from app.services.runtime_execution_result import ExecutionResult, ExecutionResultStatus, build_execution_result, validate_execution_result
+from app.services.runtime_execution_result import (
+    ExecutionResult,
+    ExecutionResultStatus,
+    build_execution_result,
+    validate_execution_result,
+)
 
 
 def ref(name, status=ReferenceStatus.VALID, digest=None):

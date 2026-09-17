@@ -1,6 +1,9 @@
 import pytest
-from app.services.runtime_admission_bundle import ReferenceToken,ReferenceStatus
+
 from app.services.runtime_activation_governance_review import *
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
+
 def ref(i="r",s=ReferenceStatus.VALID): return ReferenceToken(i,"sha256:"+i,s)
 def pkg(**kw):
  d=dict(review_id="r1",activation_readiness_package_reference=ref("p"),runtime_entry_decision_reference=ref("d"),governance_freeze_reference=ref("g"),baseline_manifest_reference=ref("b"),change_control_reference=ref("c"),consistency_audit_reference=ref("a"),trace_reference=ref("t"));d.update(kw);return RuntimeActivationGovernanceReview(**d)

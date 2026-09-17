@@ -1,4 +1,6 @@
 from app.services.runtime_activation_staging_entry_review import *
+
+
 def refs(): return tuple(f'ref-{i}' for i in range(5))
 def test_digest_and_guards():
     r=RuntimeActivationStagingEntryReview('r',*refs(),('ok',),('STAGING_ENTRY=REVIEW_ONLY',),'trace')

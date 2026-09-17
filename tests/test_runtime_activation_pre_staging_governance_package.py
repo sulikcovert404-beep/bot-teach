@@ -1,4 +1,6 @@
 from app.services.runtime_activation_pre_staging_governance_package import *
+
+
 def refs(): return tuple(f'ref-{i}' for i in range(9))
 def test_digest_is_deterministic_and_immutable():
     p=RuntimeActivationPreStagingGovernancePackage('p',*refs())

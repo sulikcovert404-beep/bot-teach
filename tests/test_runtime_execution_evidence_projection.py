@@ -1,7 +1,13 @@
 import pytest
-from app.services.runtime_execution_evidence_projection import EvidenceValidityStatus,build_evidence_projection,validate_evidence_projection
+
+from app.services.runtime_execution_evidence_projection import (
+ EvidenceValidityStatus,
+ build_evidence_projection,
+ validate_evidence_projection,
+)
 from app.services.runtime_execution_result import ExecutionResultStatus
-from tests.test_runtime_execution_result import ref,result
+from tests.test_runtime_execution_result import ref, result
+
 
 def projection(status=EvidenceValidityStatus.VALID,result_ref=None):
  item,_,_=result(ExecutionResultStatus.SUCCEEDED); return build_evidence_projection(projection_id="p",execution_reference=ref("exec"),result_reference=result_ref or ref("exec",digest=item.result_digest),evidence_type="validation",evidence_payload_reference=ref("payload"),validity_status=status,trace_reference=ref("trace")),item

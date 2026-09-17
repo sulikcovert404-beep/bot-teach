@@ -1,6 +1,7 @@
 from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.runtime_entry_governance_consolidation import (
-    ConsolidationOutcome, RuntimeEntryGovernanceConsolidation,
+    ConsolidationOutcome,
+    RuntimeEntryGovernanceConsolidation,
     evaluate_runtime_entry_governance_consolidation,
 )
 

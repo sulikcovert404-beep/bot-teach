@@ -1,4 +1,6 @@
 from app.services.staging_activation_readiness_control_package import *
+
+
 def refs(): return tuple(f'ref-{i}' for i in range(7))
 def test_digest():
     x=StagingActivationReadinessControlPackage('p',*refs(),(),('STAGING_ACTIVATION=PROHIBITED','RUNTIME_ACTIVATION=PROHIBITED','RUNTIME_ADMISSION=PROHIBITED','EXECUTION=FALSE','DEPLOYMENT=PROHIBITED'),'trace'); assert len(x.package_digest)==64

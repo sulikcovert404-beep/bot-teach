@@ -1,7 +1,13 @@
 import pytest
+
 from app.services.runtime_admission_bundle import ReferenceStatus
-from app.services.runtime_contract_integration_review import IntegrationOutcome,build_integration_review,validate_integration_review
+from app.services.runtime_contract_integration_review import (
+ IntegrationOutcome,
+ build_integration_review,
+ validate_integration_review,
+)
 from tests.test_runtime_execution_result import ref
+
 
 def review(violations=(),risk=''):
  refs=(ref('admission'),ref('boundary'),ref('result')); return build_integration_review(review_id='r',contract_references=refs,dependency_map={'admission':(),'boundary':('admission',),'result':('boundary',)},compatibility_summary='ok',violations=tuple(violations),risk_summary=risk,trace_reference=ref('trace'))

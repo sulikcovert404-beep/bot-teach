@@ -1,6 +1,8 @@
 import pytest
-from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
 from app.services.runtime_activation_control_plane import *
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
 
 def ref(i="r", s=ReferenceStatus.VALID): return ReferenceToken(i, "sha256:" + i, s)
 def plane(**kw):

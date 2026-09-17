@@ -1,5 +1,7 @@
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.staging_activation_baseline_freeze_assurance import *
-from app.services.runtime_admission_bundle import ReferenceStatus,ReferenceToken
+
+
 def make(status=ReferenceStatus.VALID,**kw):
  r=[ReferenceToken(f"r{i}",f"d{i}",status) for i in range(5)]
  return StagingActivationBaselineFreezeAssurance("a1",*r,drift_findings=kw.get("drift",()),integrity_findings=kw.get("integrity",()),boundary_assertions=kw.get("boundary",{"execution":False}),trace_reference=ReferenceToken("trace","dt"))

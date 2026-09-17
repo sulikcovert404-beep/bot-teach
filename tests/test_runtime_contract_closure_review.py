@@ -1,5 +1,7 @@
-from app.services.runtime_admission_bundle import ReferenceToken,ReferenceStatus
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.runtime_contract_closure_review import *
+
+
 def ref(i,s=ReferenceStatus.VALID): return ReferenceToken(i,"sha256:"+i,status=s)
 def base(**kw):
  d=dict(closure_id="c",evaluated_contracts=[ref("a"),ref("b")],dependency_graph={"a":("b",),"b":()},authority_map={"admission":"a","execution":"b"},version_summary={"a":"1","b":"1"},digest_summary={"a":"sha256:a","b":"sha256:b"},trace_reference=ref("trace")); d.update(kw); return build_closure_review(**d)

@@ -1,7 +1,11 @@
 from dataclasses import replace
+
 import pytest
+
 from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.runtime_entry_preparation_baseline_snapshot import *
+
+
 def ref(i, status=ReferenceStatus.VALID): return ReferenceToken(i, 'sha256:'+i, status)
 def make(**kw):
     args=dict(snapshot_id='s1',preparation_review_reference=ref('p'),reconciliation_reference=ref('r'),freeze_reference=ref('f'),baseline_reference=ref('b'),trace_reference=ref('t'))

@@ -1,6 +1,7 @@
 from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.runtime_entry_preparation_handoff import *
 
+
 def refs(status=ReferenceStatus.VALID):
     return [ReferenceToken(f"r{i}", f"sha256:{i:064x}", status) for i in range(5)]
 def make(status=ReferenceStatus.VALID):

@@ -1,7 +1,13 @@
 import pytest
+
 from app.services.runtime_admission_bundle import ReferenceStatus
-from app.services.runtime_contract_readiness_snapshot import SnapshotStatus,build_snapshot,validate_snapshot
+from app.services.runtime_contract_readiness_snapshot import (
+ SnapshotStatus,
+ build_snapshot,
+ validate_snapshot,
+)
 from tests.test_runtime_execution_result import ref
+
 
 def snap():return build_snapshot(snapshot_id='s',evaluated_contracts=(ref('c1'),),integration_review_reference=ref('i'),release_readiness_reference=ref('r'),evidence_references=(ref('e'),),trace_reference=ref('t'),snapshot_timestamp_reference=ref('ts'))
 def test_ready_and_statuses():

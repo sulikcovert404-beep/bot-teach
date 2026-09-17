@@ -1,8 +1,14 @@
 import pytest
+
 from app.services.runtime_execution_lifecycle import LifecycleState
+from app.services.runtime_execution_reconciliation import (
+ ReconciliationOutcome,
+ build_reconciliation,
+ validate_reconciliation,
+)
 from app.services.runtime_execution_result import ExecutionResultStatus
-from app.services.runtime_execution_reconciliation import ReconciliationOutcome,build_reconciliation,validate_reconciliation
-from tests.test_runtime_execution_result import ref,upstream,result
+from tests.test_runtime_execution_result import ref, result, upstream
+
 
 def req(expected=LifecycleState.SUCCEEDED,observed=LifecycleState.SUCCEEDED,result_ref=None,evidence=(None,)):
  b,bd=upstream(); ev=tuple(x for x in evidence if x); return build_reconciliation(reconciliation_id="r1",execution_reference=ref("exec"),expected_state=expected,observed_state=observed,result_reference=result_ref,evidence_references=ev,trace_reference=ref("trace"))

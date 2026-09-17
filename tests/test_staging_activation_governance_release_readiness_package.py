@@ -1,5 +1,7 @@
-from app.services.runtime_admission_bundle import ReferenceToken, ReferenceStatus
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.staging_activation_governance_release_readiness_package import *
+
+
 def ref(i,s="VALID"):
     return ReferenceToken(i, "sha256:"+i, status=ReferenceStatus(s))
 def make(**kw):

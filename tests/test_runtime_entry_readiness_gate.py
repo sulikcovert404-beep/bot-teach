@@ -1,5 +1,7 @@
 from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.runtime_entry_readiness_gate import *
+
+
 def r(n, s=ReferenceStatus.VALID): return ReferenceToken(n, "sha256:"+n, s)
 def make(**kw):
  d={n:r(n) for n in ("governance_consolidation_reference","runtime_entry_decision_reference","readiness_reconciliation_reference","environment_readiness_reference","trace_reference")}; d.update(kw); return RuntimeEntryReadinessGate("g1",**d)

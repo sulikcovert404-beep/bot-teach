@@ -1,5 +1,7 @@
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.staging_activation_governance_final_audit import *
-from app.services.runtime_admission_bundle import ReferenceStatus,ReferenceToken
+
+
 def make(status=ReferenceStatus.VALID,**kw):
  r=[ReferenceToken(f"r{i}",f"d{i}",status) for i in range(6)]
  return StagingActivationGovernanceFinalAudit("a1",*r,audit_findings=kw.get("findings",()),integrity_summary=kw.get("integrity",{"digest":True}),boundary_assertions=kw.get("boundary",{"execution":False}),trace_reference=ReferenceToken("trace","dt"))

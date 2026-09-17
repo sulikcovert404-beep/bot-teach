@@ -1,5 +1,6 @@
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.staging_activation_governance_release_readiness_archive_consistency_audit import *
-from app.services.runtime_admission_bundle import ReferenceToken,ReferenceStatus
+
 
 def ref(i,s=ReferenceStatus.VALID): return ReferenceToken(reference_id=i,digest="d-"+i,status=s)
 def base(): return dict(audit_id="s1",archive_integrity_verification_reference=ref("f"),master_assurance_reference=ref("m"),release_certification_reference=ref("c"),final_audit_reference=ref("a"),consistency_findings=("governance",),boundary_assertions={"execution":False},trace_reference=ref("t"))

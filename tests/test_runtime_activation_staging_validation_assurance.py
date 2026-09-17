@@ -1,5 +1,11 @@
 import pytest
-from app.services.runtime_activation_staging_validation_assurance import RuntimeActivationStagingValidationAssurance as A, AssuranceOutcome as O
+
+from app.services.runtime_activation_staging_validation_assurance import AssuranceOutcome as O
+from app.services.runtime_activation_staging_validation_assurance import (
+ RuntimeActivationStagingValidationAssurance as A,
+)
+
+
 def make(**k):
  d=dict(assurance_id='a1',staging_validation_framework_reference='f:1',staging_evidence_governance_reference='g:1',final_readiness_review_reference='r:1',activation_decision_reference='d:1',readiness_baseline_freeze_reference='b:1',assurance_findings=(),trace_reference='t:1'); d.update(k); return A(**d)
 def test_digest(): assert make().assurance_digest==make().canonical_digest()

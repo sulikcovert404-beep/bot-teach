@@ -1,9 +1,16 @@
 import pytest
+
 from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.runtime_execution_boundary import ExecutionBoundaryContract, ExecutionScope
+from app.services.runtime_execution_lifecycle import (
+    LifecycleOutcome,
+    LifecycleState,
+    build_execution_lifecycle,
+    validate_execution_lifecycle,
+)
 from app.services.runtime_execution_result import ExecutionResultStatus, build_execution_result
-from app.services.runtime_execution_lifecycle import LifecycleOutcome, LifecycleState, build_execution_lifecycle, validate_execution_lifecycle
-from tests.test_runtime_execution_result import upstream, result, ref
+from tests.test_runtime_execution_result import ref, result, upstream
+
 
 def life(state=LifecycleState.RUNNING, prev=LifecycleState.ADMITTED, result_ref=None):
     bundle,boundary=upstream()

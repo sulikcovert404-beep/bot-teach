@@ -1,7 +1,13 @@
 import pytest
-from app.services.runtime_execution_completion import CompletionStatus,build_completion,validate_completion
+
+from app.services.runtime_execution_completion import (
+ CompletionStatus,
+ build_completion,
+ validate_completion,
+)
 from app.services.runtime_execution_lifecycle import LifecycleState
-from tests.test_runtime_execution_result import ref,result
+from tests.test_runtime_execution_result import ref, result
+
 
 def test_completion_contract_is_immutable_and_deterministic():
  a=build_completion(completion_id="c",execution_reference=ref("e"),lifecycle_reference=ref("l"),result_reference=ref("r"),attestation_reference=ref("a"),evidence_references=(ref("ev"),),trace_reference=ref("t")); b=build_completion(completion_id="c",execution_reference=ref("e"),lifecycle_reference=ref("l"),result_reference=ref("r"),attestation_reference=ref("a"),evidence_references=(ref("ev"),),trace_reference=ref("t")); assert a.canonical_bytes()==b.canonical_bytes() and a.completion_digest==b.completion_digest

@@ -1,4 +1,7 @@
-from app.services.second_development_wave_closure_review import SecondDevelopmentWaveClosureReview, Outcome
+from app.services.second_development_wave_closure_review import (
+    Outcome,
+    SecondDevelopmentWaveClosureReview,
+)
 
 
 def make(**kw):

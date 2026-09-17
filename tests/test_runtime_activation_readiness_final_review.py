@@ -1,6 +1,9 @@
 import pytest
 
-from app.services.runtime_activation_readiness_final_review import RuntimeActivationReadinessFinalReview, FinalReviewOutcome
+from app.services.runtime_activation_readiness_final_review import (
+    FinalReviewOutcome,
+    RuntimeActivationReadinessFinalReview,
+)
 
 
 def make_review(**kwargs):

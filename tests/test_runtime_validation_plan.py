@@ -1,5 +1,6 @@
 from app.services.runtime_validation_plan import *
 
+
 def req(i='e',v='1',d='d',r='ttl'): return EvidenceRequirement(i,v,d,r)
 def plan():
  s=tuple(ValidationStep(x,i,tuple([('a','b','c')[i-2]] if i>1 else []),(),('database',),(),(req(x),),f'd{i}','ttl','FAIL_CLOSED') for i,x in enumerate(('a','b','c'),1))

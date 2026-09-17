@@ -1,5 +1,7 @@
+from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from app.services.staging_activation_readiness_certification import *
-from app.services.runtime_admission_bundle import ReferenceStatus,ReferenceToken
+
+
 def make(status=ReferenceStatus.VALID,**kw):
  r=[ReferenceToken(f"r{i}",f"d{i}",status) for i in range(6)]
  return StagingActivationReadinessCertification("c1",*r,certification_findings=kw.get("findings",()),certification_scope=kw.get("scope",{"ready":True}),boundary_assertions=kw.get("boundary",{"execution":False}),trace_reference=ReferenceToken("trace","dt"))

@@ -1,6 +1,10 @@
 import pytest
 
-from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToken, RuntimeAdmissionBundle
+from app.services.runtime_admission_bundle import (
+    ReferenceStatus,
+    ReferenceToken,
+    RuntimeAdmissionBundle,
+)
 from app.services.runtime_execution_boundary import (
     BoundaryOutcome,
     ExecutionBoundaryContract,
