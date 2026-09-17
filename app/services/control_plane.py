@@ -1,11 +1,11 @@
 """Pure provider-neutral admin control-plane decision contract."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field, replace
-from enum import StrEnum
 import json
 import unicodedata
 from collections.abc import Callable, Mapping
+from dataclasses import dataclass, field, replace
+from enum import StrEnum
 from typing import Any, Protocol
 from uuid import uuid4
 

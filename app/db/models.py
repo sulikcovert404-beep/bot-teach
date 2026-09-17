@@ -7,8 +7,8 @@ from pgvector.sqlalchemy import Vector
 from sqlalchemy import (
     JSON,
     BigInteger,
-    CheckConstraint,
     Boolean,
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,

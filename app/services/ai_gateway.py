@@ -1,9 +1,9 @@
-import re
 import asyncio
-from dataclasses import dataclass
 import json
 import logging
+import re
 import time
+from dataclasses import dataclass
 from typing import Protocol
 
 import httpx

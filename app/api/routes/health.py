@@ -1,8 +1,8 @@
 from pathlib import Path
 
-from fastapi import APIRouter, HTTPException, status
 from alembic.config import Config
 from alembic.script import ScriptDirectory
+from fastapi import APIRouter, HTTPException, status
 from redis.asyncio import Redis
 from sqlalchemy import text
 

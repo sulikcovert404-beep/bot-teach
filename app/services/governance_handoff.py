@@ -1,11 +1,16 @@
 """Pure immutable handoff contract between governance and future readiness."""
 from __future__ import annotations
 
-import hashlib, json, re, unicodedata
+import hashlib
+import json
+import re
+import unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
+
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
 
 class HandoffOutcome(StrEnum):
     ACCEPTED = "ACCEPTED"

@@ -1,12 +1,12 @@
 """Pure environment evidence contracts; no live probes or infrastructure access."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import hashlib
 import json
 import re
 import unicodedata
+from dataclasses import dataclass
+from enum import Enum
 from typing import Any
 
 

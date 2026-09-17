@@ -1,12 +1,12 @@
 """Pure execution seam between control-plane decisions and future adapters."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import StrEnum
 import hashlib
 import json
 import unicodedata
 from collections.abc import Mapping
+from dataclasses import dataclass
+from enum import StrEnum
 from typing import Any
 from uuid import uuid4
 

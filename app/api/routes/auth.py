@@ -7,10 +7,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.adapters.telegram import validate_web_app_init_data
 from app.core.config import get_settings
+from app.core.logging import telegram_metrics
 from app.db.base import build_session_factory
 from app.db.models import User
 from app.security.tokens import create_access_token
-from app.core.logging import telegram_metrics
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 

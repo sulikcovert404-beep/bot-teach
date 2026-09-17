@@ -5,9 +5,9 @@ import hashlib
 import json
 import re
 import unicodedata
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from enum import StrEnum
-from collections.abc import Iterable, Mapping
 from typing import Any
 
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken

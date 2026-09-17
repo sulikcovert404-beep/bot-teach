@@ -7,12 +7,14 @@ from sqlalchemy.orm import joinedload, selectinload
 from app.db.models import (
     Classroom,
     ContentVersion,
-    SourceChunk as SourceChunkModel,
     SourceDocument,
     TeacherContentPublication,
 )
-from app.services.rag import SourceChunk
+from app.db.models import (
+    SourceChunk as SourceChunkModel,
+)
 from app.services.persian_text import normalize_persian_text
+from app.services.rag import SourceChunk
 
 
 @dataclass(frozen=True)

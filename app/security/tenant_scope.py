@@ -1,8 +1,10 @@
 from fastapi import HTTPException
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.db.models import TeacherProfile, SchoolAdminMembership
+
+from app.db.models import SchoolAdminMembership, TeacherProfile
 from app.security.principal import CanonicalPrincipal
+
 
 async def enforce_tenant(principal: CanonicalPrincipal, tenant_id: str | None, session: AsyncSession) -> str | None:
     if principal.role == "SUPER_ADMIN": return tenant_id

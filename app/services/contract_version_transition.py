@@ -1,13 +1,13 @@
 """Pure contract version transition model (no persistence or runtime upgrades)."""
 from __future__ import annotations
 
-from dataclasses import dataclass, field
-from enum import Enum
 import hashlib
 import json
 import re
 import unicodedata
 from collections.abc import Iterable, Mapping
+from dataclasses import dataclass, field
+from enum import Enum
 from typing import Any
 
 

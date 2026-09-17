@@ -1,11 +1,11 @@
 """Pure, provider-neutral configuration contracts for the admin pipeline."""
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
 from dataclasses import dataclass, fields, is_dataclass
 from hashlib import sha256
-import json
 from types import MappingProxyType
-from collections.abc import Mapping
 from typing import Any
 
 CONFIG_VERSION = "1.0.0"

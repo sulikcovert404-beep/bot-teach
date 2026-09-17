@@ -1,11 +1,11 @@
 """Provider-neutral lesson-pack contracts and deterministic generation helpers."""
 from __future__ import annotations
 
+import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import StrEnum
 from hashlib import sha256
-import json
-from collections.abc import Mapping
 
 
 class SchoolStage(StrEnum):

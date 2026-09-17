@@ -1,10 +1,13 @@
 """Provider-neutral contract conformance utilities."""
 from __future__ import annotations
+
+import json
+import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass
 from enum import Enum
-import json, unicodedata
-from collections.abc import Iterable
 from typing import Any
+
 
 @dataclass(frozen=True, slots=True)
 class ContractSpec:

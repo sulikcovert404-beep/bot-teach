@@ -9,7 +9,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import BetaFeedback, BetaQualityAudit, User, AIUsageEvent
+from app.db.models import AIUsageEvent, BetaFeedback, BetaQualityAudit, User
 
 
 class FeedbackSubmitRequest(BaseModel):

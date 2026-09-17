@@ -1,8 +1,11 @@
 """Derived, provider-neutral failure decisions (no runtime side effects)."""
 from __future__ import annotations
+
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import json, unicodedata
+
 
 class FailureSource(StrEnum):
     VALIDATION="VALIDATION"; AUTHORIZATION="AUTHORIZATION"; POLICY="POLICY"; CONFIGURATION="CONFIGURATION"; RUNTIME="RUNTIME"; CANCELLATION="CANCELLATION"; AMBIGUOUS="AMBIGUOUS"; RECONCILIATION="RECONCILIATION"
