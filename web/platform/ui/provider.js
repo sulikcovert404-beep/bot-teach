@@ -25,6 +25,13 @@ async function ensureSession(force=false){
 async function request(path, options={}, retried=false) { await ensureSession(); try { return await realClient.request(path, options); } catch (error) { if(error.status!==401 || retried) throw error; await ensureSession(true); return request(path, options, true); } }
 export const platformProvider={
   get mode(){ return useReal?"real":"unavailable" },
+  async adminDashboard(){
+    await ensureSession();
+    const [schools, users, students, classrooms, activity, content, usage] = await Promise.all([
+      request("/admin/schools"), request("/admin/users"), request("/admin/students"), request("/admin/classrooms"), request("/admin/activity"), request("/admin/content"), request("/admin/observability/overview")
+    ]);
+    return {schools: schools.items||[], users: users.items||[], students: students.items||[], classrooms: classrooms.items||[], activity, content: content.items||[], usage};
+  },
   async dashboard(role="student"){
     await ensureSession();
     if(!useReal) throw new Error("برای مشاهده داشبورد، ابتدا وارد حساب کاربری شوید.");

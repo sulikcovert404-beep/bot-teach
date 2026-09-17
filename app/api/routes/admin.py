@@ -6,7 +6,9 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.db.models import AIUsageEvent, AuditLog, PaymentTransaction, Subscription, User, TeacherProfile, ContentVersion
+from app.db.models import (AIUsageEvent, AuditLog, PaymentTransaction, Subscription, User, TeacherProfile,
+                           ContentVersion, StudentProfile, Classroom, ClassMembership, Assignment,
+                           StudentSubmission, ExamResult, ExamAttempt)
 from app.domain.entitlements.models import SubscriptionPlan
 from app.security.canonical import require_canonical_roles
 from app.security.principal import CanonicalPrincipal, require_principal
@@ -50,6 +52,41 @@ async def admin_content(principal: CanonicalPrincipal = Depends(require_principa
         stmt = stmt.join(TeacherProfile, TeacherProfile.teacher_id == ContentVersion.owner_teacher_id).where(TeacherProfile.tenant_id == scope)
     rows = (await session.execute(stmt)).scalars().all()
     return {"items": [{"id": v.id, "owner_teacher_id": v.owner_teacher_id, "processing_state": v.processing_state, "review_state": v.review_state, "vector_sync_state": v.vector_sync_state} for v in rows]}
+
+@router.get("/students")
+async def admin_students(principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN", "SCHOOL_ADMIN")), session: AsyncSession = Depends(get_session), tenant_id: str | None = Query(default=None, max_length=64)):
+    scope = await enforce_tenant(principal, tenant_id, session)
+    stmt = (select(User.id, User.username, User.role, Classroom.tenant_id)
+            .join(StudentProfile, StudentProfile.student_id == User.id)
+            .join(ClassMembership, ClassMembership.student_id == StudentProfile.id)
+            .join(Classroom, Classroom.id == ClassMembership.classroom_id)
+            .where(User.role == "STUDENT").distinct().order_by(User.id))
+    if scope: stmt = stmt.where(Classroom.tenant_id == scope)
+    rows = (await session.execute(stmt.limit(200))).all()
+    return {"items": [{"id": r.id, "username": r.username, "role": r.role, "tenant_id": r.tenant_id} for r in rows]}
+
+@router.get("/classrooms")
+async def admin_classrooms(principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN", "SCHOOL_ADMIN")), session: AsyncSession = Depends(get_session), tenant_id: str | None = Query(default=None, max_length=64)):
+    scope = await enforce_tenant(principal, tenant_id, session)
+    stmt = select(Classroom.id, Classroom.classroom_key, Classroom.tenant_id, func.count(ClassMembership.id).label("student_count")).outerjoin(ClassMembership, ClassMembership.classroom_id == Classroom.id).group_by(Classroom.id).order_by(Classroom.id)
+    if scope: stmt = stmt.where(Classroom.tenant_id == scope)
+    rows = (await session.execute(stmt.limit(200))).all()
+    return {"items": [{"id": r.id, "classroom_key": r.classroom_key, "tenant_id": r.tenant_id, "student_count": int(r.student_count)} for r in rows]}
+
+@router.get("/activity")
+async def admin_activity(principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN", "SCHOOL_ADMIN")), session: AsyncSession = Depends(get_session), tenant_id: str | None = Query(default=None, max_length=64)):
+    scope = await enforce_tenant(principal, tenant_id, session)
+    base = select(Assignment).join(Classroom, Classroom.id == Assignment.classroom_id)
+    if scope: base = base.where(Assignment.tenant_id == scope, Classroom.tenant_id == scope)
+    assignments = (await session.execute(base)).scalars().all()
+    ids = [a.id for a in assignments]
+    submissions = 0
+    results = 0
+    if ids:
+        submissions = int((await session.execute(select(func.count(StudentSubmission.id)).where(StudentSubmission.assignment_id.in_(ids)))).scalar_one())
+        result_stmt = select(func.count(ExamResult.id)).join(ExamAttempt, ExamAttempt.id == ExamResult.attempt_id).where(ExamAttempt.assignment_id.in_(ids))
+        results = int((await session.execute(result_stmt)).scalar_one())
+    return {"assignment_count": len(assignments), "exam_linked_assignment_count": sum(a.exam_id is not None for a in assignments), "published_count": sum(a.status == "PUBLISHED" for a in assignments), "open_count": sum(a.status == "PUBLISHED" and a.close_at is None for a in assignments), "closed_count": sum(a.status == "CLOSED" for a in assignments), "submission_count": submissions, "result_count": results}
 
 
 class AuditLogResponse(BaseModel):
