@@ -1,6 +1,8 @@
 """Immutable transition assurance and certification evidence."""
 from dataclasses import dataclass
 from enum import Enum
+
+
 class TransitionCertificationOutcome(str,Enum):
  TRANSITION_CERTIFIED="TRANSITION_CERTIFIED"; TRANSITION_CERTIFIED_WITH_WARNINGS="TRANSITION_CERTIFIED_WITH_WARNINGS"; TRANSITION_NOT_CERTIFIED="TRANSITION_NOT_CERTIFIED"; TRANSITION_BLOCKED="TRANSITION_BLOCKED"; UNKNOWN="UNKNOWN"
 @dataclass(frozen=True)

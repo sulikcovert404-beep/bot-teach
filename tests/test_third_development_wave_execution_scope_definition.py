@@ -1,5 +1,6 @@
 from app.services.third_development_wave_execution_scope_definition import (
-    Outcome, ThirdDevelopmentWaveExecutionScopeDefinition,
+    Outcome,
+    ThirdDevelopmentWaveExecutionScopeDefinition,
 )
 
 

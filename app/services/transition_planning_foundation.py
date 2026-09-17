@@ -1,8 +1,10 @@
 """Immutable, provider-neutral transition planning foundation."""
+import hashlib
+import json
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-import hashlib, json
-from collections.abc import Mapping
+
 
 class TransitionOutcome(str, Enum):
     TRANSITION_READY = "TRANSITION_READY"

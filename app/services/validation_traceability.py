@@ -1,13 +1,13 @@
 """Pure, provider-neutral traceability contract for validation pipelines."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import hashlib
 import json
 import re
-from collections.abc import Iterable
 import unicodedata
+from collections.abc import Iterable
+from dataclasses import dataclass
+from enum import Enum
 
 
 class TraceEventType(str, Enum):

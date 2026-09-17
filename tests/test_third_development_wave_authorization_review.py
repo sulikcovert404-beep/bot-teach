@@ -1,5 +1,6 @@
 from app.services.third_development_wave_authorization_review import (
-    Outcome, ThirdDevelopmentWaveAuthorizationReview,
+    Outcome,
+    ThirdDevelopmentWaveAuthorizationReview,
 )
 
 

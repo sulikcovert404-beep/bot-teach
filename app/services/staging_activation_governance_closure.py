@@ -1,7 +1,12 @@
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib, json, unicodedata
+
+
 class ClosureOutcome(StrEnum):
     STAGING_GOVERNANCE_CLOSED='STAGING_GOVERNANCE_CLOSED'; STAGING_GOVERNANCE_CLOSED_WITH_WARNINGS='STAGING_GOVERNANCE_CLOSED_WITH_WARNINGS'; STAGING_GOVERNANCE_OPEN='STAGING_GOVERNANCE_OPEN'; STAGING_GOVERNANCE_BLOCKED='STAGING_GOVERNANCE_BLOCKED'; UNKNOWN='UNKNOWN'
 def _n(v:str)->str:return unicodedata.normalize('NFC',str(v)).strip()

@@ -1,10 +1,16 @@
 """Immutable final audit of the staging activation governance chain."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class FinalAuditOutcome(StrEnum):
  AUDIT_PASSED="AUDIT_PASSED"; AUDIT_PASSED_WITH_WARNINGS="AUDIT_PASSED_WITH_WARNINGS"; AUDIT_FAILED="AUDIT_FAILED"; AUDIT_BLOCKED="AUDIT_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

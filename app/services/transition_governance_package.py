@@ -1,7 +1,8 @@
 """Phase-level governance package for transition planning; no runtime side effects."""
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-from collections.abc import Mapping
+
 
 class TransitionGovernanceOutcome(str, Enum):
     TRANSITION_GOVERNANCE_READY="TRANSITION_GOVERNANCE_READY"

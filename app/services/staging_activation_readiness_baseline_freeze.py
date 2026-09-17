@@ -1,10 +1,16 @@
 """Immutable, non-authoritative staging activation readiness baseline freeze."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class StagingBaselineFreezeOutcome(StrEnum):
  STAGING_BASELINE_FROZEN="STAGING_BASELINE_FROZEN"; STAGING_BASELINE_FROZEN_WITH_WARNINGS="STAGING_BASELINE_FROZEN_WITH_WARNINGS"; STAGING_BASELINE_NOT_FROZEN="STAGING_BASELINE_NOT_FROZEN"; STAGING_BASELINE_BLOCKED="STAGING_BASELINE_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

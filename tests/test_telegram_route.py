@@ -2,7 +2,13 @@ from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
 from app.api.routes.auth import get_session
-from app.api.routes.telegram import callback_reply, get_bot_client, is_navigation_label, navigation_payload, reply_for_text
+from app.api.routes.telegram import (
+    callback_reply,
+    get_bot_client,
+    is_navigation_label,
+    navigation_payload,
+    reply_for_text,
+)
 from app.core.config import get_settings
 from app.main import app
 from app.services.telegram_bot import TelegramAPIError
@@ -154,8 +160,10 @@ def test_webhook_ignores_duplicate_update(monkeypatch) -> None:
     finally:
         app.dependency_overrides.pop(get_bot_client, None)
         app.dependency_overrides.pop(get_session, None)
-from app.services.telegram_delivery import build_delivery, validate_asset_access
 import pytest
+
+from app.services.telegram_delivery import build_delivery, validate_asset_access
+
 
 def test_delivery_methods():
     assert build_delivery(asset_type="PODCAST", chat_id=1, content="audio-id", caption="c").method == "sendAudio"

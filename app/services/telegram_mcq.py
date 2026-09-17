@@ -1,5 +1,7 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
+
 
 @dataclass(frozen=True, slots=True)
 class MCQState:
@@ -24,6 +26,7 @@ def parse_mcq_callback(data: str) -> tuple[str, int]:
     except ValueError as exc: raise ValueError("MALFORMED_CALLBACK") from exc
     return parts[1], index
 from app.services.telegram_mcq import parse_mcq_callback
+
 
 def callback_response(callback_data: str | None) -> str:
     """Return a controlled Telegram callback response; never generate content."""

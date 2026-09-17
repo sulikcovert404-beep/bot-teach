@@ -1,4 +1,7 @@
-from app.services.third_development_wave_closure_review import Outcome, ThirdDevelopmentWaveClosureReview
+from app.services.third_development_wave_closure_review import (
+    Outcome,
+    ThirdDevelopmentWaveClosureReview,
+)
 
 
 def make(**overrides):

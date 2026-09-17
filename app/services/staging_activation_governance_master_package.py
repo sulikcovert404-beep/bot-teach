@@ -1,10 +1,16 @@
 """Immutable aggregate of staging activation governance artifacts."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class MasterPackageOutcome(StrEnum):
  MASTER_READY="MASTER_READY"; MASTER_READY_WITH_WARNINGS="MASTER_READY_WITH_WARNINGS"; MASTER_NOT_READY="MASTER_NOT_READY"; MASTER_BLOCKED="MASTER_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

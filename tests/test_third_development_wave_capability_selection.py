@@ -1,4 +1,7 @@
-from app.services.third_development_wave_capability_selection import ThirdDevelopmentWaveCapabilitySelection, Outcome
+from app.services.third_development_wave_capability_selection import (
+    Outcome,
+    ThirdDevelopmentWaveCapabilitySelection,
+)
 
 
 def make(**kw):

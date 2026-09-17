@@ -1,5 +1,7 @@
-from typing import Protocol
 from dataclasses import dataclass
+from typing import Protocol
+
+
 @dataclass(frozen=True, slots=True)
 class TelegramDelivery:
  method: str

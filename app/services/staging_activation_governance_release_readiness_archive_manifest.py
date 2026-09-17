@@ -1,10 +1,16 @@
 """Immutable governance sign-off record for release-readiness evidence."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class ArchiveManifestOutcome(StrEnum):
  ARCHIVE_MANIFEST_ACCEPTED="ARCHIVE_MANIFEST_ACCEPTED"; ARCHIVE_MANIFEST_ACCEPTED_WITH_WARNINGS="ARCHIVE_MANIFEST_ACCEPTED_WITH_WARNINGS"; ARCHIVE_MANIFEST_REJECTED="ARCHIVE_MANIFEST_REJECTED"; ARCHIVE_MANIFEST_BLOCKED="ARCHIVE_MANIFEST_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

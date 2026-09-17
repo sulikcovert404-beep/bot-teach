@@ -1,10 +1,16 @@
 """Immutable readiness certification; never grants execution permission."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class CertificationOutcome(StrEnum):
  CERTIFIED_READY="CERTIFIED_READY"; CERTIFIED_READY_WITH_WARNINGS="CERTIFIED_READY_WITH_WARNINGS"; CERTIFICATION_FAILED="CERTIFICATION_FAILED"; CERTIFICATION_BLOCKED="CERTIFICATION_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

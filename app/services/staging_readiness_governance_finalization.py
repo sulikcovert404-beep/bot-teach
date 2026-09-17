@@ -1,7 +1,11 @@
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib, json, unicodedata
+
 
 class FinalizationOutcome(StrEnum):
     STAGING_GOVERNANCE_FINALIZED='STAGING_GOVERNANCE_FINALIZED'

@@ -1,4 +1,8 @@
-from app.services.transition_planning_foundation import TransitionOutcome, TransitionPlanningFoundation
+from app.services.transition_planning_foundation import (
+    TransitionOutcome,
+    TransitionPlanningFoundation,
+)
+
 
 def make(**overrides):
     d=dict(foundation_id="tp-1",current_phase_reference="readiness",future_phase_boundary="runtime",

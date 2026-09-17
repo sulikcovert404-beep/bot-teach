@@ -1,17 +1,17 @@
 """Pure stage admission composition over existing readiness evidence contracts."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import Enum
 import hashlib
 import json
 import unicodedata
-from typing import Any
 from collections.abc import Mapping
+from dataclasses import dataclass
+from enum import Enum
+from typing import Any
 
 from .environment_readiness import CapabilityStatus, EnvironmentReadinessReport
 from .readiness_evidence_gate import GateName, GateStatus, ReadinessDecision, ReadinessReport
-from .runtime_entry_decision import RuntimeStage, RuntimeEntryDecision, AdmissionOutcome
+from .runtime_entry_decision import AdmissionOutcome, RuntimeEntryDecision, RuntimeStage
 
 
 class StageAdmissionOutcome(str, Enum):

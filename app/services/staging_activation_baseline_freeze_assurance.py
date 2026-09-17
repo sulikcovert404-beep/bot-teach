@@ -1,10 +1,16 @@
 """Immutable assurance record for the staging activation baseline freeze."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class FreezeAssuranceOutcome(StrEnum):
  FREEZE_ASSURANCE_CONFIRMED="FREEZE_ASSURANCE_CONFIRMED"; FREEZE_ASSURANCE_CONFIRMED_WITH_WARNINGS="FREEZE_ASSURANCE_CONFIRMED_WITH_WARNINGS"; FREEZE_ASSURANCE_FAILED="FREEZE_ASSURANCE_FAILED"; FREEZE_ASSURANCE_BLOCKED="FREEZE_ASSURANCE_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

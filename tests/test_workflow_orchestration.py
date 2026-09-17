@@ -1,5 +1,9 @@
 from app.services.admin_authorization import Actor, AuthorizationContext, Role
-from app.services.content_commands import SubmitProcessingCommand, ApproveContentVersionCommand, PublishRequestContract
+from app.services.content_commands import (
+    ApproveContentVersionCommand,
+    PublishRequestContract,
+    SubmitProcessingCommand,
+)
 from app.services.workflow_orchestration import WorkflowDispatcher, WorkflowStatus
 
 

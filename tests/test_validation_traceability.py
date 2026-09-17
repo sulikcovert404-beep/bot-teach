@@ -1,5 +1,7 @@
 import hashlib
+
 import pytest
+
 from app.services.validation_traceability import *
 
 D = hashlib.sha256(b"x").hexdigest()

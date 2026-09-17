@@ -1,10 +1,16 @@
 """Immutable release-readiness package; packaging only, never release execution."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class ReleaseReadinessOutcome(StrEnum):
  RELEASE_READY="RELEASE_READY"; RELEASE_READY_WITH_WARNINGS="RELEASE_READY_WITH_WARNINGS"; RELEASE_NOT_READY="RELEASE_NOT_READY"; RELEASE_BLOCKED="RELEASE_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

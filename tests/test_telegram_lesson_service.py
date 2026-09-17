@@ -1,7 +1,12 @@
 import pytest
+
 from app.services.lesson_pack import LessonPackRequest, SchoolStage
 from app.services.lesson_pack_orchestrator import InMemoryAssetStore, LessonPackOrchestrator
-from app.services.telegram_lesson_service import TelegramLessonContext, deliver_persisted_lesson_pack
+from app.services.telegram_lesson_service import (
+    TelegramLessonContext,
+    deliver_persisted_lesson_pack,
+)
+
 
 @pytest.mark.asyncio
 async def test_persisted_lesson_service_delivers_four_assets():

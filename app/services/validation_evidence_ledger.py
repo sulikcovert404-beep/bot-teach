@@ -1,13 +1,13 @@
 """Provider-neutral immutable validation evidence contract."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from datetime import datetime
-from enum import StrEnum
 import hashlib
 import json
 import re
 import unicodedata
+from dataclasses import dataclass
+from datetime import datetime
+from enum import StrEnum
 from typing import Optional
 
 

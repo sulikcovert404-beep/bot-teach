@@ -1,7 +1,11 @@
 """Pure immutable governance evaluator for future validation execution."""
+import hashlib
+import json
+import re
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib, json, re, unicodedata
+
 
 class GovernanceOutcome(StrEnum):
     ALLOWED = "ALLOWED"; DENIED = "DENIED"; BLOCKED = "BLOCKED"; REQUIRES_REVIEW = "REQUIRES_REVIEW"

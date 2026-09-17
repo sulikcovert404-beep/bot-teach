@@ -1,4 +1,6 @@
 from app.services.transition_assurance_certification_package import *
+
+
 def make(**o):
  d=dict(package_id="p",planning_reference="plan",governance_reference="gov",completeness_findings=("ok",),integrity_findings=("ok",),boundary_findings=("ok",),risk_model=("low",),unresolved_risks=(),escalation_readiness=("ready",),rollback_semantics=("defined",),recovery_boundary=("bounded",),ownership_transfer=("defined",),responsibility_consistency=("ok",),certification_record="record",trace_reference="trace",package_digest="digest"); d.update(o); return TransitionAssuranceCertificationPackage(**d)
 def test_certified(): assert make().outcome() is TransitionCertificationOutcome.TRANSITION_CERTIFIED

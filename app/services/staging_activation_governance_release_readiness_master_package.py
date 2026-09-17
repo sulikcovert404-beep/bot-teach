@@ -1,10 +1,16 @@
 """Immutable final review of staging governance release-readiness evidence."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class ReleaseMasterOutcome(StrEnum):
  RELEASE_READY_CONFIRMED="RELEASE_READY_CONFIRMED"; RELEASE_READY_CONFIRMED_WITH_WARNINGS="RELEASE_READY_CONFIRMED_WITH_WARNINGS"; RELEASE_NOT_READY="RELEASE_NOT_READY"; RELEASE_BLOCKED="RELEASE_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

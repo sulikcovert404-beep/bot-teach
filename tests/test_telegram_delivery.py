@@ -1,6 +1,8 @@
 import pytest
+
 from app.services.lesson_pack_orchestrator import DeliveryAsset
 from app.services.telegram_delivery import deliver_assets
+
 
 @pytest.mark.asyncio
 async def test_deliver_assets_dispatches_media_without_generation():

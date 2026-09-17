@@ -1,8 +1,15 @@
 from __future__ import annotations
+
 from dataclasses import dataclass
+
 from app.services.lesson_pack import LessonPackRequest
 from app.services.lesson_pack_orchestrator import LessonPackOrchestrator
-from app.services.telegram_delivery import deliver_assets, validate_asset_access, TelegramMediaSender
+from app.services.telegram_delivery import (
+    TelegramMediaSender,
+    deliver_assets,
+    validate_asset_access,
+)
+
 
 @dataclass(frozen=True, slots=True)
 class TelegramLessonContext:

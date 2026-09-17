@@ -1,10 +1,16 @@
 """Immutable governance sign-off record for release-readiness evidence."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class SignOffOutcome(StrEnum):
  SIGNOFF_ACCEPTED="SIGNOFF_ACCEPTED"; SIGNOFF_ACCEPTED_WITH_WARNINGS="SIGNOFF_ACCEPTED_WITH_WARNINGS"; SIGNOFF_REJECTED="SIGNOFF_REJECTED"; SIGNOFF_BLOCKED="SIGNOFF_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:

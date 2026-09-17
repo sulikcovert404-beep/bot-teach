@@ -1,12 +1,12 @@
 """Pure validation gate contracts for the admin pipeline."""
 from __future__ import annotations
 
+import json
+import unicodedata
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass
 from enum import Enum
-import json
 from typing import Any, Protocol
-from collections.abc import Mapping, Sequence
-import unicodedata
 
 GATE_ORDER: tuple[str, ...] = (
     "configuration_valid",

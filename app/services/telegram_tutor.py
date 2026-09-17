@@ -1,11 +1,21 @@
 from __future__ import annotations
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+
 from app.core.config import get_settings
 from app.db.models import ClassMembership, Classroom, StudentProfile, Subscription, User
 from app.domain.entitlements.models import FeatureCode
 from app.domain.entitlements.service import entitlement_for_subscription
-from app.services.ai_gateway import GeminiProvider, ModelRouter, ProviderAuthError, ProviderQuotaError, ProviderResponseError, ProviderTransientError, StructuredLoggingAIProviderObserver
+from app.services.ai_gateway import (
+    GeminiProvider,
+    ModelRouter,
+    ProviderAuthError,
+    ProviderQuotaError,
+    ProviderResponseError,
+    ProviderTransientError,
+    StructuredLoggingAIProviderObserver,
+)
 from app.services.ai_tutor import AITutor
 from app.services.document_ingestion import DatabaseRetriever
 from app.services.usage_repository import record_usage
