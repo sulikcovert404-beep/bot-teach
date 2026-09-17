@@ -14,6 +14,9 @@ const compactFeedback = document.querySelector("#compact-feedback");
 
 let isRequestInProgress = false;
 let accessToken = sessionStorage.getItem("accessToken") || null;
+function safeText(value) {
+  return String(value ?? "").replace(/[&<>\"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" }[char]));
+}
 function setAccessToken(token) {
   accessToken = token || null;
   if (accessToken) sessionStorage.setItem("accessToken", accessToken);
@@ -546,69 +549,61 @@ async function loadPlanCatalog() {
 }
 
 let activeExamQuestions = [];
+let activeAttemptId = null;
 
 async function loadExamQuestions() {
   const container = document.querySelector("#exam-questions-list");
+  const submitExamBtn = document.querySelector("#submit-exam-btn");
   if (!container || !accessToken) return;
+  container.innerHTML = "<div class='loading'>در حال دریافت آزمون‌های مجاز…</div>";
   try {
-    const res = await fetch("/api/v1/exams/bank", {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
-    if (res.ok) {
-      const data = await res.json();
-      activeExamQuestions = data.questions || [];
-      container.innerHTML = activeExamQuestions.map((q, idx) => `
-        <div style="background: rgba(0,0,0,0.02); border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px;">
-          <div style="font-weight: 600; font-size: 0.95rem; margin-bottom: 8px;">سوال ${idx + 1}: ${q.prompt}</div>
-          <div style="display: flex; flex-direction: column; gap: 6px;">
-            ${q.options.map(opt => `
-              <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer;">
-                <input type="radio" name="q_${q.id}" value="${opt}" />
-                <span>${opt}</span>
-              </label>
-            `).join("")}
-          </div>
-        </div>
-      `).join("");
+    const res = await fetch("/api/v1/student/v1/assignments", { headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!res.ok) throw new Error(res.status === 401 ? "احراز هویت منقضی شده است." : "دریافت آزمون‌ها ناموفق بود.");
+    const data = await res.json();
+    const assignments = data.assignments || [];
+    if (!assignments.length) {
+      container.innerHTML = "<div class='empty'>آزمون فعالی برای شما وجود ندارد.</div>";
+      if (submitExamBtn) submitExamBtn.hidden = true;
+      return;
     }
+    const assignment = assignments[0];
+    container.innerHTML = `<div class='panel'><strong>${safeText(assignment.title || "آزمون")}</strong><p>${safeText(assignment.instructions || "آزمون آماده شروع است.")}</p><button type='button' id='start-exam-btn'>شروع آزمون</button><p id='exam-flow-status' aria-live='polite'></p></div>`;
+    if (submitExamBtn) submitExamBtn.hidden = true;
+    document.querySelector("#start-exam-btn")?.addEventListener("click", async () => {
+      const status = document.querySelector("#exam-flow-status");
+      status.textContent = "در حال شروع…";
+      try {
+        const started = await fetch(`/api/v1/student/exam-assignments/${assignment.id}/attempts`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } });
+        if (!started.ok) throw new Error(started.status === 403 ? "این آزمون اکنون قابل شروع نیست." : "شروع آزمون ناموفق بود.");
+        const payload = await started.json();
+        activeAttemptId = payload.attempt_id;
+        activeExamQuestions = payload.question_snapshot || [];
+        container.innerHTML = activeExamQuestions.map((q, idx) => `<div class='exam-question'><div><strong>سوال ${idx + 1}:</strong> ${safeText(q.prompt)}</div>${(q.options || []).map(opt => `<label><input type='radio' name='q_${q.id}' value='${safeText(opt)}'> ${safeText(opt)}</label>`).join("")}</div>`).join("");
+        if (submitExamBtn) { submitExamBtn.hidden = false; submitExamBtn.disabled = false; }
+      } catch (err) { status.textContent = err.message || "خطا در شروع آزمون."; }
+    });
   } catch (err) {
-    console.error("Failed to load questions:", err);
+    container.innerHTML = `<div class='error'>${safeText(err.message || "خطا در دریافت آزمون‌ها.")}</div>`;
   }
 }
 
 const submitExamBtn = document.querySelector("#submit-exam-btn");
-if (submitExamBtn) {
-  submitExamBtn.addEventListener("click", () => {
-    const reportCard = document.querySelector("#exam-report-card");
-    const summary = document.querySelector("#exam-report-summary");
-    const details = document.querySelector("#exam-report-details");
-    
-    let correct = 0;
-    const total = activeExamQuestions.length;
-    const results = [];
-
-    activeExamQuestions.forEach(q => {
-      const selected = document.querySelector(`input[name="q_${q.id}"]:checked`)?.value;
-      const isCorrect = selected === q.correct_option;
-      if (isCorrect) correct++;
-      results.push({ prompt: q.prompt, selected, correct: q.correct_option, isCorrect });
-    });
-
-    const scorePct = total > 0 ? Math.round((correct / total) * 100) : 0;
-
-    summary.innerHTML = `<strong>نمره کل شما: ${scorePct}٪ (${correct} از ${total} صحیح)</strong> — ${scorePct >= 70 ? 'قبولی با تسلط عالی ✅' : 'نیاز به مرور مباحث ⚠️'}`;
-    details.innerHTML = results.map(r => `
-      <div style="padding: 6px; border-radius: 6px; background: ${r.isCorrect ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.08)'};">
-        <div>${r.prompt}</div>
-        <div style="font-size: 0.75rem; color: ${r.isCorrect ? '#059669' : '#dc2626'};">
-          پاسخ شما: ${r.selected || 'بدون پاسخ'} | پاسخ صحیح: ${r.correct}
-        </div>
-      </div>
-    `).join("");
-
+if (submitExamBtn) submitExamBtn.addEventListener("click", async () => {
+  if (!activeAttemptId || submitExamBtn.disabled) return;
+  submitExamBtn.disabled = true;
+  const answers = Object.fromEntries(activeExamQuestions.map(q => [String(q.id), document.querySelector(`input[name="q_${q.id}"]:checked`)?.value]).filter(([, value]) => value !== undefined));
+  const reportCard = document.querySelector("#exam-report-card");
+  const summary = document.querySelector("#exam-report-summary");
+  try {
+    const save = await fetch(`/api/v1/student/exam-attempts/${activeAttemptId}/answers`, { method: "PATCH", headers: { Authorization: `Bearer ${accessToken}`, "Content-Type": "application/json" }, body: JSON.stringify({ answers }) });
+    if (!save.ok) throw new Error("ذخیره پاسخ‌ها ناموفق بود.");
+    const submit = await fetch(`/api/v1/student/exam-attempts/${activeAttemptId}/submit`, { method: "POST", headers: { Authorization: `Bearer ${accessToken}` } });
+    if (!submit.ok) throw new Error(submit.status === 409 ? "آزمون قبلاً ثبت شده است." : "ثبت آزمون ناموفق بود.");
+    const result = await submit.json();
+    summary.textContent = `کارنامه ثبت شد: ${result.score} از ${result.max_score}`;
     reportCard.hidden = false;
-  });
-}
+  } catch (err) { summary.textContent = err.message || "خطا در ثبت آزمون."; reportCard.hidden = false; submitExamBtn.disabled = false; }
+});
 
 async function loadStudentDashboard() {
   const view = document.querySelector("#student-view");
