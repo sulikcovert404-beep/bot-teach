@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -14,11 +14,73 @@ from app.security.canonical import require_canonical_roles
 from app.security.principal import CanonicalPrincipal, require_principal
 from app.security.tenant_scope import enforce_tenant
 from app.services.audit_repository import record_audit_log
+from app.services.test_identity_provisioning import ProvisioningDenied, provision_test_identity
 from app.db.base import set_tenant_context
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 _ADMIN_ROLES = ("ADMIN", "SUPER_ADMIN")
+
+
+class TestIdentityProvisionRequest(BaseModel):
+    provider: str = Field(min_length=1, max_length=32)
+    subject: str = Field(min_length=1, max_length=255)
+    username: str | None = Field(default=None, max_length=255)
+    role: str = Field(min_length=1, max_length=32)
+    tenant_id: str | None = Field(default=None, max_length=64)
+    active_until: datetime | None = None
+    idempotency_key: str = Field(min_length=1, max_length=128)
+    audit_reason: str = Field(min_length=1, max_length=500)
+
+
+class TestIdentityProvisionResponse(BaseModel):
+    status: str
+    user_id: int
+    role: str
+    tenant_id: str | None
+    audit_id: int
+
+
+@router.post("/test-identities", response_model=TestIdentityProvisionResponse, status_code=201)
+async def provision_test_identity_endpoint(
+    payload: TestIdentityProvisionRequest,
+    principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN")),
+    session: AsyncSession = Depends(get_session),  # noqa: B008
+) -> TestIdentityProvisionResponse:
+    """Provision a controlled test identity; subscriptions remain separate."""
+    try:
+        actor_id = int(principal.subject)
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(status_code=403, detail="Provisioning actor is invalid") from exc
+    actor = await session.scalar(select(User).where(User.id == actor_id))
+    if actor is None or actor.role != "SUPER_ADMIN":
+        raise HTTPException(status_code=403, detail="Canonical owner required")
+    if payload.active_until is not None:
+        # Expiry is part of the contract but is not persisted until the
+        # entitlement gate is separately approved.
+        raise HTTPException(status_code=400, detail="active_until requires entitlement gate")
+    try:
+        result = await provision_test_identity(
+            session,
+            actor_user_id=actor_id,
+            provider=payload.provider,
+            subject=payload.subject,
+            username=payload.username,
+            role=payload.role,
+            tenant_id=payload.tenant_id,
+            audit_reason=payload.audit_reason,
+            idempotency_key=payload.idempotency_key,
+        )
+    except ProvisioningDenied as exc:
+        await session.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return TestIdentityProvisionResponse(
+        status=result.status,
+        user_id=result.user_id,
+        role=result.role,
+        tenant_id=result.tenant_id,
+        audit_id=result.audit_id,
+    )
 
 @router.get("/schools")
 async def admin_schools(principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN", "SCHOOL_ADMIN")), session: AsyncSession = Depends(get_session), tenant_id: str | None = Query(default=None, max_length=64)):
@@ -399,7 +461,7 @@ async def get_content_curriculum(
     session: AsyncSession = Depends(get_session),
 ):
     from sqlalchemy.orm import selectinload
-    from app.db.models import Book, Chapter, Lesson
+    from app.db.models import Book, Chapter
 
     books = (
         await session.execute(
