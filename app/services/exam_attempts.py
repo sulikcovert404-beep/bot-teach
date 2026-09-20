@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import func, select
@@ -31,12 +31,12 @@ async def start_attempt(session: AsyncSession, *, assignment_id: int, student_id
     assignment = await session.scalar(select(Assignment).where(Assignment.id == assignment_id, Assignment.tenant_id == tenant_id, Assignment.exam_id.is_not(None)).with_for_update())
     if assignment is None or assignment.status != "PUBLISHED":
         raise ExamAccessError("assignment unavailable")
-    now = datetime.now(timezone.utc)
-    if assignment.publish_at is not None and now < assignment.publish_at.replace(tzinfo=timezone.utc):
+    now = datetime.now(UTC)
+    if assignment.publish_at is not None and now < assignment.publish_at.replace(tzinfo=UTC):
         raise ExamAccessError("assignment not yet available")
-    if assignment.due_at is not None and now > assignment.due_at.replace(tzinfo=timezone.utc):
+    if assignment.due_at is not None and now > assignment.due_at.replace(tzinfo=UTC):
         raise ExamAccessError("assignment window closed")
-    if assignment.close_at is not None and now >= assignment.close_at.replace(tzinfo=timezone.utc):
+    if assignment.close_at is not None and now >= assignment.close_at.replace(tzinfo=UTC):
         raise ExamAccessError("assignment closed")
     profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == student_id))
     membership = await session.scalar(
@@ -70,7 +70,7 @@ async def save_answers(session: AsyncSession, *, attempt_id: int, student_id: in
         raise ExamAccessError("attempt unavailable")
     attempt.answer_payload = json.dumps(answers, ensure_ascii=False, sort_keys=True)
     attempt.status = "IN_PROGRESS"
-    attempt.last_saved_at = datetime.now(timezone.utc)
+    attempt.last_saved_at = datetime.now(UTC)
     return attempt
 
 
@@ -79,12 +79,12 @@ async def submit_attempt(session: AsyncSession, *, attempt_id: int, student_id: 
     if attempt is None or attempt.status not in {"STARTED", "IN_PROGRESS", "SUBMITTED", "GRADED"}:
         raise ExamAccessError("attempt unavailable")
     assignment = await session.scalar(select(Assignment).where(Assignment.id == attempt.assignment_id, Assignment.tenant_id == tenant_id))
-    now = datetime.now(timezone.utc)
-    if assignment is None or (assignment.publish_at is not None and now < assignment.publish_at.replace(tzinfo=timezone.utc)):
+    now = datetime.now(UTC)
+    if assignment is None or (assignment.publish_at is not None and now < assignment.publish_at.replace(tzinfo=UTC)):
         raise ExamAccessError("assignment not yet available")
-    if assignment.due_at is not None and now > assignment.due_at.replace(tzinfo=timezone.utc):
+    if assignment.due_at is not None and now > assignment.due_at.replace(tzinfo=UTC):
         raise ExamAccessError("assignment window closed")
-    if assignment.close_at is not None and now >= assignment.close_at.replace(tzinfo=timezone.utc):
+    if assignment.close_at is not None and now >= assignment.close_at.replace(tzinfo=UTC):
         raise ExamAccessError("assignment closed")
     existing = await session.scalar(select(ExamResult).where(ExamResult.attempt_id == attempt.id, ExamResult.tenant_id == tenant_id))
     if existing is not None:
@@ -92,9 +92,9 @@ async def submit_attempt(session: AsyncSession, *, attempt_id: int, student_id: 
     snapshot = json.loads(attempt.question_snapshot)
     answers = json.loads(attempt.answer_payload or "{}")
     score = sum(1 for q in snapshot if answers.get(str(q["id"])) == q.get("correct_option"))
-    result = ExamResult(tenant_id=tenant_id, attempt_id=attempt.id, score=float(score), max_score=float(len(snapshot)), grading_status="GRADED", grading_source="server", graded_at=datetime.now(timezone.utc))
+    result = ExamResult(tenant_id=tenant_id, attempt_id=attempt.id, score=float(score), max_score=float(len(snapshot)), grading_status="GRADED", grading_source="server", graded_at=datetime.now(UTC))
     session.add(result)
     attempt.status = "GRADED"
-    attempt.submitted_at = datetime.now(timezone.utc)
+    attempt.submitted_at = datetime.now(UTC)
     await session.flush()
     return result

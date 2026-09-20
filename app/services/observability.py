@@ -9,12 +9,12 @@ import json
 import uuid
 from collections.abc import Callable, Mapping
 from dataclasses import asdict, dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 
 def _timestamp(value: datetime | None = None) -> str:
-    instant = (value or datetime.now(timezone.utc)).astimezone(timezone.utc)
+    instant = (value or datetime.now(UTC)).astimezone(UTC)
     return instant.isoformat(timespec="microseconds").replace("+00:00", "Z")
 
 
@@ -120,7 +120,7 @@ class ObservabilityHook:
 
     def __init__(self, observer: ObservabilityObserver, clock: Callable[[], datetime] | None = None) -> None:
         self._observer = observer
-        self._clock = clock or (lambda: datetime.now(timezone.utc))
+        self._clock = clock or (lambda: datetime.now(UTC))
         self.observer_failures = 0
 
     def project(self, *, context: TraceContext, metric_name: str, result_status: str,

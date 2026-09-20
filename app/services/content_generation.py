@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 from typing import Protocol
 
 from sqlalchemy import select, update
@@ -56,11 +56,11 @@ class GenerationService:
             raise ValueError("INVALID_OUTPUT")
         asset = GeneratedAsset(job_id=job.id, asset_type=job.asset_type, content_json=raw,
             content_hash=hashlib.sha256(raw.encode()).hexdigest(), review_state="DRAFT")
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         session.add(GenerationAttempt(job_id=job.id, outcome="COMPLETED", token_usage=0, started_at=now, completed_at=now, provider="mock", model="mock"))
         session.add(asset)
         job.status = "COMPLETED"
-        job.completed_at = datetime.now(timezone.utc)
+        job.completed_at = datetime.now(UTC)
         await session.flush()
         return asset
 
@@ -71,7 +71,7 @@ class GenerationService:
         """Run one job through the provider-neutral gateway and persist a draft asset."""
         job.status = "PROCESSING"
         job.attempt_count += 1
-        started = datetime.now(timezone.utc)
+        started = datetime.now(UTC)
         try:
             response = await gateway.generate(
                 AIRequest(content_context=source_text, task_type=job.asset_type,
@@ -83,11 +83,11 @@ class GenerationService:
                 content_hash=hashlib.sha256(raw.encode()).hexdigest(), review_state="DRAFT")
             session.add(GenerationAttempt(job_id=job.id, outcome="COMPLETED", provider=response.provider,
                 model=response.model, token_usage=response.input_tokens + response.output_tokens,
-                started_at=started, completed_at=datetime.now(timezone.utc), cost=response.estimated_cost))
+                started_at=started, completed_at=datetime.now(UTC), cost=response.estimated_cost))
             session.add(asset)
             job.provider, job.model = response.provider, response.model
             job.status = "COMPLETED"
-            job.completed_at = datetime.now(timezone.utc)
+            job.completed_at = datetime.now(UTC)
             await session.flush()
             return asset
         except Exception as exc:
@@ -96,7 +96,7 @@ class GenerationService:
 
     async def claim_next(self, session: AsyncSession, *, worker_id: str = "worker", lease_seconds: int = 300) -> ContentGenerationJob | None:
         """Claim one pending job; the transaction boundary provides the lease."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         result = await session.execute(select(ContentGenerationJob).where(
             (ContentGenerationJob.status == "PENDING") |
             ((ContentGenerationJob.status == "PROCESSING") & (ContentGenerationJob.lease_expires_at < now))
