@@ -2,7 +2,7 @@ from app.services.rag_integration_impact_review_wave import Outcome, RAGIntegrat
 
 
 def make(**kw):
-    b=dict(consumers=("tutor",), downstream_behavior=("ground",), compatibility_boundaries=("legacy",), affected_interfaces=("GroundedContext",), required_updates=("tests",), backward_compatibility=("preserve",), existing_tests=("rag",), missing_scenarios=("conflict",), future_regression_needs=("threshold",), approved_decision="ready", trace_reference="t")
+    b={"consumers": ("tutor",), "downstream_behavior": ("ground",), "compatibility_boundaries": ("legacy",), "affected_interfaces": ("GroundedContext",), "required_updates": ("tests",), "backward_compatibility": ("preserve",), "existing_tests": ("rag",), "missing_scenarios": ("conflict",), "future_regression_needs": ("threshold",), "approved_decision": "ready", "trace_reference": "t"}
     b.update(kw); return RAGIntegrationImpactReviewWave(**b)
 
 

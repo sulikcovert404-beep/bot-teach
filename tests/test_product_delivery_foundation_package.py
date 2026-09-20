@@ -5,10 +5,10 @@ from app.services.product_delivery_foundation_package import (
 
 
 def make(**kw):
-    b = dict(capability_inventory=("rag",), feature_boundaries=("admin",), business_objectives=("education",),
-             success_criteria=("verified",), delivery_streams=("backend",), component_ownership=("team",),
-             implementation_roadmap=("phase1",), dependency_ordering=("contracts",), testing_strategy=("unit",),
-             acceptance_criteria=("reviewed",), trace_reference="t")
+    b = {"capability_inventory": ("rag",), "feature_boundaries": ("admin",), "business_objectives": ("education",),
+             "success_criteria": ("verified",), "delivery_streams": ("backend",), "component_ownership": ("team",),
+             "implementation_roadmap": ("phase1",), "dependency_ordering": ("contracts",), "testing_strategy": ("unit",),
+             "acceptance_criteria": ("reviewed",), "trace_reference": "t"}
     b.update(kw); return ProductDeliveryFoundationPackage(**b)
 
 

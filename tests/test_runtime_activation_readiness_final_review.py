@@ -7,7 +7,7 @@ from app.services.runtime_activation_readiness_final_review import (
 
 
 def make_review(**kwargs):
-    base = dict(review_id="r1", readiness_assurance_bundle_reference="bundle:1", readiness_baseline_freeze_reference="freeze:1", governance_closure_reference="closure:1", activation_control_plane_reference="control:1", activation_decision_reference="decision:1", cross_layer_findings=(), boundary_assertions=("runtime prohibited",), trace_reference="trace:1")
+    base = {"review_id": "r1", "readiness_assurance_bundle_reference": "bundle:1", "readiness_baseline_freeze_reference": "freeze:1", "governance_closure_reference": "closure:1", "activation_control_plane_reference": "control:1", "activation_decision_reference": "decision:1", "cross_layer_findings": (), "boundary_assertions": ("runtime prohibited",), "trace_reference": "trace:1"}
     base.update(kwargs)
     return RuntimeActivationReadinessFinalReview(**base)
 

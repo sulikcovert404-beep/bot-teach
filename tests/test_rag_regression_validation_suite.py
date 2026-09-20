@@ -2,7 +2,7 @@ from app.services.rag_regression_validation_suite import Outcome, RAGRegressionV
 
 
 def make(**kw):
-    b=dict(baseline_scenarios=("basic",), expected_grounding_states=("no_source",), failure_cases=("empty",), retrieval_request_validation=("limits",), source_guardian_behavior=("mapping",), confidence_outcomes=("low",), acceptance_criteria=("pass",), edge_cases=("rtl",), compatibility_checks=("legacy",), validated_behaviors=("threshold",), trace_reference="t")
+    b={"baseline_scenarios": ("basic",), "expected_grounding_states": ("no_source",), "failure_cases": ("empty",), "retrieval_request_validation": ("limits",), "source_guardian_behavior": ("mapping",), "confidence_outcomes": ("low",), "acceptance_criteria": ("pass",), "edge_cases": ("rtl",), "compatibility_checks": ("legacy",), "validated_behaviors": ("threshold",), "trace_reference": "t"}
     b.update(kw); return RAGRegressionValidationSuite(**b)
 
 

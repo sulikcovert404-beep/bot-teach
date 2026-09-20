@@ -7,7 +7,7 @@ from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToke
 
 def make(**kw):
     r = ReferenceToken("ref", "sha256:x")
-    values = dict(activation_control_plane_reference=r, activation_decision_reference=r, activation_review_reference=r, runtime_entry_consolidation_reference=r, governance_freeze_reference=r, baseline_manifest_reference=r, trace_reference=r, boundary_assertions=("runtime_activation=PROHIBITED", "runtime_admission=PROHIBITED", "execution=false"))
+    values = {"activation_control_plane_reference": r, "activation_decision_reference": r, "activation_review_reference": r, "runtime_entry_consolidation_reference": r, "governance_freeze_reference": r, "baseline_manifest_reference": r, "trace_reference": r, "boundary_assertions": ("runtime_activation=PROHIBITED", "runtime_admission=PROHIBITED", "execution=false")}
     values.update(kw)
     return RuntimeActivationGovernanceClosure("c1", **values)
 

@@ -5,7 +5,7 @@ from app.services.rag_confidence_conflict_decision_wave import (
 
 
 def make(**kw):
-    b=dict(conflict_detection_semantics=("version",), source_precedence_rules=("approved",), resolution_outcomes=("report",), confidence_bands=("low",), threshold_policy=("fixed",), scoring_interpretation=("retrieval",), valid_source=("sufficient",), low_confidence=("warn",), conflicting_sources=("escalate",), no_source=("refuse",), backward_compatibility=("preserve",), required_changes=("contract",), approved_semantics=("matrix",), future_implementation_boundary=("runtime",), trace_reference="t")
+    b={"conflict_detection_semantics": ("version",), "source_precedence_rules": ("approved",), "resolution_outcomes": ("report",), "confidence_bands": ("low",), "threshold_policy": ("fixed",), "scoring_interpretation": ("retrieval",), "valid_source": ("sufficient",), "low_confidence": ("warn",), "conflicting_sources": ("escalate",), "no_source": ("refuse",), "backward_compatibility": ("preserve",), "required_changes": ("contract",), "approved_semantics": ("matrix",), "future_implementation_boundary": ("runtime",), "trace_reference": "t"}
     b.update(kw); return RAGConfidenceConflictDecisionWave(**b)
 
 

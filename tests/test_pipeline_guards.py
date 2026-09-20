@@ -11,13 +11,13 @@ from app.services.pipeline_guards import (
 
 
 def candidate(**overrides):
-    values = dict(
-        version_id=1,
-        processing_state="VALIDATED",
-        review_state="APPROVED",
-        vector_sync_state="VECTOR_SYNCED",
-        pipeline_digest="d",
-    )
+    values = {
+        "version_id": 1,
+        "processing_state": "VALIDATED",
+        "review_state": "APPROVED",
+        "vector_sync_state": "VECTOR_SYNCED",
+        "pipeline_digest": "d",
+    }
     values.update(overrides)
     return PublicationCandidate(**values)
 

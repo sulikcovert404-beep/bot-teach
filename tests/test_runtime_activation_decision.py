@@ -6,7 +6,7 @@ from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToke
 
 def ref(i="r",s=ReferenceStatus.VALID): return ReferenceToken(i,"sha256:"+i,s)
 def dec(**kw):
- d=dict(decision_id="d1",activation_governance_review_reference=ref("gr"),activation_readiness_package_reference=ref("p"),runtime_entry_decision_reference=ref("e"),governance_freeze_reference=ref("g"),baseline_manifest_reference=ref("b"),change_control_reference=ref("c"),consistency_audit_reference=ref("a"),decision_reason="زنجیره معتبر است",trace_reference=ref("t"));d.update(kw);return RuntimeActivationDecision(**d)
+ d={"decision_id": "d1","activation_governance_review_reference": ref("gr"),"activation_readiness_package_reference": ref("p"),"runtime_entry_decision_reference": ref("e"),"governance_freeze_reference": ref("g"),"baseline_manifest_reference": ref("b"),"change_control_reference": ref("c"),"consistency_audit_reference": ref("a"),"decision_reason": "زنجیره معتبر است","trace_reference": ref("t")};d.update(kw);return RuntimeActivationDecision(**d)
 def test_allowed_and_deterministic():
  d=dec();assert evaluate_runtime_activation_decision(d) is ActivationDecisionOutcome.ACTIVATION_ALLOWED;assert dec().canonical_bytes()==d.canonical_bytes();assert d.payload()["executable"] is False
 def test_warning_and_blocked():

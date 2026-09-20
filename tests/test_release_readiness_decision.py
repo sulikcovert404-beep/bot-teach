@@ -7,7 +7,7 @@ from app.services.release_readiness_decision import *
 
 
 def kwargs():
-    return dict(release_reference="rel-1", evaluated_contracts=("c1",), evidence_summary=("e1",), validation_summary=("v1",), transition_summary=("t1",), trace_reference="trace-1")
+    return {"release_reference": "rel-1", "evaluated_contracts": ("c1",), "evidence_summary": ("e1",), "validation_summary": ("v1",), "transition_summary": ("t1",), "trace_reference": "trace-1"}
 
 def test_ready_and_immutable():
     status, d = resolve_readiness(**kwargs()); assert status is ReadinessOutcome.READY and d.verify_digest()
