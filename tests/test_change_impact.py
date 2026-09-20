@@ -1,5 +1,5 @@
-from dataclasses import FrozenInstanceError
 import unicodedata
+from dataclasses import FrozenInstanceError
 
 import pytest
 
