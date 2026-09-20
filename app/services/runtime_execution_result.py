@@ -129,9 +129,7 @@ def validate_execution_result(
         return False
     if admission_bundle is not None and (validate_runtime_admission_bundle(admission_bundle) is not BundleOutcome.VALID or result.admission_bundle_reference.digest != admission_bundle.bundle_digest):
         return False
-    if boundary is not None and admission_bundle is not None and boundary.admission_bundle_reference.digest != admission_bundle.bundle_digest:
-        return False
-    return True
+    return not (boundary is not None and admission_bundle is not None and boundary.admission_bundle_reference.digest != admission_bundle.bundle_digest)
 
 
 def build_execution_result(

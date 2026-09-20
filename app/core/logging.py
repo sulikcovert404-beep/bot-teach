@@ -136,7 +136,7 @@ class RequestLoggingMiddleware:
                 ]
                 headers.append((b"x-request-id", request_id.encode()))
                 raw_path = scope.get("path", "")
-                is_mini_app = raw_path.startswith("/mini-app") or raw_path.startswith("/static")
+                is_mini_app = raw_path.startswith(("/mini-app", "/static"))
                 sec_headers = [
                     (b"x-content-type-options", b"nosniff"),
                     (b"referrer-policy", b"no-referrer"),

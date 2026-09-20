@@ -47,6 +47,5 @@ def validate_snapshot(snapshot:RuntimeContractReadinessSnapshot,status:SnapshotS
  if not snapshot.digest_matches():return False
  refs=(*snapshot.evaluated_contracts,snapshot.integration_review_reference,snapshot.release_readiness_reference,*snapshot.evidence_references,snapshot.trace_reference,snapshot.snapshot_timestamp_reference)
  if any(x.status is not ReferenceStatus.VALID for x in refs):return status in (SnapshotStatus.BLOCKED,SnapshotStatus.NOT_READY,SnapshotStatus.UNKNOWN)
- if status is SnapshotStatus.READY and (not snapshot.evaluated_contracts or not snapshot.evidence_references):return False
- return True
+ return not (status is SnapshotStatus.READY and (not snapshot.evaluated_contracts or not snapshot.evidence_references))
 def build_snapshot(*,snapshot_id:str,evaluated_contracts:Iterable[ReferenceToken],integration_review_reference:ReferenceToken,release_readiness_reference:ReferenceToken,evidence_references:Iterable[ReferenceToken],trace_reference:ReferenceToken,snapshot_timestamp_reference:ReferenceToken)->RuntimeContractReadinessSnapshot:return RuntimeContractReadinessSnapshot(snapshot_id,tuple(evaluated_contracts),integration_review_reference,release_readiness_reference,tuple(evidence_references),trace_reference,snapshot_timestamp_reference)
