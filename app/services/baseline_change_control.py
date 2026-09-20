@@ -59,7 +59,7 @@ class BaselineChangeControl:
     def __post_init__(self) -> None:
         if not self.change_request_id or not self.baseline_reference or not self.trace_reference:
             raise ValueError("change identity and references are required")
-        object.__setattr__(self, "proposed_changes", tuple(sorted(set(unicodedata.normalize("NFC", x) for x in self.proposed_changes))))
+        object.__setattr__(self, "proposed_changes", tuple(sorted({unicodedata.normalize("NFC", x) for x in self.proposed_changes})))
         _reject(self.payload())
         if self.decision_digest and self.decision_digest != self.compute_digest(): raise ValueError("decision digest mismatch")
         if not self.decision_digest: object.__setattr__(self, "decision_digest", self.compute_digest())

@@ -27,7 +27,7 @@ class ValidationExecutionRequest:
         for n in ("validation_id", "plan_version", "requester_reference", "authorization_context", "evidence_expectation", "request_digest"):
             object.__setattr__(self, n, _text(getattr(self, n), n))
         caps = self.required_capabilities if not isinstance(self.required_capabilities, str) else (self.required_capabilities,)
-        object.__setattr__(self, "required_capabilities", tuple(sorted(set(_text(x, "required_capabilities") for x in caps))))
+        object.__setattr__(self, "required_capabilities", tuple(sorted({_text(x, "required_capabilities") for x in caps})))
         _safe((self.requester_reference, self.authorization_context, self.evidence_expectation, *self.required_capabilities))
     def as_dict(self):
         return {"authorization_context": self.authorization_context, "evidence_expectation": self.evidence_expectation, "plan_version": self.plan_version, "requester_reference": self.requester_reference, "required_capabilities": list(self.required_capabilities), "request_digest": self.request_digest, "validation_id": self.validation_id}
