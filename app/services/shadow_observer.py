@@ -151,7 +151,7 @@ def _critical(comparison: ShadowComparison) -> bool:
 
 
 def _artifact_hash(comparison: ShadowComparison, decision: EvidenceDecision, config: ShadowObserverConfig) -> str:
-    payload = "|".join((comparison.to_canonical_json(), decision.to_canonical_json(), config.policy_version))
+    payload = f"{comparison.to_canonical_json()}|{decision.to_canonical_json()}|{config.policy_version}"
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 

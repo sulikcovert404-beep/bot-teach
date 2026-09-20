@@ -116,7 +116,7 @@ class VersionGraph:
         p = { _clean(k, "version"): (None if v is None else _clean(v, "parent")) for k, v in self.parents.items() }
         s = { _clean(k, "version"): (None if v is None else _clean(v, "superseded")) for k, v in self.superseded.items() }
         object.__setattr__(self, "parents", p); object.__setattr__(self, "superseded", s)
-        for child, parent in p.items():
+        for parent in p.values():
             if parent is not None and parent not in p: raise TransitionError("broken version graph")
         for version in p:
             seen: set[str] = set(); cur: str | None = version
