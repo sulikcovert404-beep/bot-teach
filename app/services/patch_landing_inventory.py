@@ -33,7 +33,7 @@ class InventoryEntry:
     classification: InventoryClassification = InventoryClassification.UNKNOWN
     digest: str = ""
 
-    def with_digest(self) -> "InventoryEntry":
+    def with_digest(self) -> InventoryEntry:
         payload = {k: v for k, v in canonical_entry(self).items() if k != "digest"}
         digest = hashlib.sha256(_encode(payload)).hexdigest()
         return InventoryEntry(**{**self.__dict__, "digest": digest})

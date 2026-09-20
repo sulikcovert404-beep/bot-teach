@@ -42,7 +42,7 @@ class ExecutionRequest:
     digest_reference: str
 
     @classmethod
-    def from_context(cls, context: Mapping[str, Any]) -> "ExecutionRequest":
+    def from_context(cls, context: Mapping[str, Any]) -> ExecutionRequest:
         trace = tuple(sorted((str(k), _nfc(str(v))) for k, v in (context.get("trace_context") or {}).items()))
         return cls(
             str(context.get("execution_id") or uuid4()),

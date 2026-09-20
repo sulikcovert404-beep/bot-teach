@@ -32,7 +32,7 @@ class ApiError:
     retryable: bool = False
 
     @classmethod
-    def from_response(cls, status: int, body: Mapping[str, Any] | None) -> "ApiError":
+    def from_response(cls, status: int, body: Mapping[str, Any] | None) -> ApiError:
         body = body or {}
         code = body.get("code") if isinstance(body.get("code"), str) else "API_ERROR"
         message = body.get("detail") if isinstance(body.get("detail"), str) else "درخواست ناموفق بود."

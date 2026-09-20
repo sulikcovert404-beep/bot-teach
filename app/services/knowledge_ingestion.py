@@ -91,10 +91,10 @@ class ReviewItem:
     page: int | None = None
     state: ReviewState = ReviewState.PENDING
 
-    def approve(self) -> "ReviewItem":
+    def approve(self) -> ReviewItem:
         return ReviewItem(self.item_id, self.text, self.source_id, self.page, ReviewState.APPROVED)
 
-    def reject(self) -> "ReviewItem":
+    def reject(self) -> ReviewItem:
         return ReviewItem(self.item_id, self.text, self.source_id, self.page, ReviewState.REJECTED)
 
 

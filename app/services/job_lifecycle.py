@@ -30,7 +30,7 @@ def _canon(v:object)->str:return json.dumps(v,ensure_ascii=False,sort_keys=True,
 class JobRequest:
  job_id:str; execution_reference:str; command_reference:str; job_type:str; trace_context:tuple[tuple[str,str],...]; created_reference:str
  @classmethod
- def create(cls, *, job_id:str, execution_reference:str, command_reference:str, job_type:str, trace_context:Mapping[str,str], created_reference:str)->'JobRequest':
+ def create(cls, *, job_id:str, execution_reference:str, command_reference:str, job_type:str, trace_context:Mapping[str,str], created_reference:str)->JobRequest:
   return cls(_nfc(job_id),_nfc(execution_reference),_nfc(command_reference),_nfc(job_type),tuple(sorted((_nfc(str(k)),_nfc(str(v))) for k,v in trace_context.items())),_nfc(created_reference))
  def canonical_json(self)->str:return _canon({'command_reference':self.command_reference,'created_reference':self.created_reference,'execution_reference':self.execution_reference,'job_id':self.job_id,'job_type':self.job_type,'trace_context':dict(self.trace_context)})
 
