@@ -1,10 +1,16 @@
 """Pure immutable governance review before a future activation review."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class ActivationGovernanceOutcome(StrEnum):
  APPROVED_FOR_ACTIVATION_REVIEW="APPROVED_FOR_ACTIVATION_REVIEW"
  APPROVED_WITH_WARNINGS="APPROVED_WITH_WARNINGS"
