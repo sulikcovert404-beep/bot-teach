@@ -10,10 +10,21 @@ from sqlalchemy.orm import selectinload
 
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
-from app.db.models import AuditLog, Exam, ExamQuestion, User, Assignment, AssignmentTarget, ClassMembership, Classroom, StudentProfile
+from app.db.models import (
+    Assignment,
+    AssignmentTarget,
+    AuditLog,
+    ClassMembership,
+    Classroom,
+    Exam,
+    ExamQuestion,
+    StudentProfile,
+    User,
+)
 from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_roles, require_user
 from app.security.entitlements import require_feature_access
+from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 from app.services.ai_gateway import (
     GeminiProvider,
     ModelRouter,
@@ -21,9 +32,8 @@ from app.services.ai_gateway import (
 )
 from app.services.audit_repository import record_audit_log
 from app.services.educational_ai import EducationalAI
+from app.services.exam_attempts import ExamAccessError, save_answers, start_attempt, submit_attempt
 from app.services.usage_repository import record_usage
-from app.services.exam_attempts import ExamAccessError, start_attempt, save_answers, submit_attempt
-from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 
 router = APIRouter(prefix="/exams", tags=["assessment-exam-engine"])
 

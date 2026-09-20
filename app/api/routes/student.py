@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -8,25 +8,37 @@ from sqlalchemy import desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
+from app.db.base import set_tenant_context
 from app.db.models import (
+    Assignment,
+    AssignmentSnapshot,
+    AssignmentTarget,
     AuditLog,
     BetaQualityAudit,
+    ClassMembership,
+    Classroom,
+    ContentVersion,
+    ExamAttempt,
+    ExamResult,
+    StudentProfile,
+    StudentSubmission,
     StudyPlan,
     StudyPlanTask,
+    Subscription,
+    TeacherContentPublication,
     User,
-    ClassMembership, StudentProfile, TeacherContentPublication, ContentVersion,
-    Classroom, Subscription, Assignment, AssignmentSnapshot, AssignmentTarget, StudentSubmission,
 )
-from app.security.dependencies import require_roles
-from app.services.publication_access import can_access
-from app.domain.entitlements.foundation import ClassroomContentAccess, resolve_classroom_content_access
+from app.domain.entitlements.foundation import (
+    ClassroomContentAccess,
+    resolve_classroom_content_access,
+)
 from app.domain.entitlements.models import FeatureCode
+from app.security.dependencies import require_roles
 from app.security.entitlements import require_feature_access
-from app.services.audit_repository import record_audit_log
-from app.db.models import ExamAttempt, ExamResult
-from app.services.exam_attempts import ExamAccessError, start_attempt, save_answers, submit_attempt
-from app.db.base import set_tenant_context
 from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
+from app.services.audit_repository import record_audit_log
+from app.services.exam_attempts import ExamAccessError, save_answers, start_attempt, submit_attempt
+from app.services.publication_access import can_access
 
 router = APIRouter(prefix="/student", tags=["student"])
 
