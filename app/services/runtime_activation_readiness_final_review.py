@@ -1,11 +1,11 @@
 """Pure final readiness review contract; never grants runtime authority."""
 from __future__ import annotations
 
-from dataclasses import dataclass
-from enum import StrEnum
 import hashlib
 import json
 import unicodedata
+from dataclasses import dataclass
+from enum import StrEnum
 
 
 class FinalReviewOutcome(StrEnum):

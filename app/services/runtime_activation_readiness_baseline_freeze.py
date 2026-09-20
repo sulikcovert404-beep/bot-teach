@@ -1,10 +1,16 @@
 """Immutable, non-authoritative snapshot of activation readiness."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class BaselineFreezeOutcome(StrEnum):
  BASELINE_FROZEN="BASELINE_FROZEN"; BASELINE_FROZEN_WITH_WARNINGS="BASELINE_FROZEN_WITH_WARNINGS"; BASELINE_NOT_FROZEN="BASELINE_NOT_FROZEN"; BASELINE_BLOCKED="BASELINE_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:
