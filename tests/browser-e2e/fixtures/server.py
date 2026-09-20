@@ -3,7 +3,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 class Handler(BaseHTTPRequestHandler):
-    def do_GET(self):  # noqa: N802
+    def do_GET(self):
         if self.path == "/health/ready":
             body = json.dumps({"status": "ready", "environment": "disposable"}).encode()
             self.send_response(200)
