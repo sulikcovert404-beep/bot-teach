@@ -1,13 +1,22 @@
 """Pure immutable lifecycle contract for future runtime executions."""
 from __future__ import annotations
-import hashlib, json, re, unicodedata
+
+import hashlib
+import json
+import re
+import unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from collections.abc import Iterable
+
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
 from .runtime_execution_boundary import ExecutionBoundaryContract
-from .runtime_execution_result import ExecutionResult, ExecutionResultStatus, validate_execution_result
+from .runtime_execution_result import (
+    ExecutionResult,
+    ExecutionResultStatus,
+    validate_execution_result,
+)
+
 
 class LifecycleState(StrEnum):
     CREATED="CREATED"; ADMITTED="ADMITTED"; RUNNING="RUNNING"; SUCCEEDED="SUCCEEDED"; FAILED="FAILED"; PARTIAL="PARTIAL"; BLOCKED="BLOCKED"; CANCELLED="CANCELLED"; UNKNOWN="UNKNOWN"
