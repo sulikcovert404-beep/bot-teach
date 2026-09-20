@@ -1,7 +1,11 @@
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib, json, unicodedata
+
 
 class PreStagingOutcome(StrEnum):
     PRE_STAGING_READY='PRE_STAGING_READY'; PRE_STAGING_READY_WITH_WARNINGS='PRE_STAGING_READY_WITH_WARNINGS'; PRE_STAGING_NOT_READY='PRE_STAGING_NOT_READY'; PRE_STAGING_BLOCKED='PRE_STAGING_BLOCKED'; UNKNOWN='UNKNOWN'
