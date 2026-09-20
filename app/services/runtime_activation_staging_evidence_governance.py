@@ -1,8 +1,12 @@
 """Immutable governance contract for staging evidence; collection is external."""
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib, json, unicodedata
+
 
 class EvidenceGovernanceOutcome(StrEnum):
     EVIDENCE_GOVERNANCE_READY="EVIDENCE_GOVERNANCE_READY"

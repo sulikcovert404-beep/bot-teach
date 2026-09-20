@@ -1,7 +1,12 @@
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib,json,unicodedata
+
+
 class AssuranceOutcome(StrEnum):
  ASSURANCE_READY='ASSURANCE_READY'; ASSURANCE_READY_WITH_WARNINGS='ASSURANCE_READY_WITH_WARNINGS'; ASSURANCE_NOT_READY='ASSURANCE_NOT_READY'; ASSURANCE_BLOCKED='ASSURANCE_BLOCKED'; UNKNOWN='UNKNOWN'
 def _c(v:str)->str:return unicodedata.normalize('NFC',str(v)).strip()

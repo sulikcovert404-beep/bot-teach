@@ -1,7 +1,11 @@
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib, json, unicodedata
+
 
 class StagingEntryOutcome(StrEnum):
     STAGING_ENTRY_APPROVED='STAGING_ENTRY_APPROVED'; STAGING_ENTRY_APPROVED_WITH_WARNINGS='STAGING_ENTRY_APPROVED_WITH_WARNINGS'; STAGING_ENTRY_NOT_APPROVED='STAGING_ENTRY_NOT_APPROVED'; STAGING_ENTRY_BLOCKED='STAGING_ENTRY_BLOCKED'; UNKNOWN='UNKNOWN'
