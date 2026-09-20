@@ -2,11 +2,11 @@ from app.services.third_development_wave_validation import Outcome, ThirdDevelop
 
 
 def make(**overrides):
-    values = dict(implementation_outcome="ACCEPTED", acceptance_criteria=("criteria",),
-                  behavior_correctness=("correct",), test_coverage=("covered",),
-                  regression_status="PASS", compatibility=("compatible",),
-                  typed_result_consistency=("consistent",), deterministic_reasons=("stable",),
-                  preserved_behavior=("preserved",), trace_reference="trace")
+    values = {"implementation_outcome": "ACCEPTED", "acceptance_criteria": ("criteria",),
+                  "behavior_correctness": ("correct",), "test_coverage": ("covered",),
+                  "regression_status": "PASS", "compatibility": ("compatible",),
+                  "typed_result_consistency": ("consistent",), "deterministic_reasons": ("stable",),
+                  "preserved_behavior": ("preserved",), "trace_reference": "trace"}
     values.update(overrides)
     return ThirdDevelopmentWaveValidation(**values)
 

@@ -5,7 +5,7 @@ from app.services.transition_governance_package import (
 
 
 def make(**o):
- d=dict(package_id="g-1",ownership_model={"sender":"admin"},decision_authority_boundary=("commander",),review_lifecycle=("review",),change_classification={"schema":"high"},risk_acceptance_semantics=("explicit",),impact_review=("required",),sender_receiver_boundary=("admin->executor",),responsibility_transfer_rules=("ack",),evidence_expectations=("trace",),rollback_decision_semantics=("commander",),failure_escalation=("operator",),recovery_boundary=("governance",),completeness_check=("all",),consistency_review=("cross-check",),unresolved_risks=(),trace_reference="t",package_digest="d")
+ d={"package_id": "g-1","ownership_model": {"sender":"admin"},"decision_authority_boundary": ("commander",),"review_lifecycle": ("review",),"change_classification": {"schema":"high"},"risk_acceptance_semantics": ("explicit",),"impact_review": ("required",),"sender_receiver_boundary": ("admin->executor",),"responsibility_transfer_rules": ("ack",),"evidence_expectations": ("trace",),"rollback_decision_semantics": ("commander",),"failure_escalation": ("operator",),"recovery_boundary": ("governance",),"completeness_check": ("all",),"consistency_review": ("cross-check",),"unresolved_risks": (),"trace_reference": "t","package_digest": "d"}
  d.update(o); return TransitionGovernancePackage(**d)
 def test_ready(): assert make().outcome() is TransitionGovernanceOutcome.TRANSITION_GOVERNANCE_READY
 def test_warning_blocked():

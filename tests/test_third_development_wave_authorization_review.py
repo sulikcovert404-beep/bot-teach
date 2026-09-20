@@ -5,12 +5,12 @@ from app.services.third_development_wave_authorization_review import (
 
 
 def make(**overrides):
-    values = dict(capability="content", objective="manage content",
-                  boundaries=("service",), exclusions=("runtime",),
-                  existing_modules=("content_service",), contracts=("content-contract",),
-                  expected_files=("app/services/content.py",),
-                  acceptance_criteria=("deterministic",), test_strategy=("unit",),
-                  validation_requirements=("pytest",), trace_reference="trace")
+    values = {"capability": "content", "objective": "manage content",
+                  "boundaries": ("service",), "exclusions": ("runtime",),
+                  "existing_modules": ("content_service",), "contracts": ("content-contract",),
+                  "expected_files": ("app/services/content.py",),
+                  "acceptance_criteria": ("deterministic",), "test_strategy": ("unit",),
+                  "validation_requirements": ("pytest",), "trace_reference": "trace"}
     values.update(overrides)
     return ThirdDevelopmentWaveAuthorizationReview(**values)
 

@@ -2,7 +2,7 @@ from app.services.validation_evidence_ledger import *
 
 
 def make(status=EvidenceStatus.ACCEPTED, **kw):
-    base = dict(evidence_id="ev-1", validation_id="val-1", plan_version="v1", result_status=status, artifact_reference="artifact-1", digest="0"*64, timestamp_reference="2026-01-01T00:00:00Z", source_type="test", validity_period="2026-01-02T00:00:00Z")
+    base = {"evidence_id": "ev-1", "validation_id": "val-1", "plan_version": "v1", "result_status": status, "artifact_reference": "artifact-1", "digest": "0"*64, "timestamp_reference": "2026-01-01T00:00:00Z", "source_type": "test", "validity_period": "2026-01-02T00:00:00Z"}
     base.update(kw)
     record = ValidationEvidenceRecord(**base)
     return ValidationEvidenceRecord(**{**record.as_dict(), "digest": record.computed_digest()})

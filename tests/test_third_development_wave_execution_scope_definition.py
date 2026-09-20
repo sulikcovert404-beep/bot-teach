@@ -5,14 +5,14 @@ from app.services.third_development_wave_execution_scope_definition import (
 
 
 def make(**overrides):
-    values = dict(capability="content", objective="manage content",
-                  inputs=("content command",), outputs=("content result",),
-                  expected_behavior=("deterministic",), allowed_files=("app/services/content.py",),
-                  forbidden_changes=("database",), success_scenarios=("valid",),
-                  error_scenarios=("invalid",), regression_scenarios=("existing",),
-                  edge_cases=("empty",), new_tests=("unit",), regression_tests=("suite",),
-                  out_of_scope=("deployment",), implementation_changes=("service",),
-                  preserved_behavior=("existing contracts",), trace_reference="trace")
+    values = {"capability": "content", "objective": "manage content",
+                  "inputs": ("content command",), "outputs": ("content result",),
+                  "expected_behavior": ("deterministic",), "allowed_files": ("app/services/content.py",),
+                  "forbidden_changes": ("database",), "success_scenarios": ("valid",),
+                  "error_scenarios": ("invalid",), "regression_scenarios": ("existing",),
+                  "edge_cases": ("empty",), "new_tests": ("unit",), "regression_tests": ("suite",),
+                  "out_of_scope": ("deployment",), "implementation_changes": ("service",),
+                  "preserved_behavior": ("existing contracts",), "trace_reference": "trace"}
     values.update(overrides)
     return ThirdDevelopmentWaveExecutionScopeDefinition(**values)
 

@@ -5,7 +5,7 @@ from app.services.third_development_wave_capability_selection import (
 
 
 def make(**kw):
-    b=dict(available_capabilities=("content", "analytics"), business_technical_value=("value",), dependencies=("none",), impact=("high",), complexity=("low",), risk=("low",), architectural_fit=("fit",), existing_contracts=("contracts",), rag_dependency=("none",), implementation_isolation=("isolated",), selected_capability="content", rationale="value", prerequisites=("ready",), trace_reference="t")
+    b={"available_capabilities": ("content", "analytics"), "business_technical_value": ("value",), "dependencies": ("none",), "impact": ("high",), "complexity": ("low",), "risk": ("low",), "architectural_fit": ("fit",), "existing_contracts": ("contracts",), "rag_dependency": ("none",), "implementation_isolation": ("isolated",), "selected_capability": "content", "rationale": "value", "prerequisites": ("ready",), "trace_reference": "t"}
     b.update(kw); return ThirdDevelopmentWaveCapabilitySelection(**b)
 
 

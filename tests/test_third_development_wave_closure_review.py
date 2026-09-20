@@ -5,9 +5,9 @@ from app.services.third_development_wave_closure_review import (
 
 
 def make(**overrides):
-    values = dict(implementation_outcome="COMPLETE", validation_result="VALIDATED",
-                  lessons_learned=("pure boundary",), carryover_risks=("persistence",),
-                  next_capability_entry_criteria=("new scope",), trace_reference="trace")
+    values = {"implementation_outcome": "COMPLETE", "validation_result": "VALIDATED",
+                  "lessons_learned": ("pure boundary",), "carryover_risks": ("persistence",),
+                  "next_capability_entry_criteria": ("new scope",), "trace_reference": "trace"}
     values.update(overrides)
     return ThirdDevelopmentWaveClosureReview(**values)
 
