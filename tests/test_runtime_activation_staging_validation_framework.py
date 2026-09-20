@@ -9,7 +9,7 @@ from app.services.runtime_activation_staging_validation_framework import (
 
 
 def make(**kw):
-    d=dict(framework_id="f1", final_readiness_review_reference="review:1", assurance_bundle_reference="bundle:1", activation_decision_reference="decision:1", validation_plan_reference="plan:1", evidence_requirements=("tests",), rollback_requirements=("restore",), trace_reference="trace:1")
+    d={"framework_id": "f1", "final_readiness_review_reference": "review:1", "assurance_bundle_reference": "bundle:1", "activation_decision_reference": "decision:1", "validation_plan_reference": "plan:1", "evidence_requirements": ("tests",), "rollback_requirements": ("restore",), "trace_reference": "trace:1"}
     d.update(kw); return F(**d)
 
 def test_digest_and_immutability():

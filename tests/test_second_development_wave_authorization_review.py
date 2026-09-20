@@ -5,7 +5,7 @@ from app.services.second_development_wave_authorization_review import (
 
 
 def make(**kw):
-    b=dict(capability_confirmation="search", scope_boundary=("service",), exclusions=("deploy",), existing_contracts=("rag",), required_prerequisites=("ready",), expected_modules=("search",), affected_areas=("api",), acceptance_criteria=("pass",), test_strategy=("unit",), validation_requirements=("green",), decision="ready", trace_reference="t")
+    b={"capability_confirmation": "search", "scope_boundary": ("service",), "exclusions": ("deploy",), "existing_contracts": ("rag",), "required_prerequisites": ("ready",), "expected_modules": ("search",), "affected_areas": ("api",), "acceptance_criteria": ("pass",), "test_strategy": ("unit",), "validation_requirements": ("green",), "decision": "ready", "trace_reference": "t"}
     b.update(kw); return SecondDevelopmentWaveAuthorizationReview(**b)
 
 

@@ -25,7 +25,7 @@ def upstream():
 
 def result(status=ExecutionResultStatus.SUCCEEDED, **kwargs):
     bundle, boundary = upstream()
-    values = dict(execution_id="exec", boundary_reference=ref("boundary", digest=boundary.boundary_digest), admission_bundle_reference=ref("bundle", digest=bundle.bundle_digest), status=status, output_reference=ref("output") if status in (ExecutionResultStatus.SUCCEEDED, ExecutionResultStatus.PARTIAL) else None, evidence_references=(ref("evidence"),) if status is ExecutionResultStatus.PARTIAL else (), trace_reference=ref("trace"), failure_reference=ref("failure") if status is ExecutionResultStatus.FAILED else None, recovery_reference=ref("recovery") if status is ExecutionResultStatus.FAILED else None)
+    values = {"execution_id": "exec", "boundary_reference": ref("boundary", digest=boundary.boundary_digest), "admission_bundle_reference": ref("bundle", digest=bundle.bundle_digest), "status": status, "output_reference": ref("output") if status in (ExecutionResultStatus.SUCCEEDED, ExecutionResultStatus.PARTIAL) else None, "evidence_references": (ref("evidence"),) if status is ExecutionResultStatus.PARTIAL else (), "trace_reference": ref("trace"), "failure_reference": ref("failure") if status is ExecutionResultStatus.FAILED else None, "recovery_reference": ref("recovery") if status is ExecutionResultStatus.FAILED else None}
     values.update(kwargs)
     return ExecutionResult(**values), bundle, boundary
 

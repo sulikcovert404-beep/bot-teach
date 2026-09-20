@@ -15,13 +15,13 @@ def ref(name: str, status=ReferenceStatus.VALID) -> ReferenceToken:
 
 
 def make(**changes):
-    values = dict(
-        bundle_id="bundle-1", target_stage="PUBLISH",
-        release_decision_reference=ref("release"), stage_admission_reference=ref("stage"),
-        runtime_entry_reference=ref("entry"), environment_reference=ref("environment"),
-        evidence_references=(ref("evidence"),), validation_references=(ref("validation"),),
-        trace_reference=ref("trace"),
-    )
+    values = {
+        "bundle_id": "bundle-1", "target_stage": "PUBLISH",
+        "release_decision_reference": ref("release"), "stage_admission_reference": ref("stage"),
+        "runtime_entry_reference": ref("entry"), "environment_reference": ref("environment"),
+        "evidence_references": (ref("evidence"),), "validation_references": (ref("validation"),),
+        "trace_reference": ref("trace"),
+    }
     values.update(changes)
     return RuntimeAdmissionBundle(**values)
 

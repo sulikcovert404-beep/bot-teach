@@ -25,12 +25,12 @@ def bundle():
 
 
 def boundary(b, **changes):
-    values = dict(
-        boundary_id="boundary-1", admission_bundle_reference=ref("bundle", digest=b.bundle_digest),
-        execution_scope=ExecutionScope.CONTROLLED_EXECUTION,
-        allowed_operations=frozenset({"SYNC_VECTOR"}), denied_operations=frozenset({"DROP_ALL"}),
-        actor_reference="system:admin", trace_reference=ref("boundary-trace"),
-    )
+    values = {
+        "boundary_id": "boundary-1", "admission_bundle_reference": ref("bundle", digest=b.bundle_digest),
+        "execution_scope": ExecutionScope.CONTROLLED_EXECUTION,
+        "allowed_operations": frozenset({"SYNC_VECTOR"}), "denied_operations": frozenset({"DROP_ALL"}),
+        "actor_reference": "system:admin", "trace_reference": ref("boundary-trace"),
+    }
     values.update(changes)
     return ExecutionBoundaryContract(**values)
 

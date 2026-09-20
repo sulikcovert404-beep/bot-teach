@@ -5,7 +5,7 @@ from app.services.second_development_wave_execution_scope_definition import (
 
 
 def make(**kw):
-    b=dict(capability="search", purpose="score and classify retrieved results", user_system_behavior=("return grounded state",), non_goals=("provider changes",), allowed_files=("app/services/rag.py",), input_contract=("RetrievalRequest",), output_contract=("GroundedContext",), error_contract=("ValueError",), compatibility_requirements=("preserve NO_SOURCE",), acceptance_criteria=("low scores are explicit",), required_tests=("threshold",), regression_tests=("legacy",), out_of_scope=("deployment",), trace_reference="t")
+    b={"capability": "search", "purpose": "score and classify retrieved results", "user_system_behavior": ("return grounded state",), "non_goals": ("provider changes",), "allowed_files": ("app/services/rag.py",), "input_contract": ("RetrievalRequest",), "output_contract": ("GroundedContext",), "error_contract": ("ValueError",), "compatibility_requirements": ("preserve NO_SOURCE",), "acceptance_criteria": ("low scores are explicit",), "required_tests": ("threshold",), "regression_tests": ("legacy",), "out_of_scope": ("deployment",), "trace_reference": "t"}
     b.update(kw); return SecondDevelopmentWaveExecutionScope(**b)
 
 

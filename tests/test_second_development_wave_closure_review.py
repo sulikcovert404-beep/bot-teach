@@ -5,7 +5,7 @@ from app.services.second_development_wave_closure_review import (
 
 
 def make(**kw):
-    b=dict(delivered_changes=("rag",), objective_achievement=("done",), scope_compliance=("within",), test_validation=("10 passed",), regression_status=("green",), compatibility_review=("safe",), reusable_patterns=("pattern",), decision="closed", trace_reference="t")
+    b={"delivered_changes": ("rag",), "objective_achievement": ("done",), "scope_compliance": ("within",), "test_validation": ("10 passed",), "regression_status": ("green",), "compatibility_review": ("safe",), "reusable_patterns": ("pattern",), "decision": "closed", "trace_reference": "t"}
     b.update(kw); return SecondDevelopmentWaveClosureReview(**b)
 
 

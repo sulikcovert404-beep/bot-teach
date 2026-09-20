@@ -7,7 +7,7 @@ from app.services.runtime_entry_preparation_baseline_snapshot import *
 
 def ref(i, status=ReferenceStatus.VALID): return ReferenceToken(i, 'sha256:'+i, status)
 def make(**kw):
-    args=dict(snapshot_id='s1',preparation_review_reference=ref('p'),reconciliation_reference=ref('r'),freeze_reference=ref('f'),baseline_reference=ref('b'),trace_reference=ref('t'))
+    args={'snapshot_id': 's1','preparation_review_reference': ref('p'),'reconciliation_reference': ref('r'),'freeze_reference': ref('f'),'baseline_reference': ref('b'),'trace_reference': ref('t')}
     args.update(kw); return RuntimeEntryPreparationBaselineSnapshot(**args)
 def test_valid_and_deterministic():
     s=make(); assert evaluate_runtime_entry_preparation_baseline_snapshot(s) is SnapshotOutcome.CAPTURED; assert s.snapshot_digest==s.compute_digest(); assert s.canonical_bytes()==make().canonical_bytes()
