@@ -1,13 +1,25 @@
 from pathlib import Path
+
 import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.db.base import Base
-from app.db.models import (Classroom, ClassMembership, ContentVersion, SchoolTenant, SourceDocument, StudentProfile, TeacherContentPublication, TeacherProfile, User)
-from app.api.routes.auth import get_session
+from app.db.models import (
+    ClassMembership,
+    Classroom,
+    ContentVersion,
+    SchoolTenant,
+    SourceDocument,
+    StudentProfile,
+    TeacherProfile,
+    User,
+)
 from app.main import app
 from app.security.tokens import create_access_token
+
 
 @pytest.mark.asyncio
 async def test_missing_tenant_context_fails_closed_for_authenticated_student(tmp_path: Path, monkeypatch):
