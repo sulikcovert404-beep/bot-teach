@@ -1,10 +1,15 @@
 """Pure contract gate assessing readiness for a future Runtime Admission step."""
 from __future__ import annotations
-import hashlib, json, unicodedata
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
+
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
 
 class ReadinessGateOutcome(StrEnum):
     READY = "READY"

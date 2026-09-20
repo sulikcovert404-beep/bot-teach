@@ -1,10 +1,15 @@
 """Pure immutable transfer record for runtime-entry preparation evidence."""
 from __future__ import annotations
-import hashlib, json, unicodedata
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
+
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
 
 class HandoffOutcome(StrEnum):
     TRANSFERRED = "TRANSFERRED"

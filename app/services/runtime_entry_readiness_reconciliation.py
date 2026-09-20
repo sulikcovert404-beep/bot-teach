@@ -1,7 +1,9 @@
 """Pure, immutable reconciliation of runtime-entry readiness evidence."""
 from __future__ import annotations
 
-import hashlib, json, unicodedata
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any

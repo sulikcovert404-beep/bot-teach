@@ -1,11 +1,18 @@
 """Pure immutable readiness snapshot contract."""
 from __future__ import annotations
-import hashlib,json,re,unicodedata
-from dataclasses import dataclass,field
-from enum import StrEnum
+
+import hashlib
+import json
+import re
+import unicodedata
 from collections.abc import Iterable
+from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
+
 class SnapshotStatus(StrEnum):
  READY="READY"; READY_WITH_WARNINGS="READY_WITH_WARNINGS"; NOT_READY="NOT_READY"; BLOCKED="BLOCKED"; UNKNOWN="UNKNOWN"
 _SECRET=re.compile(r"(?i)(api[_-]?key|token|password|secret|credential|authorization|private[_-]?key)")
