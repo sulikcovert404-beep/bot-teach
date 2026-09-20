@@ -4,10 +4,17 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.db.base import Base
-from app.db.models import Classroom, ClassMembership, SchoolTenant, StudentProfile, TeacherProfile, User
-from app.api.routes.auth import get_session
+from app.db.models import (
+    ClassMembership,
+    Classroom,
+    SchoolTenant,
+    StudentProfile,
+    TeacherProfile,
+    User,
+)
 from app.main import app
 from app.security.tokens import create_access_token
 

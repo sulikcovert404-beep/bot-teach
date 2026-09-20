@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 
 import pytest
-
 from scripts.postgresql_backup import build_plan, command_for, ensure_free_space, parse_args
 
 
