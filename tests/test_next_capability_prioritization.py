@@ -2,7 +2,7 @@ from app.services.next_capability_prioritization import NextCapabilityPrioritiza
 
 
 def make(**kw):
-    b=dict(available_capabilities=("search", "admin"), business_technical_value=("value",), dependencies=("deps",), impact=("high",), complexity=("low",), risk=("low",), dependency_weight=("low",), rag_dependency=("none",), architecture_fit=("fit",), existing_contracts=("rag",), selected_capability="search", rationale="value", approved_next_wave="search", prerequisites=("ready",), trace_reference="t")
+    b={"available_capabilities": ("search", "admin"), "business_technical_value": ("value",), "dependencies": ("deps",), "impact": ("high",), "complexity": ("low",), "risk": ("low",), "dependency_weight": ("low",), "rag_dependency": ("none",), "architecture_fit": ("fit",), "existing_contracts": ("rag",), "selected_capability": "search", "rationale": "value", "approved_next_wave": "search", "prerequisites": ("ready",), "trace_reference": "t"}
     b.update(kw); return NextCapabilityPrioritization(**b)
 
 

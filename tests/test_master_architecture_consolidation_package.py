@@ -5,9 +5,9 @@ from app.services.master_architecture_consolidation_package import (
 
 
 def make(**kw):
-    b = dict(architecture_map=("governance",), implemented_contracts=("contracts",),
-              design_artifacts=("design",), prohibited_areas=("runtime",), dependency_graph=("g->r",),
-              lineage_summary=("trace",), future_entry_conditions=("approval",), trace_reference="t")
+    b = {"architecture_map": ("governance",), "implemented_contracts": ("contracts",),
+              "design_artifacts": ("design",), "prohibited_areas": ("runtime",), "dependency_graph": ("g->r",),
+              "lineage_summary": ("trace",), "future_entry_conditions": ("approval",), "trace_reference": "t"}
     b.update(kw)
     return MasterArchitectureConsolidationPackage(**b)
 

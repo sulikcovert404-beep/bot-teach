@@ -4,7 +4,7 @@ from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToke
 
 def r(i='x',s=ReferenceStatus.VALID): return ReferenceToken(i,'sha256:'+i,s)
 def a(**kw):
- d=dict(audit_id='a',baseline_reference=r('b'),closure_reference=r('c'),handoff_reference=r('h'),readiness_reference=r('r'),change_control_reference=r('cc'),consistency_findings=(),trace_reference=r('t')); d.update(kw); return GovernanceConsistencyAudit(**d)
+ d={'audit_id': 'a','baseline_reference': r('b'),'closure_reference': r('c'),'handoff_reference': r('h'),'readiness_reference': r('r'),'change_control_reference': r('cc'),'consistency_findings': (),'trace_reference': r('t')}; d.update(kw); return GovernanceConsistencyAudit(**d)
 def test_ok(): assert evaluate_consistency(a()) is ConsistencyOutcome.CONSISTENT
 def test_warn(): assert evaluate_consistency(a(consistency_findings=('هشدار',))) is ConsistencyOutcome.CONSISTENT_WITH_WARNINGS
 def test_block(): assert evaluate_consistency(a(baseline_reference=r('x',ReferenceStatus.BLOCKED))) is ConsistencyOutcome.BLOCKED

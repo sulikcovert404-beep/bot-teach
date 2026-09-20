@@ -4,7 +4,7 @@ from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToke
 
 def r(i='x',s=ReferenceStatus.VALID): return ReferenceToken(i,'sha256:'+i,s)
 def b(**kw):
- d=dict(handoff_id='h',baseline_reference=r('base'),closure_reference=r('close'),readiness_snapshot_reference=r('ready'),change_control_reference=r('change'),evidence_references=(r('evidence'),),trace_reference=r('trace')); d.update(kw); return GovernanceHandoffBundle(**d)
+ d={'handoff_id': 'h','baseline_reference': r('base'),'closure_reference': r('close'),'readiness_snapshot_reference': r('ready'),'change_control_reference': r('change'),'evidence_references': (r('evidence'),),'trace_reference': r('trace')}; d.update(kw); return GovernanceHandoffBundle(**d)
 def test_accept(): assert evaluate_handoff(b()) is HandoffOutcome.ACCEPTED
 def test_warn(): assert evaluate_handoff(b(change_control_reference=r('warn'))) is HandoffOutcome.ACCEPTED_WITH_WARNINGS
 def test_block(): assert evaluate_handoff(b(),baseline_frozen=False) is HandoffOutcome.BLOCKED

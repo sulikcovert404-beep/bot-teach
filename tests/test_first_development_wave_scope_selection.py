@@ -5,7 +5,7 @@ from app.services.first_development_wave_scope_selection import (
 
 
 def make(**kw):
-    b=dict(candidate_capabilities=("rag", "admin"), selected_capability="rag", priority_scoring=("value",), dependency_check=("ready",), implementation_boundary=("service",), acceptance_criteria=("tests",), trace_reference="t")
+    b={"candidate_capabilities": ("rag", "admin"), "selected_capability": "rag", "priority_scoring": ("value",), "dependency_check": ("ready",), "implementation_boundary": ("service",), "acceptance_criteria": ("tests",), "trace_reference": "t"}
     b.update(kw); return FirstDevelopmentWaveScopeSelection(**b)
 
 

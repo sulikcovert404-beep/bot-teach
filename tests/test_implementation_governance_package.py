@@ -2,10 +2,10 @@ from app.services.implementation_governance_package import ImplementationGoverna
 
 
 def make(**kw):
-    b=dict(coding_boundaries=("scope",), review_ownership=("reviewer",), change_ownership=("owner",),
-           validation_requirements=("tests",), test_expectations=("unit",), change_proposal=("request",),
-           completion_criteria=("pass",), defect_classification=("severity",), developer_handoff=("handoff",),
-           acceptance_boundary=("acceptance",), trace_reference="t")
+    b={"coding_boundaries": ("scope",), "review_ownership": ("reviewer",), "change_ownership": ("owner",),
+           "validation_requirements": ("tests",), "test_expectations": ("unit",), "change_proposal": ("request",),
+           "completion_criteria": ("pass",), "defect_classification": ("severity",), "developer_handoff": ("handoff",),
+           "acceptance_boundary": ("acceptance",), "trace_reference": "t"}
     b.update(kw); return ImplementationGovernancePackage(**b)
 
 

@@ -2,10 +2,10 @@ from app.services.implementation_kickoff_package import ImplementationKickoffPac
 
 
 def make(**kw):
-    b=dict(wave_objective="deliver", scope_boundary=("service",), expected_deliverables=("code",), work_items=("item",),
-           dependencies=("deps",), ownership=("owner",), prerequisites=("ready",), required_reviews=("review",),
-           validation_checkpoints=("tests",), done_criteria=("pass",), quality_gates=("gate",), handoff_conditions=("handoff",),
-           decision="approved", next_action="start", trace_reference="t")
+    b={"wave_objective": "deliver", "scope_boundary": ("service",), "expected_deliverables": ("code",), "work_items": ("item",),
+           "dependencies": ("deps",), "ownership": ("owner",), "prerequisites": ("ready",), "required_reviews": ("review",),
+           "validation_checkpoints": ("tests",), "done_criteria": ("pass",), "quality_gates": ("gate",), "handoff_conditions": ("handoff",),
+           "decision": "approved", "next_action": "start", "trace_reference": "t"}
     b.update(kw); return ImplementationKickoffPackage(**b)
 
 
