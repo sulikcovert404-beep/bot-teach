@@ -2,7 +2,8 @@ from datetime import datetime, timezone
 
 from app.api.routes.teacher import _assignment_payload
 from app.db.models import Assignment
-from app.domain.assignment import Assignment as DomainAssignment, AssignmentStatus, assignment_status_at, can_student_submit
+from app.domain.assignment import Assignment as DomainAssignment
+from app.domain.assignment import AssignmentStatus, assignment_status_at, can_student_submit
 
 
 def test_persisted_assignment_columns_are_timezone_aware():

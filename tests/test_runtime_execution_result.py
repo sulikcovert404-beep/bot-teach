@@ -9,7 +9,6 @@ from app.services.runtime_execution_boundary import ExecutionBoundaryContract, E
 from app.services.runtime_execution_result import (
     ExecutionResult,
     ExecutionResultStatus,
-    build_execution_result,
     validate_execution_result,
 )
 
