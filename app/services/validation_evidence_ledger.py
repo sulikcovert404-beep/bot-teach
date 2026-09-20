@@ -7,7 +7,6 @@ import re
 import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Optional
 
 
 class EvidenceStatus(StrEnum):
@@ -63,9 +62,9 @@ class ValidationEvidenceRecord:
     digest: str
     timestamp_reference: str
     source_type: str
-    validity_period: Optional[str] = None
-    parent_evidence_reference: Optional[str] = None
-    derived_evidence_reference: Optional[str] = None
+    validity_period: str | None = None
+    parent_evidence_reference: str | None = None
+    derived_evidence_reference: str | None = None
 
     def __post_init__(self) -> None:
         for name in ("evidence_id", "validation_id", "plan_version", "artifact_reference", "digest", "timestamp_reference", "source_type"):
