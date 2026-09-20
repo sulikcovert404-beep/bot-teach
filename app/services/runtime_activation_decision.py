@@ -1,10 +1,16 @@
 """Pure immutable contract decision for a future runtime activation."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class ActivationDecisionOutcome(StrEnum):
  ACTIVATION_ALLOWED="ACTIVATION_ALLOWED"
  ACTIVATION_ALLOWED_WITH_WARNINGS="ACTIVATION_ALLOWED_WITH_WARNINGS"
