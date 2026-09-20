@@ -1,5 +1,5 @@
-import hmac
 import hashlib
+import hmac
 import logging
 from typing import Any
 
@@ -10,27 +10,27 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.core.config import get_settings
 from app.core.channels import CanonicalCommand, Channel, ChannelContext
+from app.core.config import get_settings
+from app.core.logging import telegram_metrics
 from app.db.models import Subscription, TelegramUpdate, User
 from app.domain.entitlements.models import FeatureCode
 from app.domain.entitlements.service import entitlement_for_subscription
-from app.services.notification import telegram_notifications
 from app.services.audit_repository import record_audit_log
+from app.services.notification import telegram_notifications
 from app.services.telegram_bot import TelegramAPIError, TelegramBotClient
-from app.services.telegram_tutor import resolve_telegram_identity
 from app.services.telegram_navigation import (
     NavigationConfig,
     allowed_callback,
     build_inline_keyboard,
     build_reply_keyboard,
+    build_role_keyboard,
     build_start_inline_keyboard,
     fallback_text,
-    build_role_keyboard,
     web_app_url_for_role,
 )
+from app.services.telegram_tutor import resolve_telegram_identity
 from app.services.telegram_ui import confirmation_message, main_menu
-from app.core.logging import telegram_metrics
 
 router = APIRouter(prefix="/telegram", tags=["telegram"])
 logger = logging.getLogger(__name__)
@@ -270,5 +270,5 @@ async def telegram_webhook(
 
 
 
-from app.services.telegram_tutor import answer_telegram_text as educational_reply
 from app.services.telegram_mcq import callback_response
+from app.services.telegram_tutor import answer_telegram_text as educational_reply

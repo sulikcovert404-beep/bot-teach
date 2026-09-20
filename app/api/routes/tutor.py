@@ -93,7 +93,11 @@ async def tutor_answer(
         charged_tokens=charged_tokens,
     )
 
-    from app.services.cohort_feedback import record_beta_quality_audit, record_user_feedback, FeedbackSubmitRequest
+    from app.services.cohort_feedback import (
+        FeedbackSubmitRequest,
+        record_beta_quality_audit,
+        record_user_feedback,
+    )
     await record_beta_quality_audit(
         session,
         user_id=user_id,
@@ -155,7 +159,8 @@ async def get_student_history(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user identity"
         ) from exc
 
-    from sqlalchemy import select, desc
+    from sqlalchemy import desc, select
+
     from app.db.models import BetaQualityAudit
 
     audits = (

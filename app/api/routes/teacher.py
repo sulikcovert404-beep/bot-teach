@@ -1,5 +1,5 @@
-from datetime import UTC, datetime
 import json
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, Field
@@ -8,34 +8,34 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
+from app.db.base import set_tenant_context
 from app.db.models import (
     Assignment,
     AuditLog,
-    StudentSubmission,
     BetaQualityAudit,
     ClassMembership,
     Classroom,
-    StudentProfile,
-    TeacherProfile,
-    User,
     ExamAttempt,
     ExamResult,
+    StudentProfile,
+    StudentSubmission,
+    TeacherProfile,
+    User,
 )
 from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_roles
 from app.security.entitlements import require_feature_access
+from app.security.teacher_scope import resolve_teacher_scope
+from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 from app.services.ai_gateway import (
     GeminiProvider,
     ModelRouter,
     StructuredLoggingAIProviderObserver,
 )
 from app.services.audit_repository import record_audit_log
-from app.services.teacher_assistant import TeacherAssistant
 from app.services.publication_access import PublicationContext, can_publish
+from app.services.teacher_assistant import TeacherAssistant
 from app.services.usage_repository import record_usage
-from app.security.teacher_scope import resolve_teacher_scope
-from app.db.base import set_tenant_context
-from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 
 router = APIRouter(prefix="/teacher", tags=["teacher-classroom-intelligence"])
 
@@ -406,9 +406,24 @@ async def get_teaching_recommendations(
     }
 
 # --- Persistence-backed classroom integration ---
-from sqlalchemy.exc import IntegrityError
-from app.db.models import Classroom, ClassMembership, StudentProfile, TeacherProfile, ContentVersion, TeacherContentPublication, Assignment, AssignmentSnapshot, AssignmentTarget, StudentSubmission, SubmissionReview
 from hashlib import sha256
+
+from sqlalchemy.exc import IntegrityError
+
+from app.db.models import (
+    Assignment,
+    AssignmentSnapshot,
+    AssignmentTarget,
+    ClassMembership,
+    Classroom,
+    ContentVersion,
+    StudentProfile,
+    StudentSubmission,
+    SubmissionReview,
+    TeacherContentPublication,
+    TeacherProfile,
+)
+
 
 class PersistentClassroomCreateRequest(BaseModel):
     classroom_key: str = Field(min_length=1, max_length=64)
