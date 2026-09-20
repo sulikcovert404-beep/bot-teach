@@ -40,7 +40,7 @@ class PracticeRecommendationResponse(BaseModel):
 @router.get("/summary", response_model=LearningSummaryResponse)
 async def learning_summary(
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> LearningSummaryResponse:
     try:
         user_id = int(subject)
@@ -66,7 +66,7 @@ async def learning_summary(
 async def record_learning_event(
     request: LearningEventRequest,
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> LearningEventRequest:
     try:
         user_id = int(subject)
@@ -87,7 +87,7 @@ async def record_learning_event(
 @router.get("/recommendation", response_model=PracticeRecommendationResponse)
 async def practice_recommendation(
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> PracticeRecommendationResponse:
     summary = await learning_summary(subject, session)
     learning = LearningSummary(

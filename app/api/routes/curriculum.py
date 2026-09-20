@@ -59,7 +59,7 @@ class LessonCreate(BaseModel):
 async def list_books(
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> list[Book]:
     result = await session.scalars(
         select(Book)
@@ -75,7 +75,7 @@ async def list_books(
 async def create_book(
     request: BookCreate,
     subject: str = Depends(require_roles("ADMIN", "TEACHER")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> Book:
     book = Book(title=request.title, grade=request.grade, subject=request.subject)
     session.add(book)
@@ -105,7 +105,7 @@ async def create_chapter(
     book_id: int,
     request: ChapterCreate,
     subject: str = Depends(require_roles("ADMIN", "TEACHER")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> Chapter:
     book = await session.get(Book, book_id)
     if book is None:
@@ -135,7 +135,7 @@ async def create_lesson(
     chapter_id: int,
     request: LessonCreate,
     subject: str = Depends(require_roles("ADMIN", "TEACHER")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> Lesson:
     chapter = await session.get(Chapter, chapter_id)
     if chapter is None:

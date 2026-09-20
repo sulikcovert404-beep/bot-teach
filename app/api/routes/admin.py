@@ -59,7 +59,7 @@ async def provision_test_identity_endpoint(
     payload: TestIdentityProvisionRequest,
     request: Request,
     principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> TestIdentityProvisionResponse:
     """Provision a controlled test identity; subscriptions remain separate."""
     try:
@@ -246,7 +246,7 @@ class AdminObservabilityOverviewResponse(BaseModel):
 @router.get("/audit-logs", response_model=AuditLogListResponse)
 async def list_audit_logs(
     _subject: str = Depends(require_canonical_roles("SUPER_ADMIN")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ) -> AuditLogListResponse:
@@ -266,7 +266,7 @@ async def list_audit_logs(
 @router.get("/payments", response_model=list[PaymentResponse])
 async def list_payments(
     _subject: str = Depends(require_canonical_roles("SUPER_ADMIN")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ) -> list[PaymentTransaction]:
@@ -282,7 +282,7 @@ async def list_payments(
 @router.get("/subscriptions", response_model=list[SubscriptionResponse])
 async def list_subscriptions(
     _subject: str = Depends(require_canonical_roles("SUPER_ADMIN")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
     limit: int = Query(default=50, ge=1, le=100),
     offset: int = Query(default=0, ge=0),
 ) -> list[Subscription]:
@@ -298,7 +298,7 @@ async def list_subscriptions(
 @router.get("/ai-usage/summary", response_model=AIUsageSummaryResponse)
 async def ai_usage_summary(
     _subject: str = Depends(require_canonical_roles("SUPER_ADMIN")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> AIUsageSummaryResponse:
     result = await session.execute(
         select(
@@ -318,7 +318,7 @@ async def ai_usage_summary(
 @router.get("/observability/overview", response_model=AdminObservabilityOverviewResponse)
 async def observability_overview(
     _subject: str = Depends(require_canonical_roles("SUPER_ADMIN")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> AdminObservabilityOverviewResponse:
     from datetime import UTC, datetime
     today_start = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
@@ -410,7 +410,7 @@ async def update_subscription(
     user_id: int,
     request: SubscriptionUpdateRequest,
     subject: str = Depends(require_canonical_roles("SUPER_ADMIN")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> SubscriptionUpdateResponse:
     if await session.get(User, user_id) is None:
         raise HTTPException(status_code=404, detail="User not found")

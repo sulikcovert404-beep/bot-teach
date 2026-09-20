@@ -86,7 +86,7 @@ async def _record_ai_usage(
 async def generate(
     request: GenerateRequest,
     subject: str = Depends(require_feature_access(FeatureCode.AI_CHAT)),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> GenerateResponse:
     settings = get_settings()
     if not settings.gemini_api_key:
@@ -151,7 +151,7 @@ def _educational_ai() -> EducationalAI:
 async def summarize(
     request: SummarizeRequest,
     subject: str = Depends(require_feature_access(FeatureCode.SMART_SUMMARY)),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().summarize(request.text, max_tokens=request.max_tokens)
@@ -174,7 +174,7 @@ async def summarize(
 async def generate_questions(
     request: QuestionsRequest,
     subject: str = Depends(require_feature_access(FeatureCode.QUESTION_GENERATOR)),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().generate_questions(
@@ -199,7 +199,7 @@ async def generate_questions(
 async def generate_exam(
     request: ExamRequest,
     subject: str = Depends(require_feature_access(FeatureCode.EXAM_GENERATOR)),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().generate_exam(
@@ -224,7 +224,7 @@ async def generate_exam(
 async def correct_exam(
     request: ExamCorrectionRequest,
     subject: str = Depends(require_feature_access(FeatureCode.EXAM_CORRECTOR)),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> GenerateResponse:
     try:
         result = await _educational_ai().correct_exam(

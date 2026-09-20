@@ -43,7 +43,7 @@ class TutorResponse(BaseModel):
 async def tutor_answer(
     request: TutorRequest,
     subject: str = Depends(require_feature_access(FeatureCode.BOOK_QA)),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> TutorResponse:
     try:
         user_id = int(subject)

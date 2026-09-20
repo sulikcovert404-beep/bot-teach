@@ -53,7 +53,7 @@ class PlannedDayResponse(BaseModel):
 async def create_study_plan(
     request: StudyPlanRequest,
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> list[PlannedDayResponse]:
     try:
         user_id = int(subject)
@@ -102,7 +102,7 @@ async def update_study_task(
     task_id: int,
     request: StudyPlanTaskUpdate,
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> StudyPlanTask:
     try:
         user_id = int(subject)
@@ -124,7 +124,7 @@ async def update_study_task(
 @router.get("", response_model=list[PlannedDayResponse])
 async def list_latest_study_plan(
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> list[PlannedDayResponse]:
     try:
         user_id = int(subject)

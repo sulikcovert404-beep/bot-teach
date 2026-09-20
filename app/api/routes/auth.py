@@ -38,7 +38,7 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
 @router.post("/telegram", response_model=AuthResponse)
 async def authenticate_telegram(
     request: TelegramAuthRequest,
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> AuthResponse:
     telegram_metrics.auth_attempt()
     settings = get_settings()

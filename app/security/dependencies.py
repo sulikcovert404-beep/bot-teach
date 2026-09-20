@@ -10,7 +10,7 @@ bearer = HTTPBearer(auto_error=False)
 
 
 def require_user(
-    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),  # noqa: B008
+    credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
 ) -> str:
     if credentials is None:
         raise HTTPException(
@@ -33,7 +33,7 @@ def require_roles(*allowed_roles: str) -> Callable[..., str]:
     allowed = set(allowed_roles)
 
     def dependency(
-        credentials: HTTPAuthorizationCredentials | None = Depends(bearer),  # noqa: B008
+        credentials: HTTPAuthorizationCredentials | None = Depends(bearer),
     ) -> str:
         if credentials is None:
             raise HTTPException(

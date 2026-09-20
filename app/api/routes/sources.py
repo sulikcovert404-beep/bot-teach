@@ -50,7 +50,7 @@ class SourceChunkResponse(BaseModel):
 async def ingest_source(
     request: IngestRequest,
     _subject: str = Depends(require_roles("ADMIN", "TEACHER")),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> IngestResponse:
     result = await ingest_document(
         session,
@@ -70,7 +70,7 @@ async def search_sources(
     classroom_id: int = Query(..., ge=1),
     grade: str = Query(..., min_length=1, max_length=64),
     _subject: str = Depends(require_feature_access(FeatureCode.BOOK_QA)),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> list[SourceChunkResponse]:
     try:
         user_id = int(_subject)

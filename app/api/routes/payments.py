@@ -40,7 +40,7 @@ class PaymentCallbackRequest(BaseModel):
 async def payment_intent(
     request: PaymentIntentRequest,
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> PaymentIntentResponse:
     try:
         user_id = int(subject)
@@ -76,7 +76,7 @@ async def payment_intent(
 async def payment_webhook(
     request: PaymentCallbackRequest,
     x_payment_webhook_secret: str | None = Header(default=None),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> PaymentIntentResponse:
     expected = get_settings().payment_webhook_secret
     if (

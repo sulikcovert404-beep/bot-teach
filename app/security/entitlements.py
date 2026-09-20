@@ -14,7 +14,7 @@ from app.security.dependencies import require_user
 def require_feature_access(feature: FeatureCode) -> Callable[..., Awaitable[str]]:
     async def dependency(
         subject: str = Depends(require_user),
-        session: AsyncSession = Depends(get_session),  # noqa: B008
+        session: AsyncSession = Depends(get_session),
     ) -> str:
         try:
             user_id = int(subject)

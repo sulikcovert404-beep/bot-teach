@@ -96,8 +96,8 @@ async def mini_app_config() -> MiniAppConfigResponse:
 async def telegram_webhook(
     update: dict[str, Any] = Body(default_factory=dict),  # noqa: B008
     x_telegram_bot_api_secret_token: str | None = Header(default=None),
-    bot: TelegramBotClient | None = Depends(get_bot_client),  # noqa: B008
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    bot: TelegramBotClient | None = Depends(get_bot_client),
+    session: AsyncSession = Depends(get_session),
 ) -> TelegramWebhookResponse:
     telegram_metrics.webhook_request()
     expected = get_settings().telegram_webhook_secret

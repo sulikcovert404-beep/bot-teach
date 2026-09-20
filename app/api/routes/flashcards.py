@@ -38,7 +38,7 @@ class FlashcardReviewRequest(BaseModel):
 async def create_flashcard(
     request: FlashcardCreate,
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> Flashcard:
     try:
         user_id = int(subject)
@@ -56,7 +56,7 @@ async def create_flashcard(
 @router.get("", response_model=list[FlashcardResponse])
 async def list_flashcards(
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> list[Flashcard]:
     try:
         user_id = int(subject)
@@ -73,7 +73,7 @@ async def review_flashcard(
     card_id: int,
     request: FlashcardReviewRequest,
     subject: str = Depends(require_user),
-    session: AsyncSession = Depends(get_session),  # noqa: B008
+    session: AsyncSession = Depends(get_session),
 ) -> Flashcard:
     try:
         user_id = int(subject)
