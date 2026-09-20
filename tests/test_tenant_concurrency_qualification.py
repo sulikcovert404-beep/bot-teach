@@ -88,21 +88,19 @@ async def test_tenant_concurrency_and_connection_reuse_isolation():
     assert results == [admin_a.id, admin_b.id, admin_a.id, admin_b.id]
     
     # 3. Connection Reuse / Pooling Isolation Test:
-    async with session_factory() as s1:
-        async with s1.begin():
-            s1_teachers = (await s1.scalars(
+    async with session_factory() as s1, s1.begin():
+        s1_teachers = (await s1.scalars(
                 select(TeacherProfile).where(TeacherProfile.tenant_id == "tenant-alborz")
-            )).all()
-            assert len(s1_teachers) == 1
-            assert s1_teachers[0].teacher_id == teacher_a.id
+        )).all()
+        assert len(s1_teachers) == 1
+        assert s1_teachers[0].teacher_id == teacher_a.id
             
-    async with session_factory() as s2:
-        async with s2.begin():
-            s2_teachers = (await s2.scalars(
+    async with session_factory() as s2, s2.begin():
+        s2_teachers = (await s2.scalars(
                 select(TeacherProfile).where(TeacherProfile.tenant_id == "tenant-helli")
-            )).all()
-            assert len(s2_teachers) == 1
-            assert s2_teachers[0].teacher_id == teacher_b.id
+        )).all()
+        assert len(s2_teachers) == 1
+        assert s2_teachers[0].teacher_id == teacher_b.id
 
     # 4. Cross-Tenant Access DENY & Revoked Membership Deny Test
     async with session_factory() as session:
