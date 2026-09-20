@@ -12,7 +12,7 @@ def ref(name, status='VALID'):
 
 
 def manifest(**kw):
-    base = dict(baseline_id='b1', contract_inventory=('A','B'), contract_versions={'A':'1.0','B':'1.0'}, dependency_summary={'A':('B',),'B':()}, authority_summary={'a':'A','b':'B'}, digest_summary={'A':'x','B':'y'}, closure_reference=ref('closure'), trace_reference=ref('trace'))
+    base = {'baseline_id': 'b1', 'contract_inventory': ('A','B'), 'contract_versions': {'A':'1.0','B':'1.0'}, 'dependency_summary': {'A':('B',),'B':()}, 'authority_summary': {'a':'A','b':'B'}, 'digest_summary': {'A':'x','B':'y'}, 'closure_reference': ref('closure'), 'trace_reference': ref('trace')}
     base.update(kw)
     return ContractBaselineManifest(**base)
 

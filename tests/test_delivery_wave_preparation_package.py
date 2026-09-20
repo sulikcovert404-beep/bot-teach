@@ -2,10 +2,10 @@ from app.services.delivery_wave_preparation_package import DeliveryWavePreparati
 
 
 def make(**kw):
-    b=dict(wave_scope=("wave1",), selected_capabilities=("rag",), exclusions=("deploy",), success_criteria=("pass",),
-           technical_prerequisites=("contracts",), dependency_readiness=("ready",), test_requirements=("unit",),
-           acceptance_preparation=("review",), planned_change_boundaries=("service",), rollback_expectations=("revert",),
-           wave_rationale="value", trace_reference="t")
+    b={"wave_scope": ("wave1",), "selected_capabilities": ("rag",), "exclusions": ("deploy",), "success_criteria": ("pass",),
+           "technical_prerequisites": ("contracts",), "dependency_readiness": ("ready",), "test_requirements": ("unit",),
+           "acceptance_preparation": ("review",), "planned_change_boundaries": ("service",), "rollback_expectations": ("revert",),
+           "wave_rationale": "value", "trace_reference": "t"}
     b.update(kw); return DeliveryWavePreparationPackage(**b)
 
 

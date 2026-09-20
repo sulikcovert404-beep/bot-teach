@@ -2,10 +2,10 @@ from app.services.development_readiness_gate_package import DevelopmentReadiness
 
 
 def make(**kw):
-    b=dict(tooling_assumptions=("python",), workspace_requirements=("repo",), dependency_readiness=("ok",),
-           coding_workflow=("branch",), review_process=("review",), validation_process=("tests",),
-           test_readiness=("ready",), acceptance_readiness=("criteria",), ownership=("team",),
-           responsibility=("executor",), prerequisites=("scope",), trace_reference="t")
+    b={"tooling_assumptions": ("python",), "workspace_requirements": ("repo",), "dependency_readiness": ("ok",),
+           "coding_workflow": ("branch",), "review_process": ("review",), "validation_process": ("tests",),
+           "test_readiness": ("ready",), "acceptance_readiness": ("criteria",), "ownership": ("team",),
+           "responsibility": ("executor",), "prerequisites": ("scope",), "trace_reference": "t"}
     b.update(kw); return DevelopmentReadinessGatePackage(**b)
 
 

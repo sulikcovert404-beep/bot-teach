@@ -5,7 +5,7 @@ from app.services.development_roadmap_rebalancing_review import (
 
 
 def make(**kw):
-    b=dict(completed_capabilities=("rag",), delivered_value=("quality",), pending_capabilities=("admin",), pending_dependencies=("none",), pending_priorities=("medium",), complexity=("low",), risk=("low",), expected_value=("high",), recommendation="SELECT_NEW_CAPABILITY", trace_reference="t")
+    b={"completed_capabilities": ("rag",), "delivered_value": ("quality",), "pending_capabilities": ("admin",), "pending_dependencies": ("none",), "pending_priorities": ("medium",), "complexity": ("low",), "risk": ("low",), "expected_value": ("high",), "recommendation": "SELECT_NEW_CAPABILITY", "trace_reference": "t"}
     b.update(kw); return DevelopmentRoadmapRebalancingReview(**b)
 
 

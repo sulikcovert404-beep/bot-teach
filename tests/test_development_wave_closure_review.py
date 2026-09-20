@@ -2,7 +2,7 @@ from app.services.development_wave_closure_review import DevelopmentWaveClosureR
 
 
 def make(**kw):
-    b=dict(delivered_changes=("rag",), achieved_objectives=("objective",), test_coverage=("5 passed",), validation_results=("green",), regression_assessment=("safe",), decision="closed", trace_reference="t")
+    b={"delivered_changes": ("rag",), "achieved_objectives": ("objective",), "test_coverage": ("5 passed",), "validation_results": ("green",), "regression_assessment": ("safe",), "decision": "closed", "trace_reference": "t"}
     b.update(kw); return DevelopmentWaveClosureReview(**b)
 
 

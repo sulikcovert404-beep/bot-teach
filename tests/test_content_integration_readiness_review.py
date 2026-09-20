@@ -5,11 +5,11 @@ from app.services.content_integration_readiness_review import (
 
 
 def make(**overrides):
-    values = dict(storage_requirements=("versioned",), data_lifecycle=("retire",),
-                  compatibility_impact=("isolated",), ownership_model=("admin",),
-                  access_boundaries=("service",), permission_requirements=("review",),
-                  affected_modules=("content",), contracts=("content-contract",),
-                  risks=("consistency",), decision="DEFERRED", trace_reference="trace")
+    values = {"storage_requirements": ("versioned",), "data_lifecycle": ("retire",),
+                  "compatibility_impact": ("isolated",), "ownership_model": ("admin",),
+                  "access_boundaries": ("service",), "permission_requirements": ("review",),
+                  "affected_modules": ("content",), "contracts": ("content-contract",),
+                  "risks": ("consistency",), "decision": "DEFERRED", "trace_reference": "trace"}
     values.update(overrides)
     return ContentIntegrationReadinessReview(**values)
 

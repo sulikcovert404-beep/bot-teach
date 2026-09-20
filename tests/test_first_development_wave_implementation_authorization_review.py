@@ -5,7 +5,7 @@ from app.services.first_development_wave_implementation_authorization_review imp
 
 
 def make(**kw):
-    b=dict(selected_capability="rag", boundary_verification=("scope",), dependency_readiness=("ready",), acceptance_readiness=("criteria",), quality_gate_readiness=("tests",), expected_files=("module",), affected_boundaries=("service",), risk_assessment=("low",), decision="ready", trace_reference="t")
+    b={"selected_capability": "rag", "boundary_verification": ("scope",), "dependency_readiness": ("ready",), "acceptance_readiness": ("criteria",), "quality_gate_readiness": ("tests",), "expected_files": ("module",), "affected_boundaries": ("service",), "risk_assessment": ("low",), "decision": "ready", "trace_reference": "t"}
     b.update(kw); return FirstDevelopmentWaveImplementationAuthorizationReview(**b)
 
 
