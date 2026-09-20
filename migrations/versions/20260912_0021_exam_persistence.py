@@ -1,6 +1,6 @@
 """Add tenant-aware exam assignment and attempt persistence (disposable qualification)."""
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "20260912_0021"
 down_revision = "20260912_0020"

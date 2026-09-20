@@ -1,6 +1,6 @@
 """Add persisted school-admin tenant memberships for scoped dashboards."""
-from alembic import op
 import sqlalchemy as sa
+from alembic import op
 
 revision = "20260910_0019"
 down_revision = "20260910_0018"
