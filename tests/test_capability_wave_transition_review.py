@@ -2,7 +2,7 @@ from app.services.capability_wave_transition_review import CapabilityWaveTransit
 
 
 def make(**kw):
-    b=dict(delivered_capability="rag", achieved_objectives=("done",), quality_status=("green",), successful_patterns=("pattern",), reusable_contracts=("contract",), readiness_conditions=("ready",), selection_rules=("rule",), dependency_check=("checked",), decision="closed", trace_reference="t")
+    b={"delivered_capability":"rag", "achieved_objectives":("done",), "quality_status":("green",), "successful_patterns":("pattern",), "reusable_contracts":("contract",), "readiness_conditions":("ready",), "selection_rules":("rule",), "dependency_check":("checked",), "decision":"closed", "trace_reference":"t"}
     b.update(kw); return CapabilityWaveTransitionReview(**b)
 
 

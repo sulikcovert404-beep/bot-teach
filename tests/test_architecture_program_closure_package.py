@@ -5,9 +5,9 @@ from app.services.architecture_program_closure_package import (
 
 
 def make(**kw):
-    b = dict(final_architecture_summary=("summary",), artifact_inventory=("artifacts",),
-             dependency_closure=("closed",), risk_closure=("risks",), final_boundary_register=("boundaries",),
-             future_phase_entry_criteria=("scope",), trace_reference="t")
+    b = {"final_architecture_summary": ("summary",), "artifact_inventory": ("artifacts",),
+         "dependency_closure": ("closed",), "risk_closure": ("risks",), "final_boundary_register": ("boundaries",),
+         "future_phase_entry_criteria": ("scope",), "trace_reference": "t"}
     b.update(kw); return ArchitectureProgramClosurePackage(**b)
 
 

@@ -11,7 +11,7 @@ from app.domain.assignment import (
 
 
 def make_assignment(**kwargs):
-    values = dict(assignment_id="a1", teacher_id="t1", classroom_id="c1", tenant_id="tenant-a")
+    values = {"assignment_id": "a1", "teacher_id": "t1", "classroom_id": "c1", "tenant_id": "tenant-a"}
     values.update(kwargs)
     return Assignment(**values)
 

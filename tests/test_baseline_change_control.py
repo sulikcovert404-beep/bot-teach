@@ -4,7 +4,7 @@ from app.services.runtime_admission_bundle import ReferenceStatus, ReferenceToke
 
 def r(name, status=ReferenceStatus.VALID): return ReferenceToken(name, 'a'*64, status)
 def c(**kw):
- d=dict(change_request_id='c1',baseline_reference=r('baseline'),proposed_changes=('field',),impact_reference=r('impact'),version_transition_reference=r('compatible'),trace_reference=r('trace'))
+ d={'change_request_id':'c1','baseline_reference':r('baseline'),'proposed_changes':('field',),'impact_reference':r('impact'),'version_transition_reference':r('compatible'),'trace_reference':r('trace')}
  d.update(kw); return BaselineChangeControl(**d)
 def test_allowed(): assert evaluate_change_control(c()) is ChangeOutcome.ALLOWED
 def test_noop_allowed(): assert evaluate_change_control(c(proposed_changes=(),impact_reference=None,version_transition_reference=None)) is ChangeOutcome.ALLOWED

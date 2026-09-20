@@ -2,9 +2,9 @@ from app.services.content_integration_closure_review import ContentIntegrationCl
 
 
 def make(**overrides):
-    values = dict(implementation_outcome="COMPLETE", validation_result="VALIDATED_WITH_WARNINGS",
-                  warning_register=("production gap",), lessons_learned=("boundary",),
-                  future_entry_criteria=("external persistence",), trace_reference="trace")
+    values = {"implementation_outcome":"COMPLETE", "validation_result":"VALIDATED_WITH_WARNINGS",
+              "warning_register":("production gap",), "lessons_learned":("boundary",),
+              "future_entry_criteria":("external persistence",), "trace_reference":"trace"}
     values.update(overrides); return ContentIntegrationClosureReview(**values)
 
 
