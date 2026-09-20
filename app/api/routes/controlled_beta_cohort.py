@@ -147,9 +147,9 @@ async def get_founder_dashboard(
 ):
     """Comprehensive Founder Dashboard: Active Users, AI Success, Top Problems, Retention."""
     total_users = len(_COHORT_REGISTRATIONS)
-    opened = len(set(e["user_id"] for e in _COHORT_EVENTS if e["event_type"] == "MINIAPP_OPEN"))
-    asked = len(set(e["user_id"] for e in _COHORT_EVENTS if e["event_type"] == "FIRST_QUESTION"))
-    returned = len(set(e["user_id"] for e in _COHORT_EVENTS if e["event_type"] == "USER_RETURNED"))
+    opened = len({e["user_id"] for e in _COHORT_EVENTS if e["event_type"] == "MINIAPP_OPEN"})
+    asked = len({e["user_id"] for e in _COHORT_EVENTS if e["event_type"] == "FIRST_QUESTION"})
+    returned = len({e["user_id"] for e in _COHORT_EVENTS if e["event_type"] == "USER_RETURNED"})
     
     total_q = sum(1 for e in _COHORT_EVENTS if e["event_type"] == "FIRST_QUESTION")
     successful_q = sum(1 for e in _COHORT_EVENTS if e["event_type"] == "AI_ANSWER_RECEIVED" and e["is_success"])
