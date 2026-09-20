@@ -4,6 +4,9 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   quality:
     runs-on: ubuntu-latest
@@ -48,14 +51,74 @@ jobs:
   docker:
     runs-on: ubuntu-latest
     needs: quality
+    permissions:
+      contents: read
+      id-token: write
+      packages: write
+      attestations: write
     steps:
       - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Extract image metadata
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/${{ github.repository }}
+          tags: |
+            type=sha,format=long
+            type=raw,value=latest,enable=${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
       - uses: docker/build-push-action@v6
+        id: build
         with:
           context: .
-          push: false
-          tags: ai-education-platform-iran:ci
+          push: ${{ github.event_name == 'push' && github.ref == 'refs/heads/master' }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          outputs: type=image,name=target,annotation-index.org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+      - name: Generate release provenance metadata
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        env:
+          IMAGE_REF: ghcr.io/${{ github.repository }}
+          IMAGE_DIGEST: ${{ steps.build.outputs.digest }}
+        run: |
+          python - <<'PY'
+          import json, os
+          payload = {
+              "release_id": os.environ["GITHUB_RUN_ID"],
+              "commit_sha": os.environ["GITHUB_SHA"],
+              "ci_run_id": os.environ["GITHUB_RUN_ID"],
+              "builder": os.environ["GITHUB_ACTOR"],
+              "timestamp": os.environ["GITHUB_RUN_STARTED_AT"] if "GITHUB_RUN_STARTED_AT" in os.environ else None,
+              "artifact_reference": os.environ["IMAGE_REF"],
+              "digest": os.environ["IMAGE_DIGEST"],
+              "checksum": os.environ["IMAGE_DIGEST"],
+              "platform": "linux/amd64",
+              "attestation_reference": "pending-after-attestation",
+          }
+          with open("release-provenance.json", "w", encoding="utf-8") as handle:
+              json.dump(payload, handle, indent=2, sort_keys=True)
+          PY
+      - name: Attest image provenance
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-name: ghcr.io/${{ github.repository }}
+          subject-digest: ${{ steps.build.outputs.digest }}
+          push-to-registry: true
+      - name: Upload release provenance
+        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-provenance
+          path: release-provenance.json
+          retention-days: 30
 
   staging-smoke:
     runs-on: ubuntu-latest
