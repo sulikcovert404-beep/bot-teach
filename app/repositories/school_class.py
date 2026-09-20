@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import ClassMembership, Classroom, SchoolTenant, StudentProfile, TeacherProfile
+from app.db.models import ClassMembership, Classroom, SchoolTenant
 
 
 class SchoolRepository:
