@@ -1,10 +1,16 @@
 """Immutable assurance bundle for pre-activation evidence; never an executor."""
 from __future__ import annotations
-import hashlib,json,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken,_reject_secrets
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
+
 class AssuranceOutcome(StrEnum):
  ASSURANCE_CONFIRMED="ASSURANCE_CONFIRMED"; ASSURANCE_CONFIRMED_WITH_WARNINGS="ASSURANCE_CONFIRMED_WITH_WARNINGS"; ASSURANCE_FAILED="ASSURANCE_FAILED"; ASSURANCE_BLOCKED="ASSURANCE_BLOCKED"; UNKNOWN="UNKNOWN"
 def _clean(v:Any)->Any:
