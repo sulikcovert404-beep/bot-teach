@@ -1,5 +1,5 @@
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -136,8 +136,8 @@ async def submit_assignment_v1(assignment_id: int, req: AssignmentSubmissionV1Re
     student = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == int(subject)))
     assignment = await session.scalar(select(Assignment).join(AssignmentTarget).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).where(Assignment.id == assignment_id, ClassMembership.student_id == (student.id if student else -1), Assignment.status == "PUBLISHED"))
     if assignment is None: raise HTTPException(status_code=404, detail="Assignment not found")
-    now = datetime.now(timezone.utc)
-    if assignment.close_at and now >= assignment.close_at.replace(tzinfo=timezone.utc): raise HTTPException(status_code=409, detail="Assignment is closed")
+    now = datetime.now(UTC)
+    if assignment.close_at and now >= assignment.close_at.replace(tzinfo=UTC): raise HTTPException(status_code=409, detail="Assignment is closed")
     existing = await session.scalar(select(StudentSubmission).where(StudentSubmission.assignment_id == assignment_id, StudentSubmission.student_id == student.id))
     if existing:
         existing.content_json = json.dumps(req.content, ensure_ascii=False, sort_keys=True); existing.revision += 1; existing.submitted_at = now
