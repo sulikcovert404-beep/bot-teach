@@ -102,7 +102,7 @@ def run_validation_gates(
     for gate in supplied:
         name = getattr(gate, "gate_name", None)
         if not isinstance(name, str) or name not in GATE_ORDER or name in by_name:
-            bad_name = name if isinstance(name, str) else "unknown"
+            _bad_name = name if isinstance(name, str) else "unknown"
             result = GateResult("unknown", GateStatus.BLOCKED, GateReasonCode.INVALID_GATE, "Unknown validation gate")
             return ValidationReport(tuple((*results, result)), "unknown")
         by_name[name] = gate

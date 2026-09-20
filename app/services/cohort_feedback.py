@@ -105,7 +105,7 @@ async def get_beta_telemetry_and_metrics(session: AsyncSession) -> dict[str, Any
     success_audits = await session.scalar(select(func.count(BetaQualityAudit.id)).where(BetaQualityAudit.is_success.is_(True))) or 0
     with_citations = await session.scalar(select(func.count(BetaQualityAudit.id)).where(BetaQualityAudit.has_citations.is_(True))) or 0
     avg_lat = await session.scalar(select(func.coalesce(func.avg(BetaQualityAudit.latency_ms), 0.0))) or 0.0
-    gaps_count = await session.scalar(select(func.count(BetaQualityAudit.id)).where(BetaQualityAudit.content_gap_detected.is_(True))) or 0
+    _gaps_count = await session.scalar(select(func.count(BetaQualityAudit.id)).where(BetaQualityAudit.content_gap_detected.is_(True))) or 0
 
     success_rate = (success_audits / total_audits * 100.0) if total_audits > 0 else 100.0
     citation_coverage = (with_citations / total_audits * 100.0) if total_audits > 0 else 100.0
