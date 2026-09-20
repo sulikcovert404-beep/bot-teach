@@ -5,10 +5,10 @@ from app.services.operational_validation_observability_foundation_package import
 
 
 def make(**kw):
-    base = dict(validation_layers=("contract",), validation_ownership=("service",),
-                validation_criteria=("evidence",), metric_semantics=("count",),
-                signal_categories=("health",), health_states=("healthy",),
-                finding_lifecycle=("open",), trace_reference="trace-1")
+    base = {"validation_layers": ("contract",), "validation_ownership": ("service",),
+                "validation_criteria": ("evidence",), "metric_semantics": ("count",),
+                "signal_categories": ("health",), "health_states": ("healthy",),
+                "finding_lifecycle": ("open",), "trace_reference": "trace-1"}
     base.update(kw)
     return OperationalValidationObservabilityFoundationPackage(**base)
 

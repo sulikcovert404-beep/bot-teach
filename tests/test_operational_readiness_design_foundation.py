@@ -5,7 +5,7 @@ from app.services.operational_readiness_design_foundation import (
 
 
 def make(**kw):
-    data = dict(foundation_id="f1", governance_phase_closure_reference="g1", operational_scope_definition="design", future_capability_boundaries=("runtime",), dependency_inventory=(), risk_summary=(), readiness_constraints=("approval",), boundary_assertions={"runtime_activation":"PROHIBITED", "execution":False}, trace_reference="t1", foundation_digest="d1")
+    data = {"foundation_id": "f1", "governance_phase_closure_reference": "g1", "operational_scope_definition": "design", "future_capability_boundaries": ("runtime",), "dependency_inventory": (), "risk_summary": (), "readiness_constraints": ("approval",), "boundary_assertions": {"runtime_activation":"PROHIBITED", "execution":False}, "trace_reference": "t1", "foundation_digest": "d1"}
     data.update(kw)
     return OperationalReadinessDesignFoundation(**data)
 
