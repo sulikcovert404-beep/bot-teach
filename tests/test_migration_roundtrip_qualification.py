@@ -7,9 +7,11 @@ from alembic.script import ScriptDirectory
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.db.base import Base
-from app.db.models import SchoolAdminMembership  # noqa: F401 — registers model metadata for schema assertions
-from app.db.models import SchoolTenant  # noqa: F401 — registers model metadata for schema assertions
-from app.db.models import User  # noqa: F401 — registers model metadata for schema assertions
+from app.db.models import (
+    SchoolAdminMembership,  # noqa: F401 — registers model metadata for schema assertions
+    SchoolTenant,  # noqa: F401 — registers model metadata for schema assertions
+    User,  # noqa: F401 — registers model metadata for schema assertions
+)
 
 
 @pytest.mark.asyncio
@@ -77,4 +79,3 @@ def test_dual_parent_lineage_convergence_0009_and_0019_to_0020():
     # 4. Verify staging branch ancestry from 0019
     rev_0019 = script.get_revision("20260910_0019")
     assert rev_0019.down_revision == "20260910_0018"
-
