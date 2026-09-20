@@ -1,13 +1,24 @@
 """Pure immutable attestation reference contract."""
 from __future__ import annotations
-import hashlib,json,re,unicodedata
-from dataclasses import dataclass,field
-from enum import StrEnum
+
+import hashlib
+import json
+import re
+import unicodedata
 from collections.abc import Iterable
+from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
-from .runtime_execution_result import ExecutionResult,validate_execution_result
-from .runtime_execution_evidence_projection import ExecutionEvidenceProjection, EvidenceValidityStatus, validate_evidence_projection
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
+from .runtime_execution_evidence_projection import (
+ EvidenceValidityStatus,
+ ExecutionEvidenceProjection,
+ validate_evidence_projection,
+)
+from .runtime_execution_result import ExecutionResult, validate_execution_result
+
+
 class AttestationStatus(StrEnum):
  VALID="VALID"; INVALID="INVALID"; EXPIRED="EXPIRED"; UNKNOWN="UNKNOWN"
 _SECRET=re.compile(r"(?i)(api[_-]?key|token|password|secret|credential|authorization|private[_-]?key)")

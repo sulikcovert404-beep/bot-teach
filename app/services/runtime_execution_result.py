@@ -5,12 +5,18 @@ import hashlib
 import json
 import re
 import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from collections.abc import Iterable
 
-from .runtime_admission_bundle import BundleOutcome, ReferenceStatus, ReferenceToken, RuntimeAdmissionBundle, validate_runtime_admission_bundle
+from .runtime_admission_bundle import (
+    BundleOutcome,
+    ReferenceStatus,
+    ReferenceToken,
+    RuntimeAdmissionBundle,
+    validate_runtime_admission_bundle,
+)
 from .runtime_execution_boundary import ExecutionBoundaryContract
 
 

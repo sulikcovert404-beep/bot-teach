@@ -1,11 +1,22 @@
 """Pure immutable projection from execution results to future evidence references."""
 from __future__ import annotations
-import hashlib,json,re,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import re
+import unicodedata
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
-from .runtime_execution_result import ExecutionResult,ExecutionResultStatus,validate_execution_result
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
+from .runtime_execution_result import (
+ ExecutionResult,
+ ExecutionResultStatus,
+ validate_execution_result,
+)
+
+
 class EvidenceValidityStatus(StrEnum):
  VALID="VALID"; INVALID="INVALID"; EXPIRED="EXPIRED"; UNKNOWN="UNKNOWN"
 _SECRET=re.compile(r"(?i)(api[_-]?key|token|password|secret|credential|authorization|private[_-]?key)")

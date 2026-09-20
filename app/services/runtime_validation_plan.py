@@ -1,9 +1,13 @@
 """Provider-neutral declarative runtime validation plan contracts."""
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import Enum
-import hashlib, json, unicodedata
 from typing import Any
+
 
 class ValidationOutcome(str, Enum):
     PASSED='PASSED'; FAILED='FAILED'; BLOCKED='BLOCKED'; UNKNOWN='UNKNOWN'; REQUIRES_REVALIDATION='REQUIRES_REVALIDATION'; NOT_RUN='NOT_RUN'

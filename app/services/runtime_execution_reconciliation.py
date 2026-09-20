@@ -1,13 +1,24 @@
 """Pure immutable reconciliation contract for future execution observations."""
 from __future__ import annotations
-import hashlib,json,re,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import re
+import unicodedata
+from collections.abc import Iterable
+from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
-from collections.abc import Iterable
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
-from .runtime_execution_lifecycle import ExecutionLifecycle,LifecycleState
-from .runtime_execution_result import ExecutionResult,ExecutionResultStatus,validate_execution_result
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
+from .runtime_execution_lifecycle import ExecutionLifecycle, LifecycleState
+from .runtime_execution_result import (
+ ExecutionResult,
+ ExecutionResultStatus,
+ validate_execution_result,
+)
+
+
 class ReconciliationOutcome(StrEnum):
  CONSISTENT="CONSISTENT"; REQUIRES_RECONCILIATION="REQUIRES_RECONCILIATION"; BLOCKED="BLOCKED"; UNKNOWN="UNKNOWN"
 _SECRET=re.compile(r"(?i)(api[_-]?key|token|password|secret|credential|authorization|private[_-]?key)")

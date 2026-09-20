@@ -5,15 +5,15 @@ import hashlib
 import json
 import re
 import unicodedata
+from collections.abc import Iterable
 from dataclasses import dataclass, field
 from enum import StrEnum
-from collections.abc import Iterable
 from typing import Any
 
 from .runtime_admission_bundle import (
     BundleOutcome,
-    ReferenceToken,
     ReferenceStatus,
+    ReferenceToken,
     RuntimeAdmissionBundle,
     validate_runtime_admission_bundle,
 )
