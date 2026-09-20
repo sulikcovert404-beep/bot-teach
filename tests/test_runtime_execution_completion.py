@@ -5,8 +5,7 @@ from app.services.runtime_execution_completion import (
  build_completion,
  validate_completion,
 )
-from app.services.runtime_execution_lifecycle import LifecycleState
-from tests.test_runtime_execution_result import ref, result
+from tests.test_runtime_execution_result import ref
 
 
 def test_completion_contract_is_immutable_and_deterministic():
