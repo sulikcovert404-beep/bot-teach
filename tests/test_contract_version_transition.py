@@ -1,3 +1,4 @@
+from dataclasses import FrozenInstanceError
 import unicodedata
 
 import pytest
@@ -8,7 +9,7 @@ from app.services.contract_version_transition import *
 def test_record_is_immutable_and_digest_bound():
     r = ContractVersionRecord("c", "rag", "1", "2", "chg", CompatibilityClass.COMPATIBLE, ("رابط",), "trace")
     assert r.verify_digest() and r.canonical_bytes() == r.canonical_bytes()
-    with pytest.raises(Exception): r.current_version = "3"
+    with pytest.raises(FrozenInstanceError): r.current_version = "3"
 
 def test_compatibility_and_decision():
     assert promotion_allowed(CompatibilityClass.COMPATIBLE)

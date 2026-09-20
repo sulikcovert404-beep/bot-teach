@@ -1,3 +1,4 @@
+from dataclasses import FrozenInstanceError
 import unicodedata
 
 import pytest
@@ -25,7 +26,7 @@ def test_outcomes_and_incomplete_graph_fail_closed():
 
 def test_linkage_and_immutability():
     r = ChangeImpactRecord("c2", ChangeType.EVIDENCE_CHANGE, dependency_changes=(ref(),), trace_reference=ref("trace"), outcome=ImpactOutcome.UNKNOWN)
-    with pytest.raises(Exception): r.change_id = "x"
+    with pytest.raises(FrozenInstanceError): r.change_id = "x"
     assert r.dependency_changes[0].target_id == "x" and r.trace_reference.target_id == "trace"
 
 def test_digest_mismatch_and_secret_rejected():
