@@ -74,9 +74,7 @@ def propagate_outcome(plan: RuntimeValidationPlan, outcomes: dict[str, Validatio
     for step in plan.ordered_steps():
         if step.validation_id not in result:
             result[step.validation_id] = ValidationOutcome.NOT_RUN
-        if any(result.get(dep) in {ValidationOutcome.FAILED, ValidationOutcome.BLOCKED, ValidationOutcome.NOT_RUN} for dep in step.dependencies):
-            result[step.validation_id] = ValidationOutcome.NOT_RUN
-        elif any(dep not in result for dep in step.dependencies):
+        if any(result.get(dep) in {ValidationOutcome.FAILED, ValidationOutcome.BLOCKED, ValidationOutcome.NOT_RUN} for dep in step.dependencies) or any(dep not in result for dep in step.dependencies):
             result[step.validation_id] = ValidationOutcome.NOT_RUN
     return result
 

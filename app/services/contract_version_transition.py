@@ -26,7 +26,7 @@ def _clean(value: str, name: str) -> str:
     if not isinstance(value, str) or not value or "\x00" in value:
         raise TransitionError(f"{name} must be non-empty text")
     normalized = unicodedata.normalize("NFC", value)
-    if re.search(r"(?:api[_ -]?key|password|token|secret)\s*[:=]", normalized, re.I):
+    if re.search(r"(?:api[_ -]?key|password|token|secret)\s*[:=]", normalized, re.IGNORECASE):
         raise TransitionError("secret values are forbidden")
     return normalized
 
