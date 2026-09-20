@@ -75,4 +75,4 @@ class NavigationKeyboard:
         return build_role_keyboard(role)
 
 
-__all__ = ["UXMessage", "main_menu", "role_menu", "lesson_card", "content_card", "progress_card", "error_message", "empty_state", "confirmation_message", "StudentKeyboard", "TeacherKeyboard", "SchoolAdminKeyboard", "NavigationKeyboard"]
+__all__ = ["NavigationKeyboard", "SchoolAdminKeyboard", "StudentKeyboard", "TeacherKeyboard", "UXMessage", "confirmation_message", "content_card", "empty_state", "error_message", "lesson_card", "main_menu", "progress_card", "role_menu"]

@@ -161,7 +161,7 @@ def web_app_url_for_role(base_url: str, role: str | None) -> str:
 
 __all__ = [
     "NavigationAction", "NavigationConfig", "NavigationIntent", "allowed_callback",
-    "build_inline_keyboard", "build_reply_keyboard", "build_start_inline_keyboard",
-    "default_intents", "fallback_text",
-    "build_role_keyboard", "lesson_card_text", "role_menu_labels", "web_app_url_for_role",
+    "build_inline_keyboard", "build_reply_keyboard", "build_role_keyboard",
+    "build_start_inline_keyboard", "default_intents", "fallback_text",
+    "lesson_card_text", "role_menu_labels", "web_app_url_for_role",
 ]

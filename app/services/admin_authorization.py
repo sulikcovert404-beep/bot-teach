@@ -71,9 +71,12 @@ def authorize(command: Any, actor: Actor, context: AuthorizationContext) -> Auth
             return AuthorizationDecision(False, "maker_checker_violation")
         if context.lifecycle_state not in {"VALIDATED", "PENDING_REVIEW"}:
             return AuthorizationDecision(False, "invalid_ownership")
-    if command_name in {"CreateContentVersionCommand", "UpdateContentMetadataCommand", "SubmitProcessingCommand"}:
-        if context.creator_id is not None and context.creator_id != actor.actor_id:
-            return AuthorizationDecision(False, "invalid_ownership")
+    if (
+        command_name in {"CreateContentVersionCommand", "UpdateContentMetadataCommand", "SubmitProcessingCommand"}
+        and context.creator_id is not None
+        and context.creator_id != actor.actor_id
+    ):
+        return AuthorizationDecision(False, "invalid_ownership")
     if command_name == "PublishRequestContract" and context.lifecycle_state != "APPROVED":
         return AuthorizationDecision(False, "forbidden_transition")
     return AuthorizationDecision(True)

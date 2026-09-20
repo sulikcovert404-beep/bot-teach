@@ -22,8 +22,7 @@ def validate_asset_access(*, review_state, tenant_id, requested_tenant_id, lesso
  if review_state!='APPROVED': raise PermissionError('UNAPPROVED_ASSET')
  if tenant_id is None or requested_tenant_id is None or tenant_id!=requested_tenant_id: raise PermissionError('WRONG_TENANT')
  if lesson_id!=requested_lesson_id: raise PermissionError('WRONG_LESSON')
- if grade is not None or requested_grade is not None:
-  if grade is None or requested_grade is None or grade!=requested_grade: raise PermissionError('WRONG_GRADE')
+ if (grade is not None or requested_grade is not None) and (grade is None or requested_grade is None or grade!=requested_grade): raise PermissionError('WRONG_GRADE')
 
 class TelegramMediaSender(Protocol):
  async def send_audio(self, chat_id: int, audio: str, *, caption: str | None = None) -> None: ...

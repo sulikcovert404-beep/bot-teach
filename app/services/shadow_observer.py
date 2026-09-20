@@ -233,6 +233,6 @@ class ShadowObserver:
 
 
 __all__ = [
-    "BoundedShadowQueue", "SanitizedShadowEvent", "SamplingReason", "ShadowCounters",
+    "BoundedShadowQueue", "SamplingReason", "SanitizedShadowEvent", "ShadowCounters",
     "ShadowObserver", "ShadowObserverConfig", "deterministic_sample",
 ]
