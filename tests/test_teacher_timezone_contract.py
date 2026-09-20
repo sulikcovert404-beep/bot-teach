@@ -1,4 +1,4 @@
-from datetime import datetime, timezone, UTC
+from datetime import UTC, datetime
 
 from app.api.routes.teacher import _assignment_payload
 from app.db.models import Assignment

@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone, UTC
+from datetime import UTC, datetime
 from typing import Any, Protocol
 
 
