@@ -11,7 +11,7 @@ from tests.test_runtime_execution_result import ref, result, upstream
 
 
 def req(expected=LifecycleState.SUCCEEDED,observed=LifecycleState.SUCCEEDED,result_ref=None,evidence=(None,)):
- b,bd=upstream(); ev=tuple(x for x in evidence if x); return build_reconciliation(reconciliation_id="r1",execution_reference=ref("exec"),expected_state=expected,observed_state=observed,result_reference=result_ref,evidence_references=ev,trace_reference=ref("trace"))
+    _,_=upstream(); ev=tuple(x for x in evidence if x); return build_reconciliation(reconciliation_id="r1",execution_reference=ref("exec"),expected_state=expected,observed_state=observed,result_reference=result_ref,evidence_references=ev,trace_reference=ref("trace"))
 def test_consistent_and_conflict():
  r=req(); assert validate_reconciliation(r) is ReconciliationOutcome.CONSISTENT
  assert validate_reconciliation(req(observed=LifecycleState.FAILED)) is ReconciliationOutcome.REQUIRES_RECONCILIATION

@@ -15,7 +15,7 @@ def life(state=LifecycleState.RUNNING, prev=LifecycleState.ADMITTED, result_ref=
     return build_execution_lifecycle(execution_id="exec",current_state=state,previous_state=prev,transition_reference=ref("transition"),boundary_reference=ref("boundary",digest=boundary.boundary_digest),result_reference=result_ref,trace_reference=ref("trace")),bundle,boundary
 
 def test_valid_lifecycle_and_result_binding():
-    item,boundary_bundle,boundary=result()
+    item,_,boundary=result()
     lc,_,_=life(LifecycleState.SUCCEEDED,LifecycleState.RUNNING,ref("result",digest=item.result_digest))
     assert validate_execution_lifecycle(lc,item,boundary) is LifecycleOutcome.VALID
 
@@ -48,7 +48,7 @@ def test_result_state_mismatch_invalid():
     assert validate_execution_lifecycle(lc,item,boundary) is LifecycleOutcome.INVALID
 
 def test_required_references_and_secret_rejection():
-    bundle,boundary=upstream()
+    _,boundary=upstream()
     with pytest.raises(ValueError): build_execution_lifecycle(execution_id="exec",current_state=LifecycleState.CREATED,previous_state=None,transition_reference=None,boundary_reference=ref("boundary",digest=boundary.boundary_digest),result_reference=None,trace_reference=ref("trace"))
     with pytest.raises(ValueError): build_execution_lifecycle(execution_id="exec",current_state=LifecycleState.CREATED,previous_state=None,transition_reference=ref("transition"),boundary_reference=ref("boundary",digest=boundary.boundary_digest),result_reference=None,trace_reference=ref("token=secret"))
 
