@@ -1,9 +1,9 @@
 """Provider-neutral persistence readiness contracts; no runtime adapter."""
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
 from enum import Enum
-from collections.abc import Mapping
 from typing import Any
 
 
