@@ -1,8 +1,12 @@
 """Pure staging-validation planning contract; it performs no staging actions."""
 from __future__ import annotations
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass
 from enum import StrEnum
-import hashlib, json, unicodedata
+
 
 class StagingValidationOutcome(StrEnum):
     STAGING_VALIDATION_READY = "STAGING_VALIDATION_READY"

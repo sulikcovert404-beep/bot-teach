@@ -1,11 +1,18 @@
 """Pure immutable closure review of the admin contract chain."""
 from __future__ import annotations
-import hashlib,json,re,unicodedata
-from dataclasses import dataclass,field
+
+import hashlib
+import json
+import re
+import unicodedata
+from collections.abc import Iterable, Mapping
+from dataclasses import dataclass, field
 from enum import StrEnum
-from collections.abc import Mapping, Iterable
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
+
 class ClosureOutcome(StrEnum):
  CLOSED="CLOSED"; CLOSED_WITH_WARNINGS="CLOSED_WITH_WARNINGS"; OPEN="OPEN"; BLOCKED="BLOCKED"; UNKNOWN="UNKNOWN"
 _SECRET=re.compile(r"(?i)(api[_-]?key|token|password|secret|credential|authorization|private[_-]?key)")

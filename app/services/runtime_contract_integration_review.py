@@ -1,11 +1,18 @@
 """Pure immutable review of the runtime contract dependency chain."""
 from __future__ import annotations
-import hashlib,json,re,unicodedata
-from dataclasses import dataclass,field
-from enum import StrEnum
+
+import hashlib
+import json
+import re
+import unicodedata
 from collections.abc import Mapping
+from dataclasses import dataclass, field
+from enum import StrEnum
 from typing import Any
-from .runtime_admission_bundle import ReferenceStatus,ReferenceToken
+
+from .runtime_admission_bundle import ReferenceStatus, ReferenceToken
+
+
 class IntegrationOutcome(StrEnum):
  COMPATIBLE="COMPATIBLE"; COMPATIBLE_WITH_WARNINGS="COMPATIBLE_WITH_WARNINGS"; INCOMPATIBLE="INCOMPATIBLE"; BLOCKED="BLOCKED"; UNKNOWN="UNKNOWN"
 _SECRET=re.compile(r"(?i)(api[_-]?key|token|password|secret|credential|authorization|private[_-]?key)")
