@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 
 import pytest
 
@@ -25,7 +25,7 @@ def test_trace_and_metric_serialization_is_deterministic_and_preserves_zwnj() ->
     context = TraceContext("t1", "c1", "cmd1", "کاربر\u200c۱")
     assert context.serialize() == context.serialize()
     observer = Observer()
-    hook = ObservabilityHook(observer, lambda: datetime(2026, 1, 1, tzinfo=timezone.utc))
+    hook = ObservabilityHook(observer, lambda: datetime(2026, 1, 1, tzinfo=UTC))
     metric = hook.project(context=context, metric_name="command_completed", result_status="accepted", command_type="publish")
     assert "کاربر\u200c۱" in observer.events[0][1].serialize()
     assert metric.timestamp == "2026-01-01T00:00:00.000000Z"

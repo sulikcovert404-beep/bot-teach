@@ -4,7 +4,7 @@ from __future__ import annotations
 import json
 from collections.abc import Callable
 from dataclasses import asdict, dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timezone, UTC
 from typing import Any, Protocol
 
 
@@ -40,14 +40,14 @@ class AuditHook:
     """Observer-only projection; it never changes the workflow result."""
     def __init__(self, sink: AuditSink, clock: Callable[[], datetime] | None = None) -> None:
         self.sink = sink
-        self.clock = clock or (lambda: datetime.now(timezone.utc))
+        self.clock = clock or (lambda: datetime.now(UTC))
     def project(self, *, event_id: str, command_id: str, correlation_id: str, causation_id: str,
                 actor: dict[str, Any], action: str, target: dict[str, Any], result_status: str,
                 previous_state: dict[str, Any] | None = None, new_state: dict[str, Any] | None = None,
                 schema_version: str = "audit-v1", digest_reference: str | None = None) -> AuditEvent:
         if not event_id or not command_id or not correlation_id or not causation_id or not action or not result_status:
             raise ValueError("audit identifiers and status are required")
-        timestamp = self.clock().astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
+        timestamp = self.clock().astimezone(UTC).isoformat().replace("+00:00", "Z")
         event = AuditEvent(event_id, command_id, correlation_id, causation_id, dict(actor), action, dict(target), previous_state, new_state, result_status, schema_version, timestamp, digest_reference)
         self.sink.emit(event)
         return event
