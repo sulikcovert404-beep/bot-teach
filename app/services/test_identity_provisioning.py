@@ -1,6 +1,10 @@
 from __future__ import annotations
 
+import hashlib
+import json
 from dataclasses import dataclass
+from datetime import UTC, datetime
+from uuid import uuid4
 
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
@@ -8,6 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import (
     Identity,
+    ProvisioningIdempotencyKey,
     SchoolAdminMembership,
     SchoolTenant,
     StudentProfile,
@@ -16,8 +21,8 @@ from app.db.models import (
 )
 from app.services.audit_repository import record_audit_log
 
-
 ALLOWED_ROLES = frozenset({"STUDENT", "TEACHER", "SCHOOL_ADMIN"})
+IDEMPOTENCY_OPERATION = "TEST_IDENTITY_PROVISIONING"
 
 
 @dataclass(frozen=True)
@@ -33,6 +38,25 @@ class ProvisioningDenied(ValueError):
     pass
 
 
+def _request_fingerprint(*, provider: str, subject: str, username: str | None,
+                         role: str, tenant_id: str | None, audit_reason: str) -> str:
+    payload = {"provider": provider, "subject": subject, "username": username,
+               "role": role, "tenant_id": tenant_id, "audit_reason": audit_reason}
+    encoded = json.dumps(payload, ensure_ascii=False, sort_keys=True,
+                         separators=(",", ":")).encode("utf-8")
+    return hashlib.sha256(encoded).hexdigest()
+
+
+def _result_from_record(record: ProvisioningIdempotencyKey) -> ProvisioningResult:
+    try:
+        payload = json.loads(record.response_json or "{}")
+        return ProvisioningResult(payload["status"], int(payload["user_id"]),
+                                  payload["role"], payload.get("tenant_id"),
+                                  int(payload["audit_id"]))
+    except (KeyError, TypeError, ValueError, json.JSONDecodeError) as exc:
+        raise ProvisioningDenied("idempotency record is incomplete") from exc
+
+
 async def provision_test_identity(
     session: AsyncSession,
     *,
@@ -44,6 +68,7 @@ async def provision_test_identity(
     tenant_id: str | None,
     audit_reason: str,
     idempotency_key: str,
+    correlation_id: str | None = None,
 ) -> ProvisioningResult:
     """Create one controlled identity and its scope atomically.
 
@@ -71,9 +96,49 @@ async def provision_test_identity(
     # invariant here so the service cannot be called anonymously by mistake.
     if actor_user_id <= 0:
         raise ProvisioningDenied("invalid provisioning actor")
+    correlation_id = (correlation_id or "").strip() or str(uuid4())
+    if len(correlation_id) > 128:
+        raise ProvisioningDenied("invalid correlation id")
+
+    fingerprint = _request_fingerprint(
+        provider=provider, subject=subject, username=username.strip() if username else None,
+        role=role, tenant_id=tenant_id, audit_reason=audit_reason.strip(),
+    )
 
     try:
         async with session.begin():
+            # Claim the durable key before any identity work.  The savepoint
+            # keeps a concurrent unique-key collision from poisoning the
+            # surrounding transaction.
+            claim = ProvisioningIdempotencyKey(
+                operation=IDEMPOTENCY_OPERATION,
+                idempotency_key=idempotency_key.strip(),
+                request_fingerprint=fingerprint,
+                status="CLAIMED",
+                actor_user_id=actor_user_id,
+                correlation_id=correlation_id,
+            )
+            try:
+                async with session.begin_nested():
+                    session.add(claim)
+                    await session.flush()
+            except IntegrityError:
+                existing = await session.scalar(
+                    select(ProvisioningIdempotencyKey).where(
+                        ProvisioningIdempotencyKey.operation == IDEMPOTENCY_OPERATION,
+                        ProvisioningIdempotencyKey.idempotency_key == idempotency_key.strip(),
+                    ).with_for_update()
+                )
+                if existing is None:
+                    raise ProvisioningDenied("idempotency claim is in progress")
+                if existing.request_fingerprint != fingerprint:
+                    raise ProvisioningDenied("idempotency key conflicts with request")
+                if existing.status == "SUCCEEDED":
+                    replay = _result_from_record(existing)
+                    return ProvisioningResult("REPLAY", replay.user_id, replay.role,
+                                              replay.tenant_id, replay.audit_id)
+                raise ProvisioningDenied("idempotency claim is in progress")
+
             tenant = None
             if tenant_id:
                 tenant = await session.scalar(
@@ -133,10 +198,16 @@ async def provision_test_identity(
                         "role": role,
                         "tenant_id": tenant_id,
                         "idempotency_key": idempotency_key,
+                        "correlation_id": correlation_id,
                         "reason": audit_reason,
                     },
                 )
-                return ProvisioningResult("EXISTING", user.id, role, tenant_id, audit.id)
+                result = ProvisioningResult("EXISTING", user.id, role, tenant_id, audit.id)
+                claim.status = "SUCCEEDED"
+                claim.user_id = result.user_id
+                claim.response_json = json.dumps(result.__dict__, ensure_ascii=False)
+                claim.completed_at = datetime.now(UTC)
+                return result
 
             user = User(
                 telegram_user_id=int(subject) if provider == "telegram" else None,
@@ -170,10 +241,16 @@ async def provision_test_identity(
                     "role": role,
                     "tenant_id": tenant_id,
                     "idempotency_key": idempotency_key,
+                    "correlation_id": correlation_id,
                     "reason": audit_reason,
                 },
             )
-            return ProvisioningResult("CREATED", user.id, role, tenant_id, audit.id)
+            result = ProvisioningResult("CREATED", user.id, role, tenant_id, audit.id)
+            claim.status = "SUCCEEDED"
+            claim.user_id = result.user_id
+            claim.response_json = json.dumps(result.__dict__, ensure_ascii=False)
+            claim.completed_at = datetime.now(UTC)
+            return result
     except IntegrityError as exc:
         await session.rollback()
         raise ProvisioningDenied("identity already exists or violates a scope constraint") from exc

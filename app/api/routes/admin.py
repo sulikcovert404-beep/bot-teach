@@ -1,21 +1,34 @@
 from datetime import datetime
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, ConfigDict, Field
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
-from app.db.models import (AIUsageEvent, AuditLog, PaymentTransaction, Subscription, User, TeacherProfile,
-                           ContentVersion, StudentProfile, Classroom, ClassMembership, Assignment,
-                           StudentSubmission, ExamResult, ExamAttempt)
+from app.db.base import set_tenant_context
+from app.db.models import (
+    AIUsageEvent,
+    Assignment,
+    AuditLog,
+    ClassMembership,
+    Classroom,
+    ContentVersion,
+    ExamAttempt,
+    ExamResult,
+    PaymentTransaction,
+    StudentProfile,
+    StudentSubmission,
+    Subscription,
+    TeacherProfile,
+    User,
+)
 from app.domain.entitlements.models import SubscriptionPlan
 from app.security.canonical import require_canonical_roles
 from app.security.principal import CanonicalPrincipal, require_principal
 from app.security.tenant_scope import enforce_tenant
 from app.services.audit_repository import record_audit_log
 from app.services.test_identity_provisioning import ProvisioningDenied, provision_test_identity
-from app.db.base import set_tenant_context
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -44,6 +57,7 @@ class TestIdentityProvisionResponse(BaseModel):
 @router.post("/test-identities", response_model=TestIdentityProvisionResponse, status_code=201)
 async def provision_test_identity_endpoint(
     payload: TestIdentityProvisionRequest,
+    request: Request,
     principal: CanonicalPrincipal = Depends(require_principal("SUPER_ADMIN")),
     session: AsyncSession = Depends(get_session),  # noqa: B008
 ) -> TestIdentityProvisionResponse:
@@ -70,6 +84,7 @@ async def provision_test_identity_endpoint(
             tenant_id=payload.tenant_id,
             audit_reason=payload.audit_reason,
             idempotency_key=payload.idempotency_key,
+            correlation_id=request.headers.get("X-Correlation-ID"),
         )
     except ProvisioningDenied as exc:
         await session.rollback()
@@ -461,6 +476,7 @@ async def get_content_curriculum(
     session: AsyncSession = Depends(get_session),
 ):
     from sqlalchemy.orm import selectinload
+
     from app.db.models import Book, Chapter
 
     books = (
@@ -550,7 +566,7 @@ async def get_knowledge_base_status(
     subject: str = Depends(require_canonical_roles("SUPER_ADMIN")),
     session: AsyncSession = Depends(get_session),
 ):
-    from app.db.models import SourceDocument, SourceChunk
+    from app.db.models import SourceChunk, SourceDocument
     docs = (await session.execute(select(SourceDocument).order_by(SourceDocument.id))).scalars().all()
     total_chunks = await session.scalar(select(func.count(SourceChunk.id))) or 0
 
