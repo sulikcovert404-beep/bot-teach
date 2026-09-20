@@ -1,7 +1,9 @@
 from datetime import UTC, datetime
 from typing import Any
+
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
+
 from app.security.dependencies import require_roles, require_user
 
 external_beta_router = APIRouter(prefix="/external-beta", tags=["Controlled External Beta"])
