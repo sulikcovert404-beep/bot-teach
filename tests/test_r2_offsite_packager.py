@@ -16,7 +16,7 @@ spec.loader.exec_module(module)
 
 def make_plan(tmp_path: Path, *, mode: int = 0o600):
     source = tmp_path / "education.dump"
-    source.write_bytes("دادهٔ آزمایشی فارسی\n".encode("utf-8"))
+    source.write_bytes("دادهٔ آزمایشی فارسی\n".encode())
     source.chmod(mode)
     return module.PackagePlan(
         database="education",

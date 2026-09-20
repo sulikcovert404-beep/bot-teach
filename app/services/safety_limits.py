@@ -128,7 +128,7 @@ async def check_beta_safety_limits(
     if tokens_today >= quota.daily_tokens:
         raise HTTPException(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
-            detail=f"سقف مجاز مصرف توکن روزانه شما به پایان رسیده است.",
+            detail="سقف مجاز مصرف توکن روزانه شما به پایان رسیده است.",
         )
 
     return user

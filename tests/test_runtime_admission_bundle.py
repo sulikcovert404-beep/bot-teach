@@ -70,7 +70,7 @@ def test_deterministic_serialization_and_immutability():
 
 def test_persian_nfc_zwnj_round_trip():
     bundle = make(target_stage="مرحله پیش‌نویس")
-    assert "پیش‌نویس".encode("utf-8") in bundle.canonical_bytes()
+    assert "پیش‌نویس".encode() in bundle.canonical_bytes()
     assert bundle.digest_matches()
 
 

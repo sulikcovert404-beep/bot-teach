@@ -14,6 +14,6 @@ def test_missing_dependency_is_not_run():
 def test_reverse_graph_and_provider_neutrality():
  p=plan(); assert p.reverse_invalidations()['a']==('b','c'); assert all('PGVector' not in s.required_capabilities for s in p.validation_steps)
 def test_persian_nfc_zwnj_round_trip():
- p=RuntimeValidationPlan('پ','۱',(),(),('پایگاه‌داده',),(), 'رد', 'بازگشت'); assert 'پایگاه‌داده'.encode('utf8') in p.canonical_bytes()
+ p=RuntimeValidationPlan('پ','۱',(),(),('پایگاه‌داده',),(), 'رد', 'بازگشت'); assert 'پایگاه‌داده'.encode() in p.canonical_bytes()
 
 
