@@ -1,10 +1,15 @@
 """Immutable, advisory closure record for the pre-runtime governance chain."""
 from __future__ import annotations
-import hashlib, json, unicodedata
+
+import hashlib
+import json
+import unicodedata
 from dataclasses import dataclass, field
 from enum import StrEnum
 from typing import Any
+
 from .runtime_admission_bundle import ReferenceStatus, ReferenceToken, _reject_secrets
+
 
 class GovernanceClosureOutcome(StrEnum):
     GOVERNANCE_CLOSED = "GOVERNANCE_CLOSED"
