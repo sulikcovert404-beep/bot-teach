@@ -5,7 +5,6 @@ from typing import Any
 
 from fastapi import APIRouter, Body, Depends, Header, HTTPException, status
 from pydantic import BaseModel
-from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
