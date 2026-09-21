@@ -4,6 +4,8 @@ These tests intentionally exercise the shared production role guard and the
 public dashboard shells; they do not require a live database or Telegram.
 """
 
+import secrets
+
 import pytest
 from fastapi import HTTPException
 from fastapi.security import HTTPAuthorizationCredentials
@@ -14,12 +16,23 @@ from app.main import create_app
 from app.security.dependencies import require_roles
 from app.security.tokens import create_access_token
 
-SECRET = get_settings().jwt_secret
+
+@pytest.fixture(autouse=True)
+def _ephemeral_jwt_secret(monkeypatch: pytest.MonkeyPatch):
+    """Provide an isolated strong JWT secret for this module's auth tests."""
+    monkeypatch.setenv("JWT_SECRET", secrets.token_urlsafe(48))
+    get_settings.cache_clear()
+    try:
+        yield
+    finally:
+        monkeypatch.undo()
+        get_settings.cache_clear()
 
 
 def credentials(role: str, subject: str = "42") -> HTTPAuthorizationCredentials:
     return HTTPAuthorizationCredentials(
-        scheme="Bearer", credentials=create_access_token(subject, SECRET, role=role)
+        scheme="Bearer",
+        credentials=create_access_token(subject, get_settings().jwt_secret, role=role),
     )
 
 
