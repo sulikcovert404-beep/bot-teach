@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
@@ -14,6 +15,33 @@ from app.main import create_app
 
 app = create_app()
 from app.services.telegram_bot import TelegramAPIError
+
+
+@pytest.fixture(autouse=True)
+def telegram_webhook_session_override():
+    """Keep webhook contract tests offline while satisfying the route dependency."""
+
+    class TestSession:
+        def add(self, _object) -> None:
+            return None
+
+        async def flush(self) -> None:
+            return None
+
+        async def rollback(self) -> None:
+            return None
+
+        async def commit(self) -> None:
+            return None
+
+    async def override_session():
+        yield TestSession()
+
+    app.dependency_overrides[get_session] = override_session
+    try:
+        yield
+    finally:
+        app.dependency_overrides.pop(get_session, None)
 
 
 def test_mini_app_config_contract() -> None:
