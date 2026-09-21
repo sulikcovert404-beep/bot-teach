@@ -33,23 +33,6 @@ jobs:
           GEMINI_API_KEY: ci-only-gemini-key
           REDIS_URL: redis://localhost:6379/0
         run: python -c "from app.core.config import Settings; Settings()"
-      - name: Verify migration chain
-        env:
-          DATABASE_URL: sqlite:///ci-migrations.sqlite
-          EXPECTED_MIGRATION_HEAD: 20260912_0021
-        run: |
-          python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
-          test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
-
-      - name: Verify migration rollback and re-upgrade
-        env:
-          DATABASE_URL: sqlite:///ci-migrations.sqlite
-          EXPECTED_MIGRATION_HEAD: 20260912_0021
-        run: |
-          python -m alembic downgrade -1
-          python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
-          test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
-
   postgres-concurrency:
     runs-on: ubuntu-latest
     services:
@@ -86,6 +69,47 @@ jobs:
           for run in $(seq 1 10); do
             pytest -q tests/test_test_identity_provisioning.py -k postgres_concurrent_same_key_has_created_and_replay
           done
+
+  postgres-migration-chain:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: education
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d education"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m pip install -e ".[dev]"
+      - name: Verify canonical PostgreSQL migration chain
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/education
+          EXPECTED_MIGRATION_HEAD: 20260921_0022
+          PGPASSWORD: postgres
+        run: |
+          python -m alembic upgrade head
+          test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
+          psql -h 127.0.0.1 -U postgres -d education -v ON_ERROR_STOP=1 -tAc "SELECT 1 FROM pg_extension WHERE extname = 'vector'" | grep -qx 1
+          psql -h 127.0.0.1 -U postgres -d education -v ON_ERROR_STOP=1 -tAc "SELECT to_regclass('public.provisioning_idempotency_keys')" | grep -qx provisioning_idempotency_keys
+      - name: Verify canonical migration rollback and re-upgrade
+        env:
+          DATABASE_URL: postgresql+asyncpg://postgres:postgres@127.0.0.1:5432/education
+          EXPECTED_MIGRATION_HEAD: 20260921_0022
+        run: |
+          python -m alembic downgrade -1
+          python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
+          test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
 
   docker:
     runs-on: ubuntu-latest
