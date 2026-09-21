@@ -24,7 +24,7 @@ class RuntimeActivationStagingValidationAssurance:
  def payload(self) -> dict[str, object]: return {'assurance_id':self.assurance_id,'staging_validation_framework_reference':self.staging_validation_framework_reference,'staging_evidence_governance_reference':self.staging_evidence_governance_reference,'final_readiness_review_reference':self.final_readiness_review_reference,'activation_decision_reference':self.activation_decision_reference,'readiness_baseline_freeze_reference':self.readiness_baseline_freeze_reference,'assurance_findings':self.assurance_findings,'trace_reference':self.trace_reference,'runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False}
  def canonical_digest(self) -> str: return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
  @staticmethod
- def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=()):
+ def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=()) -> AssuranceOutcome:
   r=tuple(_c(x) for x in references)
   if not r or any(not x for x in r) or any(k in x.upper() for x in r for k in ('BLOCKED','DIGEST_MISMATCH','TRACE_FAILURE')): return AssuranceOutcome.ASSURANCE_BLOCKED
   if any(k in x.upper() for x in r for k in ('INVALID','CONTRADICTION')): return AssuranceOutcome.ASSURANCE_NOT_READY

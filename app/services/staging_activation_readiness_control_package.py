@@ -36,7 +36,7 @@ class StagingActivationReadinessControlPackage:
     def payload(self) -> dict[str, object]: return {k:getattr(self,k) for k in ('package_id','staging_governance_finalization_reference','staging_entry_review_reference','pre_staging_package_reference','activation_control_plane_reference','activation_decision_reference','readiness_assurance_reference','evidence_governance_reference','control_findings','boundary_assertions','trace_reference')} | {'staging_activation':'PROHIBITED','runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False,'deployment':'PROHIBITED'}
     def canonical_digest(self) -> str: return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
     @staticmethod
-    def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()):
+    def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()) -> StagingControlOutcome:
         refs=tuple(_n(x) for x in references)
         if not refs or any(not x for x in refs) or any(k in x.upper() for x in refs for k in ('BLOCKED','DIGEST_MISMATCH','TRACE_FAILURE','BROKEN_LINEAGE')): return StagingControlOutcome.STAGING_CONTROL_BLOCKED
         if any(k in x.upper() for x in refs for k in ('INVALID','CONTRADICTION')): return StagingControlOutcome.STAGING_CONTROL_NOT_READY

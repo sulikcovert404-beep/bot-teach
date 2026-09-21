@@ -24,7 +24,7 @@ class StagingActivationGovernanceClosure:
     def payload(self) -> dict[str, object]:return {k:getattr(self,k) for k in ('closure_id','staging_control_package_reference','staging_governance_finalization_reference','staging_entry_review_reference','activation_readiness_assurance_reference','activation_control_plane_reference','boundary_assertions','closure_findings','trace_reference')}|{'staging_activation':'PROHIBITED','runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False,'deployment':'PROHIBITED'}
     def canonical_digest(self) -> str:return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
     @staticmethod
-    def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()):
+    def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()) -> ClosureOutcome:
         r=tuple(_n(x) for x in references)
         if not r or any(not x for x in r) or any(k in x.upper() for x in r for k in ('BLOCKED','DIGEST_MISMATCH','TRACE_FAILURE','BROKEN_LINEAGE','CONFLICT')):return ClosureOutcome.STAGING_GOVERNANCE_BLOCKED
         if any(k in x.upper() for x in r for k in ('INVALID','OPEN','INCONSISTENT')):return ClosureOutcome.STAGING_GOVERNANCE_OPEN

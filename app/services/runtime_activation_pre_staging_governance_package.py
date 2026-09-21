@@ -43,7 +43,7 @@ class RuntimeActivationPreStagingGovernancePackage:
     def canonical_digest(self) -> str: return hashlib.sha256(json.dumps(self.payload(), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
 
     @staticmethod
-    def evaluate(*, references: tuple[str, ...], findings: tuple[str, ...] = ()):
+    def evaluate(*, references: tuple[str, ...], findings: tuple[str, ...] = ()) -> PreStagingOutcome:
         values = tuple(_c(x) for x in references)
         if not values or any(not x for x in values) or any(k in x.upper() for x in values for k in ('BLOCKED','DIGEST_MISMATCH','TRACE_FAILURE')): return PreStagingOutcome.PRE_STAGING_BLOCKED
         if any(k in x.upper() for x in values for k in ('INVALID','CONTRADICTION')): return PreStagingOutcome.PRE_STAGING_NOT_READY

@@ -37,7 +37,7 @@ class RuntimeActivationStagingEntryReview:
     def payload(self) -> dict[str, object]: return {'review_id':self.review_id,'pre_staging_governance_package_reference':self.pre_staging_governance_package_reference,'final_readiness_review_reference':self.final_readiness_review_reference,'activation_decision_reference':self.activation_decision_reference,'staging_validation_assurance_reference':self.staging_validation_assurance_reference,'readiness_baseline_freeze_reference':self.readiness_baseline_freeze_reference,'entry_findings':self.entry_findings,'boundary_assertions':self.boundary_assertions,'trace_reference':self.trace_reference,'staging_entry':'REVIEW_ONLY','staging_execution':'PROHIBITED','runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False}
     def canonical_digest(self) -> str: return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')).hexdigest()
     @staticmethod
-    def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()):
+    def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()) -> StagingEntryOutcome:
         vals=tuple(_c(x) for x in references)
         if not vals or any(not x for x in vals) or any(k in x.upper() for x in vals for k in ('BLOCKED','DIGEST_MISMATCH','TRACE_FAILURE')): return StagingEntryOutcome.STAGING_ENTRY_BLOCKED
         if any(k in x.upper() for x in vals for k in ('INVALID','CONTRADICTION')): return StagingEntryOutcome.STAGING_ENTRY_NOT_APPROVED
