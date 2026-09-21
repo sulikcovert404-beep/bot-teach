@@ -212,7 +212,7 @@ async def build_custom_exam(
     teacher_sub: str = Depends(require_roles("TEACHER", "ADMIN")),
     session: AsyncSession = Depends(get_session),
 ):
-    teacher_id = int(teacher_sub)
+    _teacher_id = int(teacher_sub)
 
     if not req.question_ids:
         raise HTTPException(
@@ -224,42 +224,6 @@ async def build_custom_exam(
         detail="Exam builder question-bank integration is not available",
     )
 
-    exam = Exam(user_id=teacher_id, title=req.title)
-    exam.questions = [
-        ExamQuestion(
-            prompt=q.prompt,
-            options="\n".join(q.options),
-            correct_option=q.correct_option,
-            position=idx,
-        )
-        for idx, q in enumerate(sample_questions, start=1)
-    ]
-    session.add(exam)
-    exam_meta = {
-        "exam_id": exam.id,
-        "title": exam.title,
-        "subject": req.subject,
-        "grade": req.grade,
-        "difficulty": req.difficulty_level,
-        "time_limit_minutes": req.time_limit_minutes,
-        "questions_count": len(exam.questions),
-    }
-
-    await record_audit_log(
-        session,
-        actor_user_id=teacher_id,
-        action="EXAM_BUILDER_CREATE",
-        resource_type="exam",
-        resource_id=str(exam.id),
-        metadata=exam_meta,
-    )
-    await session.commit()
-
-    loaded_exam = await session.scalar(
-        select(Exam).options(selectinload(Exam.questions)).where(Exam.id == exam.id)
-    )
-
-    return {"status": "created", "exam_metadata": exam_meta, "exam": _response(loaded_exam)}
 
 
 # --- 3. Auto Evaluation & Student Exam Experience ---
