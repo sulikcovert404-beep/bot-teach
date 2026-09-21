@@ -10,7 +10,7 @@ from fastapi.security import HTTPAuthorizationCredentials
 from fastapi.testclient import TestClient
 
 from app.core.config import get_settings
-from app.main import app
+from app.main import create_app
 from app.security.dependencies import require_roles
 from app.security.tokens import create_access_token
 
@@ -47,7 +47,7 @@ def test_wrong_role_is_denied_by_dashboard_guard(target: str, role: str) -> None
 
 
 def test_anonymous_dashboard_data_endpoints_fail_closed() -> None:
-    client = TestClient(app)
+    client = TestClient(create_app())
     endpoints = (
         "/api/v1/student/v1/assignments",
         "/api/v1/student/progress",
