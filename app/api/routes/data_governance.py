@@ -10,7 +10,6 @@ from app.db.models import (
     AIAnswerAuditLog,
     ContentVersionHistory,
     KnowledgeSourceQuality,
-    User,
 )
 from app.security.dependencies import require_roles, require_user
 

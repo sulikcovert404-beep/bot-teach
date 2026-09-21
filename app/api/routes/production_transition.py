@@ -10,7 +10,6 @@ from app.core.config import get_settings
 from app.db.models import (
     LaunchControlGateLog,
     ProductionTransitionSimulation,
-    User,
 )
 from app.security.dependencies import require_roles
 

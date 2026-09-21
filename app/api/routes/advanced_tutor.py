@@ -9,7 +9,6 @@ from app.api.routes.auth import get_session
 from app.db.models import (
     CoachPersonaSetting,
     StudentMistakeLog,
-    User,
 )
 from app.security.dependencies import require_roles, require_user
 

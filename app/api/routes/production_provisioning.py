@@ -2,7 +2,6 @@
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
 
-from app.db.models import User
 from app.security.dependencies import require_roles, require_user
 
 prod_infra_router = APIRouter(prefix="/prod-provisioning", tags=["Production Infrastructure Provisioning"])

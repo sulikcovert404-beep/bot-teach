@@ -12,8 +12,7 @@ from app.api.routes.auth import get_session
 from app.core.channels import CanonicalCommand, Channel, ChannelContext
 from app.core.config import get_settings
 from app.core.logging import telegram_metrics
-from app.db.models import Subscription, TelegramUpdate, User
-from app.domain.entitlements.models import FeatureCode
+from app.db.models import TelegramUpdate
 from app.services.audit_repository import record_audit_log
 from app.services.notification import telegram_notifications
 from app.services.telegram_bot import TelegramAPIError, TelegramBotClient

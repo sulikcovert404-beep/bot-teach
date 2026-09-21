@@ -89,11 +89,7 @@ async def tutor_answer(
         charged_tokens=charged_tokens,
     )
 
-    from app.services.cohort_feedback import (
-        FeedbackSubmitRequest,
-        record_beta_quality_audit,
-        record_user_feedback,
-    )
+    from app.services.cohort_feedback import record_beta_quality_audit
     await record_beta_quality_audit(
         session,
         user_id=user_id,

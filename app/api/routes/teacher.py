@@ -12,7 +12,6 @@ from app.db.base import set_tenant_context
 from app.db.models import (
     Assignment,
     AuditLog,
-    BetaQualityAudit,
     ClassMembership,
     Classroom,
     ExamAttempt,
@@ -25,7 +24,6 @@ from app.db.models import (
 from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_roles
 from app.security.entitlements import require_feature_access
-from app.security.teacher_scope import resolve_teacher_scope
 from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
 from app.services.ai_gateway import (
     GeminiProvider,

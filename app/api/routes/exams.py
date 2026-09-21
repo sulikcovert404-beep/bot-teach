@@ -18,7 +18,6 @@ from app.db.models import (
     Exam,
     ExamQuestion,
     StudentProfile,
-    User,
 )
 from app.domain.entitlements.models import FeatureCode
 from app.security.dependencies import require_roles, require_user
