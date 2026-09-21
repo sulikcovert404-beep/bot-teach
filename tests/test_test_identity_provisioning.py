@@ -1,8 +1,10 @@
 import asyncio
 import json
+import os
+from uuid import uuid4
 
 import pytest
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from app.db.base import Base
@@ -123,7 +125,7 @@ async def test_persisted_key_replays_and_rejects_fingerprint_conflict() -> None:
 
 
 @pytest.mark.asyncio
-async def test_concurrent_same_key_has_one_identity_and_replay() -> None:
+async def test_same_key_replay_has_one_identity_sqlite() -> None:
     import tempfile
     from pathlib import Path
 
@@ -139,25 +141,21 @@ async def test_concurrent_same_key_has_one_identity_and_replay() -> None:
         owner_id = owner.id
         await session.commit()
 
-    async def invoke() -> object:
-        async with sessions() as session:
-            return await provision_test_identity(
-                session, actor_user_id=owner_id, provider="telegram", subject="926",
-                username="concurrent", role="STUDENT", tenant_id=None,
-                audit_reason="concurrent qualification", idempotency_key="concurrent-key",
-            )
-
-    results = await asyncio.gather(invoke(), invoke(), return_exceptions=True)
-    statuses = sorted(result.status for result in results if hasattr(result, "status"))
-    # SQLite's coarse database locking does not provide the same persisted
-    # replay interleaving as PostgreSQL.  Staging/PostgreSQL qualification
-    # covers CREATED+REPLAY; this fixture asserts the SQLite invariant that
-    # at most one identity is created and no unhandled exception escapes.
-    if engine.dialect.name == "sqlite":
-        assert statuses in (["CREATED"], ["CREATED", "REPLAY"])
-    else:
-        assert statuses == ["CREATED", "REPLAY"]
-    assert not any(isinstance(result, Exception) for result in results)
+    async with sessions() as first_session:
+        first = await provision_test_identity(
+            first_session, actor_user_id=owner_id, provider="telegram", subject="926",
+            username="concurrent", role="STUDENT", tenant_id=None,
+            audit_reason="sqlite replay qualification", idempotency_key="concurrent-key",
+        )
+    async with sessions() as replay_session:
+        replay = await provision_test_identity(
+            replay_session, actor_user_id=owner_id, provider="telegram", subject="926",
+            username="concurrent", role="STUDENT", tenant_id=None,
+            audit_reason="sqlite replay qualification", idempotency_key="concurrent-key",
+        )
+    assert first.status == "CREATED"
+    assert replay.status == "REPLAY"
+    assert replay.user_id == first.user_id
     async with sessions() as session:
         assert len((await session.scalars(select(User))).all()) == 2
     await engine.dispose()
@@ -197,6 +195,58 @@ async def test_concurrent_conflicting_key_allows_one_request_only() -> None:
     assert sum(isinstance(result, ProvisioningDenied) for result in results) == 1
     await engine.dispose()
     db_path.unlink(missing_ok=True)
+
+
+@pytest.mark.asyncio
+async def test_postgres_concurrent_same_key_has_created_and_replay() -> None:
+    """Qualify the production transaction path against an ephemeral PostgreSQL DB."""
+    database_url = os.getenv("TEST_DATABASE_URL")
+    if not database_url:
+        pytest.skip("TEST_DATABASE_URL is required for PostgreSQL qualification")
+    engine = create_async_engine(database_url, pool_pre_ping=True)
+    sessions = async_sessionmaker(engine, expire_on_commit=False)
+    async with engine.connect() as connection_a, engine.connect() as connection_b:
+        backend_a = await connection_a.scalar(text("SELECT pg_backend_pid()"))
+        backend_b = await connection_b.scalar(text("SELECT pg_backend_pid()"))
+    assert backend_a != backend_b
+    async with sessions() as session:
+        suffix = uuid4().int % 1_000_000_000
+        owner = User(telegram_user_id=992500 + suffix, role="SUPER_ADMIN")
+        session.add(owner)
+        await session.commit()
+        owner_id = owner.id
+
+    key = f"postgres-concurrency-qualification-{uuid4()}"
+
+    async def invoke() -> object:
+        async with sessions() as session:
+            return await provision_test_identity(
+                session,
+                actor_user_id=owner_id,
+                provider="telegram",
+                subject=str(992501 + suffix),
+                username=f"postgres-concurrency-{suffix}",
+                role="STUDENT",
+                tenant_id=None,
+                audit_reason="postgres concurrency qualification",
+                idempotency_key=key,
+            )
+
+    results = await asyncio.gather(invoke(), invoke())
+    assert sorted(result.status for result in results) == ["CREATED", "REPLAY"]
+    assert len({result.user_id for result in results}) == 1
+    async with sessions() as session:
+        records = (await session.scalars(
+            select(ProvisioningIdempotencyKey).where(
+                ProvisioningIdempotencyKey.idempotency_key == key
+            )
+        )).all()
+        identities = (await session.scalars(
+            select(User).where(User.telegram_user_id == 992501 + suffix)
+        )).all()
+    assert len(records) == 1
+    assert len(identities) == 1
+    await engine.dispose()
 
 
 @pytest.mark.asyncio
