@@ -1,0 +1,3373 @@
+{
+  "schema_version": 1,
+  "baseline_commit": "8b77e614d8530f6c0dc81e51169c766d1dd45a9f",
+  "command": [
+    "python",
+    "-m",
+    "mypy",
+    "app"
+  ],
+  "expected_total": 479,
+  "fingerprint": [
+    "path",
+    "line",
+    "column",
+    "code",
+    "message"
+  ],
+  "findings": [
+    {
+      "path": "app/adapters/bale.py",
+      "line": 12,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a type annotation for one or more parameters"
+    },
+    {
+      "path": "app/api/routes/adaptive.py",
+      "line": 38,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/adaptive.py",
+      "line": 110,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/adaptive.py",
+      "line": 145,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/adaptive.py",
+      "line": 236,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/adaptive.py",
+      "line": 295,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 101,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 115,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 125,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 134,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 146,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 154,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 446,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 474,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 515,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 529,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 547,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 565,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 599,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 629,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 653,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/admin.py",
+      "line": 676,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/advanced_tutor.py",
+      "line": 120,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/advanced_tutor.py",
+      "line": 166,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/advanced_tutor.py",
+      "line": 198,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/advanced_tutor.py",
+      "line": 237,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/advanced_tutor.py",
+      "line": 271,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/advanced_tutor.py",
+      "line": 313,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/agent_orchestration.py",
+      "line": 54,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/agent_orchestration.py",
+      "line": 106,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/agent_orchestration.py",
+      "line": 143,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/agent_orchestration.py",
+      "line": 185,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/agent_orchestration.py",
+      "line": 205,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/ai.py",
+      "line": 258,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/ai.py",
+      "line": 294,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/ai.py",
+      "line": 328,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/ai.py",
+      "line": 345,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/ai.py",
+      "line": 360,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 101,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 117,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 126,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 136,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 138,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 139,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for < (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 140,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 142,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 143,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 157,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/beta_1000_expansion.py",
+      "line": 164,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/business_revenue_readiness.py",
+      "line": 76,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/business_revenue_readiness.py",
+      "line": 89,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaboration.py",
+      "line": 45,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaboration.py",
+      "line": 78,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaboration.py",
+      "line": 122,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaboration.py",
+      "line": 176,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaboration.py",
+      "line": 224,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaboration.py",
+      "line": 256,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaboration.py",
+      "line": 286,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaborative_network.py",
+      "line": 50,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaborative_network.py",
+      "line": 82,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaborative_network.py",
+      "line": 110,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaborative_network.py",
+      "line": 153,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaborative_network.py",
+      "line": 186,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaborative_network.py",
+      "line": 216,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/collaborative_network.py",
+      "line": 241,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/commercial_readiness.py",
+      "line": 102,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/commercial_readiness.py",
+      "line": 111,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/commercial_readiness.py",
+      "line": 114,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for + (\"object\" and \"int\")"
+    },
+    {
+      "path": "app/api/routes/commercial_readiness.py",
+      "line": 116,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for + (\"object\" and \"int\")"
+    },
+    {
+      "path": "app/api/routes/commercial_readiness.py",
+      "line": 118,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for + (\"object\" and \"int\")"
+    },
+    {
+      "path": "app/api/routes/commercial_readiness.py",
+      "line": 125,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/commercial_readiness.py",
+      "line": 130,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_beta_cohort.py",
+      "line": 52,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_beta_cohort.py",
+      "line": 70,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_beta_cohort.py",
+      "line": 92,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_beta_cohort.py",
+      "line": 122,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_beta_cohort.py",
+      "line": 145,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_external_beta.py",
+      "line": 98,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_external_beta.py",
+      "line": 115,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_external_beta.py",
+      "line": 128,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_external_beta.py",
+      "line": 140,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 1 to \"append\" of \"list\" has incompatible type \"dict[str, int | str | None]\"; expected \"dict[str, object]\""
+    },
+    {
+      "path": "app/api/routes/controlled_external_beta.py",
+      "line": 145,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_external_beta.py",
+      "line": 212,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_public_release.py",
+      "line": 57,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_public_release.py",
+      "line": 77,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_public_release.py",
+      "line": 95,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_public_release.py",
+      "line": 97,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported right operand type for in (\"object\")"
+    },
+    {
+      "path": "app/api/routes/controlled_public_release.py",
+      "line": 99,
+      "column": 0,
+      "code": "index",
+      "message": "Unsupported target for indexed assignment (\"object\")"
+    },
+    {
+      "path": "app/api/routes/controlled_public_release.py",
+      "line": 109,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/controlled_public_release.py",
+      "line": 129,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 53,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 86,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 119,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 153,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 183,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 227,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 267,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 293,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/customer_success.py",
+      "line": 337,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/data_governance.py",
+      "line": 52,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/data_governance.py",
+      "line": 91,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/data_governance.py",
+      "line": 127,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/data_governance.py",
+      "line": 181,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/data_governance.py",
+      "line": 207,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/data_governance.py",
+      "line": 247,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/day0_operations.py",
+      "line": 39,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/day0_operations.py",
+      "line": 83,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/day0_operations.py",
+      "line": 115,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/day0_operations.py",
+      "line": 147,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/day0_operations.py",
+      "line": 188,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/digital_twin.py",
+      "line": 37,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/digital_twin.py",
+      "line": 82,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/digital_twin.py",
+      "line": 119,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/digital_twin.py",
+      "line": 158,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/digital_twin.py",
+      "line": 193,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/digital_twin.py",
+      "line": 222,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/enterprise_success.py",
+      "line": 39,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/enterprise_success.py",
+      "line": 83,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/enterprise_success.py",
+      "line": 119,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/enterprise_success.py",
+      "line": 174,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/enterprise_success.py",
+      "line": 205,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/exams.py",
+      "line": 133,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/exams.py",
+      "line": 172,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/exams.py",
+      "line": 208,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/exams.py",
+      "line": 230,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/exams.py",
+      "line": 267,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 45,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 87,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 108,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 152,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 229,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 258,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 281,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/experiments.py",
+      "line": 326,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/feedback_iteration.py",
+      "line": 58,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/feedback_iteration.py",
+      "line": 102,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/feedback_iteration.py",
+      "line": 134,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/feedback_iteration.py",
+      "line": 184,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/go_to_market.py",
+      "line": 48,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/go_to_market.py",
+      "line": 92,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/go_to_market.py",
+      "line": 114,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/go_to_market.py",
+      "line": 143,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/go_to_market.py",
+      "line": 174,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth.py",
+      "line": 82,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth.py",
+      "line": 111,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth.py",
+      "line": 146,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth.py",
+      "line": 168,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth.py",
+      "line": 182,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth.py",
+      "line": 218,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth_scale_operations.py",
+      "line": 87,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth_scale_operations.py",
+      "line": 100,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/growth_scale_operations.py",
+      "line": 115,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/knowledge_graph.py",
+      "line": 41,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/knowledge_graph.py",
+      "line": 73,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/knowledge_graph.py",
+      "line": 98,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/knowledge_graph.py",
+      "line": 143,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/knowledge_graph.py",
+      "line": 184,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/knowledge_graph.py",
+      "line": 228,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/knowledge_graph.py",
+      "line": 276,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 40,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 66,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 81,
+      "column": 0,
+      "code": "misc",
+      "message": "Generator has incompatible item type \"object\"; expected \"bool\""
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 82,
+      "column": 0,
+      "code": "misc",
+      "message": "Generator has incompatible item type \"int\"; expected \"bool\""
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 82,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported left operand type for * (\"object\")"
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 83,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported left operand type for * (\"object\")"
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 84,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported left operand type for * (\"object\")"
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 105,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/market_validation.py",
+      "line": 131,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 55,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 67,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"float\", variable has type \"int\")"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 80,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"float\", variable has type \"int\")"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 100,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 119,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 148,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 162,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/observability.py",
+      "line": 190,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operational_excellence.py",
+      "line": 89,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operational_excellence.py",
+      "line": 103,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operational_excellence.py",
+      "line": 117,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operations_autonomy.py",
+      "line": 26,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operations_autonomy.py",
+      "line": 73,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operations_autonomy.py",
+      "line": 102,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operations_autonomy.py",
+      "line": 146,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/operations_autonomy.py",
+      "line": 190,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/outcome_prediction.py",
+      "line": 46,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/outcome_prediction.py",
+      "line": 109,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/outcome_prediction.py",
+      "line": 154,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/outcome_prediction.py",
+      "line": 181,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/outcome_prediction.py",
+      "line": 208,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/outcome_prediction.py",
+      "line": 236,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/phase2_scale_gateway.py",
+      "line": 73,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/phase2_scale_gateway.py",
+      "line": 92,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 61,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 93,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 139,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 178,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 237,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 281,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 299,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 328,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 376,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 403,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 432,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 460,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 513,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 544,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 568,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 599,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 624,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 645,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 691,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 711,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 750,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 779,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 820,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 851,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 897,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 939,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 984,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/pilot_preparation.py",
+      "line": 1028,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/preprod_gate_audit.py",
+      "line": 78,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/preprod_gate_audit.py",
+      "line": 94,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_decision_engine.py",
+      "line": 39,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_decision_engine.py",
+      "line": 86,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_decision_engine.py",
+      "line": 120,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_decision_engine.py",
+      "line": 155,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_decision_engine.py",
+      "line": 189,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_market_fit.py",
+      "line": 52,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_market_fit.py",
+      "line": 86,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_market_fit.py",
+      "line": 109,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_market_fit.py",
+      "line": 153,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/product_market_fit.py",
+      "line": 181,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/production_provisioning.py",
+      "line": 86,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/production_provisioning.py",
+      "line": 100,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/production_transition.py",
+      "line": 36,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/production_transition.py",
+      "line": 97,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/production_transition.py",
+      "line": 123,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/production_transition.py",
+      "line": 184,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/production_transition.py",
+      "line": 227,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_operational_monitoring.py",
+      "line": 78,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_operational_monitoring.py",
+      "line": 91,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_operational_monitoring.py",
+      "line": 93,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for < (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_operational_monitoring.py",
+      "line": 94,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for < (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_operational_monitoring.py",
+      "line": 95,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_operational_monitoring.py",
+      "line": 96,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/public_beta_operational_monitoring.py",
+      "line": 114,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 94,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 103,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported left operand type for >= (\"object\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 111,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported right operand type for in (\"object\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 115,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for + (\"object\" and \"int\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 132,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 141,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 155,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 165,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 167,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 168,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for < (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 169,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 185,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/public_beta_preparation.py",
+      "line": 190,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/public_launch_readiness.py",
+      "line": 106,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_launch_readiness.py",
+      "line": 125,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_launch_readiness.py",
+      "line": 144,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/public_launch_readiness.py",
+      "line": 158,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/resilience_hardening.py",
+      "line": 43,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/resilience_hardening.py",
+      "line": 105,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/resilience_hardening.py",
+      "line": 150,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/resilience_hardening.py",
+      "line": 176,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/resilience_hardening.py",
+      "line": 225,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/resilience_hardening.py",
+      "line": 270,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/revenue_intelligence.py",
+      "line": 46,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/revenue_intelligence.py",
+      "line": 80,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/revenue_intelligence.py",
+      "line": 125,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/revenue_intelligence.py",
+      "line": 167,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 34,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 74,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 74,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"int\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 81,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 82,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"int\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 91,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 139,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 179,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/scale_operations_intelligence.py",
+      "line": 231,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/school_operations.py",
+      "line": 42,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/school_operations.py",
+      "line": 88,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/school_operations.py",
+      "line": 123,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/school_operations.py",
+      "line": 157,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/school_operations.py",
+      "line": 180,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/self_optimizing.py",
+      "line": 51,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/self_optimizing.py",
+      "line": 83,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/self_optimizing.py",
+      "line": 127,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/self_optimizing.py",
+      "line": 180,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/self_optimizing.py",
+      "line": 202,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/self_optimizing.py",
+      "line": 239,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 82,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 104,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 106,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 108,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 109,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 111,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 112,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 113,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage3_controlled_onboarding.py",
+      "line": 124,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 73,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 91,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 94,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 95,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"int\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 96,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported left operand type for < (\"object\")"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 99,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 100,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 101,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage4_controlled_expansion.py",
+      "line": 103,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 79,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 99,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 102,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 103,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for > (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 104,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for < (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 107,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 108,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 109,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 110,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 112,
+      "column": 0,
+      "code": "operator",
+      "message": "Unsupported operand types for <= (\"float\" and \"object\")"
+    },
+    {
+      "path": "app/api/routes/stage5_controlled_validation.py",
+      "line": 127,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/api/routes/strategy.py",
+      "line": 15,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/strategy.py",
+      "line": 100,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/strategy.py",
+      "line": 129,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/strategy.py",
+      "line": 171,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/strategy.py",
+      "line": 218,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 63,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 78,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 89,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 100,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 116,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 124,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 135,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 141,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 2 to \"where\" of \"Select\" has incompatible type \"bool | Any\"; expected \"ColumnElement[bool] | _HasClauseElement[bool] | SQLCoreOperations[bool] | ExpressionElementRole[bool] | TypedColumnsClauseRole[bool] | Callable[[], ColumnElement[bool]] | LambdaElement\""
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 141,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"StudentProfile | None\" has no attribute \"id\""
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 147,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"StudentProfile | None\" has no attribute \"id\""
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 155,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 196,
+      "column": 0,
+      "code": "no-any-return",
+      "message": "Returning Any from function declared to return \"dict[str, Any]\""
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 208,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 236,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 1 to \"extract_profile_from_audit\" has incompatible type \"Sequence[AuditLog]\"; expected \"list[AuditLog]\""
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 267,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 311,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 378,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 1 to \"round\" has incompatible type \"float | None\"; expected \"_SupportsRound2[float]\""
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 423,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 450,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 1 to \"extract_profile_from_audit\" has incompatible type \"Sequence[AuditLog]\"; expected \"list[AuditLog]\""
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 535,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 567,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 631,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/student.py",
+      "line": 649,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/subscriptions.py",
+      "line": 87,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/subscriptions.py",
+      "line": 124,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/subscriptions.py",
+      "line": 199,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/subscriptions.py",
+      "line": 244,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/subscriptions.py",
+      "line": 252,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/subscriptions.py",
+      "line": 273,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 132,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 173,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 200,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 238,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 266,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 327,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 343,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 373,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 387,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 458,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 479,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 495,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 511,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 521,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 529,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 565,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 582,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 602,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 617,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 650,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 704,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 729,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/teacher.py",
+      "line": 758,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/telegram.py",
+      "line": 142,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"Any | None\", variable has type \"str\")"
+    },
+    {
+      "path": "app/api/routes/telegram.py",
+      "line": 181,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 2 to \"resolve_telegram_identity\" has incompatible type \"Any | None\"; expected \"int\""
+    },
+    {
+      "path": "app/api/routes/trust_safety.py",
+      "line": 46,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/trust_safety.py",
+      "line": 93,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/trust_safety.py",
+      "line": 118,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/trust_safety.py",
+      "line": 153,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/trust_safety.py",
+      "line": 176,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/trust_safety.py",
+      "line": 213,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/tutor.py",
+      "line": 111,
+      "column": 0,
+      "code": "attr-defined",
+      "message": "\"object\" has no attribute \"chunk_id\""
+    },
+    {
+      "path": "app/api/routes/tutor.py",
+      "line": 112,
+      "column": 0,
+      "code": "attr-defined",
+      "message": "\"object\" has no attribute \"page\""
+    },
+    {
+      "path": "app/api/routes/tutor.py",
+      "line": 113,
+      "column": 0,
+      "code": "attr-defined",
+      "message": "\"object\" has no attribute \"chapter\""
+    },
+    {
+      "path": "app/api/routes/tutor.py",
+      "line": 114,
+      "column": 0,
+      "code": "attr-defined",
+      "message": "\"object\" has no attribute \"lesson\""
+    },
+    {
+      "path": "app/api/routes/tutor.py",
+      "line": 125,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/tutor.py",
+      "line": 143,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/vps_canary_deployment.py",
+      "line": 60,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/api/routes/vps_canary_deployment.py",
+      "line": 75,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/core/client_contract.py",
+      "line": 39,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument \"code\" to \"ApiError\" has incompatible type \"Any | str | None\"; expected \"str\""
+    },
+    {
+      "path": "app/core/client_contract.py",
+      "line": 39,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument \"message\" to \"ApiError\" has incompatible type \"Any | str | None\"; expected \"str\""
+    },
+    {
+      "path": "app/core/logging.py",
+      "line": 103,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"int\", variable has type \"str\")"
+    },
+    {
+      "path": "app/repositories/school_class.py",
+      "line": 29,
+      "column": 0,
+      "code": "no-any-return",
+      "message": "Returning Any from function declared to return \"Classroom | None\""
+    },
+    {
+      "path": "app/security/role_preview.py",
+      "line": 108,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 1 to \"PreviewPrincipal\" has incompatible type \"Any | None\"; expected \"str\""
+    },
+    {
+      "path": "app/security/role_preview.py",
+      "line": 108,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 4 to \"PreviewPrincipal\" has incompatible type \"Any | None\"; expected \"str\""
+    },
+    {
+      "path": "app/security/role_preview.py",
+      "line": 108,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 5 to \"PreviewPrincipal\" has incompatible type \"Any | None\"; expected \"str\""
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 206,
+      "column": 0,
+      "code": "unused-ignore",
+      "message": "Unused \"type: ignore\" comment"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 292,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"ProviderAuthError\", variable has type \"ProviderQuotaError\")"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 296,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"ProviderResponseError\", variable has type \"ProviderQuotaError\")"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 301,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"ProviderTransientError\", variable has type \"ProviderQuotaError\")"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 311,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"ProviderTransientError\", variable has type \"ProviderQuotaError\")"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 316,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"ProviderTransientError\", variable has type \"ProviderQuotaError\")"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 320,
+      "column": 0,
+      "code": "index",
+      "message": "Value of type \"object\" is not indexable"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 322,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"ProviderResponseError\", variable has type \"ProviderQuotaError\")"
+    },
+    {
+      "path": "app/services/ai_gateway.py",
+      "line": 326,
+      "column": 0,
+      "code": "attr-defined",
+      "message": "\"object\" has no attribute \"get\""
+    },
+    {
+      "path": "app/services/configuration.py",
+      "line": 90,
+      "column": 0,
+      "code": "no-any-return",
+      "message": "Returning Any from function declared to return \"dict[str, Any]\""
+    },
+    {
+      "path": "app/services/content_generation.py",
+      "line": 111,
+      "column": 0,
+      "code": "attr-defined",
+      "message": "\"Result[Any]\" has no attribute \"rowcount\""
+    },
+    {
+      "path": "app/services/evidence_validation.py",
+      "line": 162,
+      "column": 0,
+      "code": "assignment",
+      "message": "Incompatible types in assignment (expression has type \"tuple[str, ...]\", variable has type \"tuple[()]\")"
+    },
+    {
+      "path": "app/services/lesson_pack.py",
+      "line": 92,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 8 to \"LessonPack\" has incompatible type \"tuple[dict[str, Sequence[str]]]\"; expected \"tuple[dict[str, object], ...]\""
+    },
+    {
+      "path": "app/services/lesson_pack_orchestrator.py",
+      "line": 41,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a type annotation for one or more parameters"
+    },
+    {
+      "path": "app/services/notification.py",
+      "line": 13,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a type annotation for one or more parameters"
+    },
+    {
+      "path": "app/services/runtime_activation_control_plane.py",
+      "line": 65,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_control_plane.py",
+      "line": 66,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_control_plane.py",
+      "line": 67,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_governance_closure.py",
+      "line": 63,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_governance_closure.py",
+      "line": 64,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_governance_closure.py",
+      "line": 65,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_governance_review.py",
+      "line": 54,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_governance_review.py",
+      "line": 55,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_governance_review.py",
+      "line": 56,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_readiness_assurance_bundle.py",
+      "line": 48,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_readiness_assurance_bundle.py",
+      "line": 49,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_readiness_assurance_bundle.py",
+      "line": 50,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_readiness_baseline_freeze.py",
+      "line": 51,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_readiness_baseline_freeze.py",
+      "line": 52,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_activation_readiness_baseline_freeze.py",
+      "line": 53,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_contract_closure_review.py",
+      "line": 73,
+      "column": 0,
+      "code": "comparison-overlap",
+      "message": "Non-overlapping identity check (left operand type: \"Literal[ReferenceStatus.VALID]\", right operand type: \"Literal[ReferenceStatus.REQUIRES_REVIEW]\")"
+    },
+    {
+      "path": "app/services/runtime_entry_preparation_baseline_snapshot.py",
+      "line": 63,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"to_dict\""
+    },
+    {
+      "path": "app/services/runtime_entry_preparation_baseline_snapshot.py",
+      "line": 80,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_preparation_baseline_snapshot.py",
+      "line": 82,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_preparation_baseline_snapshot.py",
+      "line": 84,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_readiness_gate.py",
+      "line": 55,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_readiness_gate.py",
+      "line": 56,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_readiness_gate.py",
+      "line": 57,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_readiness_reconciliation.py",
+      "line": 55,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"to_dict\""
+    },
+    {
+      "path": "app/services/runtime_entry_readiness_reconciliation.py",
+      "line": 67,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_readiness_reconciliation.py",
+      "line": 68,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_entry_readiness_reconciliation.py",
+      "line": 69,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/runtime_execution_lifecycle.py",
+      "line": 61,
+      "column": 0,
+      "code": "no-untyped-call",
+      "message": "Call to untyped function (unknown) in typed context"
+    },
+    {
+      "path": "app/services/runtime_execution_reconciliation.py",
+      "line": 50,
+      "column": 0,
+      "code": "no-untyped-call",
+      "message": "Call to untyped function (unknown) in typed context"
+    },
+    {
+      "path": "app/services/runtime_execution_reconciliation.py",
+      "line": 60,
+      "column": 0,
+      "code": "attr-defined",
+      "message": "\"ReferenceToken\" has no attribute \"name\""
+    },
+    {
+      "path": "app/services/shadow_observer.py",
+      "line": 226,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 2 to \"to_thread\" has incompatible type \"**dict[str, object]\"; expected \"EvidenceDecision\""
+    },
+    {
+      "path": "app/services/shadow_observer.py",
+      "line": 226,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 2 to \"to_thread\" has incompatible type \"**dict[str, object]\"; expected \"GroundingState | str\""
+    },
+    {
+      "path": "app/services/shadow_observer.py",
+      "line": 226,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 2 to \"to_thread\" has incompatible type \"**dict[str, object]\"; expected \"bool\""
+    },
+    {
+      "path": "app/services/shadow_observer.py",
+      "line": 226,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument 2 to \"to_thread\" has incompatible type \"**dict[str, object]\"; expected \"str\""
+    },
+    {
+      "path": "app/services/staging_activation_baseline_freeze_assurance.py",
+      "line": 51,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_baseline_freeze_assurance.py",
+      "line": 52,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_baseline_freeze_assurance.py",
+      "line": 53,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_governance_final_audit.py",
+      "line": 52,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_governance_final_audit.py",
+      "line": 53,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_governance_final_audit.py",
+      "line": 54,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_governance_master_package.py",
+      "line": 53,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_governance_master_package.py",
+      "line": 54,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_governance_master_package.py",
+      "line": 55,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_baseline_freeze.py",
+      "line": 51,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_baseline_freeze.py",
+      "line": 52,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_baseline_freeze.py",
+      "line": 53,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_certification.py",
+      "line": 52,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_certification.py",
+      "line": 53,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_certification.py",
+      "line": 54,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_certification_bundle.py",
+      "line": 53,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_certification_bundle.py",
+      "line": 54,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/staging_activation_readiness_certification_bundle.py",
+      "line": 55,
+      "column": 0,
+      "code": "union-attr",
+      "message": "Item \"None\" of \"ReferenceToken | None\" has no attribute \"status\""
+    },
+    {
+      "path": "app/services/telegram_bot.py",
+      "line": 44,
+      "column": 0,
+      "code": "no-redef",
+      "message": "Name \"payload\" already defined on line 39"
+    },
+    {
+      "path": "app/services/telegram_bot.py",
+      "line": 50,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument \"error_code\" to \"TelegramAPIError\" has incompatible type \"object\"; expected \"int | None\""
+    },
+    {
+      "path": "app/services/telegram_bot.py",
+      "line": 51,
+      "column": 0,
+      "code": "arg-type",
+      "message": "Argument \"description\" to \"TelegramAPIError\" has incompatible type \"object\"; expected \"str | None\""
+    },
+    {
+      "path": "app/services/telegram_delivery.py",
+      "line": 9,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "path": "app/services/telegram_delivery.py",
+      "line": 14,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a return type annotation"
+    },
+    {
+      "path": "app/services/telegram_delivery.py",
+      "line": 14,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a type annotation for one or more parameters"
+    },
+    {
+      "path": "app/services/telegram_delivery.py",
+      "line": 21,
+      "column": 0,
+      "code": "no-untyped-def",
+      "message": "Function is missing a type annotation"
+    },
+    {
+      "path": "app/services/telegram_lesson_service.py",
+      "line": 26,
+      "column": 0,
+      "code": "no-untyped-call",
+      "message": "Call to untyped function \"validate_asset_access\" in typed context"
+    },
+    {
+      "path": "app/services/transition_planning_foundation.py",
+      "line": 59,
+      "column": 0,
+      "code": "type-arg",
+      "message": "Missing type arguments for generic type \"dict\""
+    },
+    {
+      "path": "app/services/validation_evidence_ledger.py",
+      "line": 117,
+      "column": 0,
+      "code": "no-any-return",
+      "message": "Returning Any from function declared to return \"dict[str, object]\""
+    }
+  ]
+}
