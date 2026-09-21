@@ -5,7 +5,7 @@ from app.services.audit_trail import AuditHook, InMemoryAuditSink
 
 def test_audit_event_serialization_preserves_persian_zwnj_and_rtl():
     sink=InMemoryAuditSink(); hook=AuditHook(sink, lambda: datetime(2026,1,1,tzinfo=UTC))
-    e=hook.project(event_id="e1",command_id="c1",correlation_id="r1",causation_id="a1",actor={"id":"u"},action="accepted",target={"id":"x"},result_status="accepted",digest_reference="d",new_state={"title":"دانش\u200cآموز ‮RTL"})
+    e=hook.project(event_id="e1",command_id="c1",correlation_id="r1",causation_id="a1",actor={"id":"u"},action="accepted",target={"id":"x"},result_status="accepted",digest_reference="d",new_state={"title":"دانش\u200cآموز \u202eRTL"})
     assert e.serialize() == e.serialize()
     assert "دانش\u200cآموز" in e.serialize()
 

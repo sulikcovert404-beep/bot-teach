@@ -34,7 +34,7 @@ def test_blocked_postgresql_evidence_and_dependency_failure():
 
 
 def test_persian_nfc_zwnj_rtl_round_trip():
-    values = evidence(); values["contract_ready"] = EvidenceReference("می‌شود", "منبع ‏RTL", "sha256:x", "V1", "اکنون", "تأیید‌شده")
+    values = evidence(); values["contract_ready"] = EvidenceReference("می‌شود", "منبع \u200fRTL", "sha256:x", "V1", "اکنون", "تأیید‌شده")
     r = evaluate_readiness(GATES, values)
     encoded = json.dumps(r.to_dict(), ensure_ascii=False)
     assert "می‌شود" not in encoded  # IDs are structural and remain separate from payload text

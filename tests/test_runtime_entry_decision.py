@@ -40,7 +40,7 @@ def test_digest_and_version_mismatch_not_allowed():
 
 
 def test_persian_nfc_zwnj_rtl_survives_canonical_serialization():
-    values = make_evidence(); values["contract_ready"] = EvidenceReference("می‌شود", "منبع ‏RTL", "sha256:x", "V1", "اکنون", "تأیید‌شده")
+    values = make_evidence(); values["contract_ready"] = EvidenceReference("می‌شود", "منبع \u200fRTL", "sha256:x", "V1", "اکنون", "تأیید‌شده")
     r = report(values); d = resolve_stage_admission(RuntimeStage.CONTRACT_STAGE, r, values, timestamp_reference="می‌شود")
     assert "می‌شود" in d.canonical_bytes().decode("utf-8")
     assert "\u200c" in d.canonical_bytes().decode("utf-8")
