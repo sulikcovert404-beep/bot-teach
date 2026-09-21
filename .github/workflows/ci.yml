@@ -167,7 +167,7 @@ jobs:
       - name: Prepare non-secret staging configuration
         run: |
           cp .env.example .env
-          echo "EXPECTED_MIGRATION_HEAD=20260912_0021" >> .env
+          echo "EXPECTED_MIGRATION_HEAD=20260921_0022" >> .env
       - name: Start staging stack
         run: docker compose up -d --build db redis migrate api
       - name: Wait for readiness and migration head
@@ -177,7 +177,7 @@ jobs:
             if response=$(curl --silent --show-error --fail http://localhost:8000/health/ready); then
               echo "$response"
               test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["status"])')" = "ready"
-              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "20260912_0021"
+              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "20260921_0022"
               exit 0
             fi
             sleep 2
