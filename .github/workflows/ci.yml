@@ -210,15 +210,14 @@ jobs:
       - name: Provision disposable app runtime role
         run: |
           set -euo pipefail
-          runtime_password="$(sed -n 's/^APP_RUNTIME_PASSWORD=//p' .env)"
           until docker compose exec -T db pg_isready -U postgres -d education >/dev/null 2>&1; do
             sleep 2
           done
           docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d education \
-            -v runtime_password="$runtime_password" \
             -c "DO \$\$ BEGIN
                   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_runtime') THEN
-                    EXECUTE format('CREATE ROLE app_runtime LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS', :'runtime_password');
+                    CREATE ROLE app_runtime LOGIN PASSWORD 'app-runtime-ci-only'
+                      NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS;
                   END IF;
                 END \$\$;"
       - name: Run canonical migrations as postgres
