@@ -210,14 +210,12 @@ jobs:
       - name: Provision disposable app runtime role
         run: |
           set -euo pipefail
-          set -a
-          . ./.env
-          set +a
+          runtime_password="$(sed -n 's/^APP_RUNTIME_PASSWORD=//p' .env)"
           until [ "$(docker compose ps --status running --services | grep -c '^db$' || true)" = "1" ]; do
             sleep 2
           done
           docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d education \
-            -v runtime_password="$APP_RUNTIME_PASSWORD" \
+            -v runtime_password="$runtime_password" \
             -c "DO \$\$ BEGIN
                   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_runtime') THEN
                     EXECUTE format('CREATE ROLE app_runtime LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS', :'runtime_password');
