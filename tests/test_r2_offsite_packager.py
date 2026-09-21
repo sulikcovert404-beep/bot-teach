@@ -50,3 +50,11 @@ def test_rejects_permissive_source(tmp_path: Path, monkeypatch: pytest.MonkeyPat
     monkeypatch.setattr(module.shutil, "which", lambda name: f"C:/tools/{name}.exe")
     with pytest.raises(module.PackageError, match="permissive"):
         module.prepare_package(make_plan(tmp_path, mode=0o644), recipient="age1test", execute=True)
+
+
+def test_rejects_path_traversal_database_name(tmp_path: Path):
+    plan = make_plan(tmp_path)
+    unsafe = module.PackagePlan("../education", plan.timestamp_utc, plan.source_dump, plan.output_dir)
+
+    with pytest.raises(module.PackageError, match="unsafe database"):
+        module.build_manifest(unsafe)
