@@ -24,7 +24,7 @@ class StagingActivationReadinessControlPackage:
     boundary_assertions: tuple[str,...]
     trace_reference: str
     package_digest: str=''
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         for name in ('package_id','staging_governance_finalization_reference','staging_entry_review_reference','pre_staging_package_reference','activation_control_plane_reference','activation_decision_reference','readiness_assurance_reference','evidence_governance_reference','trace_reference'):
             v=_n(getattr(self,name))
             if not v or any(x in v.lower() for x in ('secret','password','api_key','bearer ')): raise ValueError(f'invalid {name}')
@@ -33,8 +33,8 @@ class StagingActivationReadinessControlPackage:
         d=self.canonical_digest()
         if self.package_digest and self.package_digest!=d: raise ValueError('package digest mismatch')
         object.__setattr__(self,'package_digest',d)
-    def payload(self): return {k:getattr(self,k) for k in ('package_id','staging_governance_finalization_reference','staging_entry_review_reference','pre_staging_package_reference','activation_control_plane_reference','activation_decision_reference','readiness_assurance_reference','evidence_governance_reference','control_findings','boundary_assertions','trace_reference')} | {'staging_activation':'PROHIBITED','runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False,'deployment':'PROHIBITED'}
-    def canonical_digest(self): return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
+    def payload(self) -> dict[str, object]: return {k:getattr(self,k) for k in ('package_id','staging_governance_finalization_reference','staging_entry_review_reference','pre_staging_package_reference','activation_control_plane_reference','activation_decision_reference','readiness_assurance_reference','evidence_governance_reference','control_findings','boundary_assertions','trace_reference')} | {'staging_activation':'PROHIBITED','runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False,'deployment':'PROHIBITED'}
+    def canonical_digest(self) -> str: return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode()).hexdigest()
     @staticmethod
     def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()):
         refs=tuple(_n(x) for x in references)

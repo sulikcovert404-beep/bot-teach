@@ -24,7 +24,7 @@ class RuntimeActivationStagingEntryReview:
     boundary_assertions: tuple[str, ...]
     trace_reference: str
     review_digest: str = ''
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         names=('review_id','pre_staging_governance_package_reference','final_readiness_review_reference','activation_decision_reference','staging_validation_assurance_reference','readiness_baseline_freeze_reference','trace_reference')
         for n in names:
             v=_c(getattr(self,n))
@@ -34,8 +34,8 @@ class RuntimeActivationStagingEntryReview:
         d=self.canonical_digest()
         if self.review_digest and self.review_digest!=d: raise ValueError('review digest mismatch')
         object.__setattr__(self,'review_digest',d)
-    def payload(self): return {'review_id':self.review_id,'pre_staging_governance_package_reference':self.pre_staging_governance_package_reference,'final_readiness_review_reference':self.final_readiness_review_reference,'activation_decision_reference':self.activation_decision_reference,'staging_validation_assurance_reference':self.staging_validation_assurance_reference,'readiness_baseline_freeze_reference':self.readiness_baseline_freeze_reference,'entry_findings':self.entry_findings,'boundary_assertions':self.boundary_assertions,'trace_reference':self.trace_reference,'staging_entry':'REVIEW_ONLY','staging_execution':'PROHIBITED','runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False}
-    def canonical_digest(self): return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')).hexdigest()
+    def payload(self) -> dict[str, object]: return {'review_id':self.review_id,'pre_staging_governance_package_reference':self.pre_staging_governance_package_reference,'final_readiness_review_reference':self.final_readiness_review_reference,'activation_decision_reference':self.activation_decision_reference,'staging_validation_assurance_reference':self.staging_validation_assurance_reference,'readiness_baseline_freeze_reference':self.readiness_baseline_freeze_reference,'entry_findings':self.entry_findings,'boundary_assertions':self.boundary_assertions,'trace_reference':self.trace_reference,'staging_entry':'REVIEW_ONLY','staging_execution':'PROHIBITED','runtime_activation':'PROHIBITED','runtime_admission':'PROHIBITED','execution':False}
+    def canonical_digest(self) -> str: return hashlib.sha256(json.dumps(self.payload(),ensure_ascii=False,sort_keys=True,separators=(',',':')).encode('utf-8')).hexdigest()
     @staticmethod
     def evaluate(*,references:tuple[str,...],findings:tuple[str,...]=(),assertions:tuple[str,...]=()):
         vals=tuple(_c(x) for x in references)

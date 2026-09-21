@@ -26,7 +26,7 @@ class RuntimeActivationPreStagingGovernancePackage:
     trace_reference: str
     package_digest: str = ''
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         names = ('package_id','final_readiness_review_reference','activation_decision_reference','activation_control_plane_reference','governance_closure_reference','readiness_baseline_freeze_reference','staging_validation_framework_reference','staging_evidence_governance_reference','staging_validation_assurance_reference','trace_reference')
         for name in names:
             value = _c(getattr(self, name))
@@ -37,10 +37,10 @@ class RuntimeActivationPreStagingGovernancePackage:
         if self.package_digest and self.package_digest != digest: raise ValueError('package digest mismatch')
         object.__setattr__(self, 'package_digest', digest)
 
-    def payload(self):
+    def payload(self) -> dict[str, object]:
         return {'package_id': self.package_id, 'final_readiness_review_reference': self.final_readiness_review_reference, 'activation_decision_reference': self.activation_decision_reference, 'activation_control_plane_reference': self.activation_control_plane_reference, 'governance_closure_reference': self.governance_closure_reference, 'readiness_baseline_freeze_reference': self.readiness_baseline_freeze_reference, 'staging_validation_framework_reference': self.staging_validation_framework_reference, 'staging_evidence_governance_reference': self.staging_evidence_governance_reference, 'staging_validation_assurance_reference': self.staging_validation_assurance_reference, 'trace_reference': self.trace_reference, 'staging_execution': 'PROHIBITED', 'runtime_activation': 'PROHIBITED', 'runtime_admission': 'PROHIBITED', 'execution': False, 'deployment': 'PROHIBITED'}
 
-    def canonical_digest(self): return hashlib.sha256(json.dumps(self.payload(), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
+    def canonical_digest(self) -> str: return hashlib.sha256(json.dumps(self.payload(), ensure_ascii=False, sort_keys=True, separators=(',', ':')).encode('utf-8')).hexdigest()
 
     @staticmethod
     def evaluate(*, references: tuple[str, ...], findings: tuple[str, ...] = ()):
