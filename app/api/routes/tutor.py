@@ -12,11 +12,7 @@ from app.services.ai_gateway import (
     StructuredLoggingAIProviderObserver,
 )
 from app.services.ai_tutor import AITutor
-from app.services.cohort_feedback import (
-    FeedbackSubmitRequest,
-    record_beta_quality_audit,
-    record_user_feedback,
-)
+from app.services.cohort_feedback import FeedbackSubmitRequest
 from app.services.document_ingestion import DatabaseRetriever
 from app.services.usage_repository import record_usage
 

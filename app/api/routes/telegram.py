@@ -14,7 +14,6 @@ from app.core.config import get_settings
 from app.core.logging import telegram_metrics
 from app.db.models import Subscription, TelegramUpdate, User
 from app.domain.entitlements.models import FeatureCode
-from app.domain.entitlements.service import entitlement_for_subscription
 from app.services.audit_repository import record_audit_log
 from app.services.notification import telegram_notifications
 from app.services.telegram_bot import TelegramAPIError, TelegramBotClient
