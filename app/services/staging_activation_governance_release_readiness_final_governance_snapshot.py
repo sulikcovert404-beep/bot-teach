@@ -27,7 +27,6 @@ class StagingActivationGovernanceReleaseReadinessFinalGovernanceSnapshotRecord:
  release_certification_reference:ReferenceToken
  final_audit_reference:ReferenceToken
  snapshot_position:tuple[str,...]=()
- snapshot_summary:tuple[str,...]=()
  snapshot_summary:dict[str,Any]=field(default_factory=dict)
  trace_reference:ReferenceToken|None=None
  snapshot_digest:str=field(default="",repr=False)
@@ -38,7 +37,7 @@ class StagingActivationGovernanceReleaseReadinessFinalGovernanceSnapshotRecord:
   if not self.snapshot_digest: object.__setattr__(self,"snapshot_digest",self.compute_digest())
  def payload(self)->dict[str,Any]:
   names=("archive_closure_decision_reference","master_assurance_reference","release_certification_reference","final_audit_reference","trace_reference")
-  out={"snapshot_id":self.snapshot_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"snapshot_position":self.snapshot_position,"snapshot_summary":self.snapshot_summary,"snapshot_summary":self.snapshot_summary}
+  out={"snapshot_id":self.snapshot_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"snapshot_position":self.snapshot_position,"snapshot_summary":self.snapshot_summary}
   for n in names: out[n]=getattr(self,n).to_dict()
   return out
  def canonical_bytes(self)->bytes:return json.dumps(_clean(self.payload()),ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")

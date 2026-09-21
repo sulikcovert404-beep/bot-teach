@@ -27,7 +27,6 @@ class StagingActivationGovernanceReleaseReadinessGovernanceChainMetaValidationRe
  release_certification_reference:ReferenceToken
  final_audit_reference:ReferenceToken
  chain_nodes_summary:tuple[str,...]=()
- dependency_graph_summary:tuple[str,...]=()
  dependency_graph_summary:dict[str,Any]=field(default_factory=dict)
  trace_reference:ReferenceToken|None=None
  review_digest:str=field(default="",repr=False)
@@ -38,7 +37,7 @@ class StagingActivationGovernanceReleaseReadinessGovernanceChainMetaValidationRe
   if not self.review_digest: object.__setattr__(self,"review_digest",self.compute_digest())
  def payload(self)->dict[str,Any]:
   names=("final_governance_snapshot_reference","master_assurance_reference","release_certification_reference","final_audit_reference","trace_reference")
-  out={"review_id":self.review_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"chain_nodes_summary":self.chain_nodes_summary,"dependency_graph_summary":self.dependency_graph_summary,"dependency_graph_summary":self.dependency_graph_summary}
+  out={"review_id":self.review_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"chain_nodes_summary":self.chain_nodes_summary,"dependency_graph_summary":self.dependency_graph_summary}
   for n in names: out[n]=getattr(self,n).to_dict()
   return out
  def canonical_bytes(self)->bytes:return json.dumps(_clean(self.payload()),ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")

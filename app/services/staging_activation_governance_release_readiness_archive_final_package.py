@@ -27,7 +27,6 @@ class StagingActivationGovernanceReleaseReadinessArchiveFinalPackageRecord:
  release_certification_reference:ReferenceToken
  final_audit_reference:ReferenceToken
  archive_scope:tuple[str,...]=()
- historical_position:tuple[str,...]=()
  historical_position:dict[str,Any]=field(default_factory=dict)
  trace_reference:ReferenceToken|None=None
  package_digest:str=field(default="",repr=False)
@@ -38,7 +37,7 @@ class StagingActivationGovernanceReleaseReadinessArchiveFinalPackageRecord:
   if not self.package_digest: object.__setattr__(self,"package_digest",self.compute_digest())
  def payload(self)->dict[str,Any]:
   names=("archive_certification_reference","master_assurance_reference","release_certification_reference","final_audit_reference","trace_reference")
-  out={"package_id":self.package_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"archive_scope":self.archive_scope,"historical_position":self.historical_position,"historical_position":self.historical_position}
+  out={"package_id":self.package_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"archive_scope":self.archive_scope,"historical_position":self.historical_position}
   for n in names: out[n]=getattr(self,n).to_dict()
   return out
  def canonical_bytes(self)->bytes:return json.dumps(_clean(self.payload()),ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")

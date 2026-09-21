@@ -27,7 +27,6 @@ class StagingActivationGovernanceReleaseReadinessArchiveClosureRecord:
  release_certification_reference:ReferenceToken
  final_audit_reference:ReferenceToken
  closure_findings:tuple[str,...]=()
- dependency_summary:tuple[str,...]=()
  dependency_summary:dict[str,Any]=field(default_factory=dict)
  trace_reference:ReferenceToken|None=None
  review_digest:str=field(default="",repr=False)
@@ -38,7 +37,7 @@ class StagingActivationGovernanceReleaseReadinessArchiveClosureRecord:
   if not self.review_digest: object.__setattr__(self,"review_digest",self.compute_digest())
  def payload(self)->dict[str,Any]:
   names=("archive_final_package_reference","master_assurance_reference","release_certification_reference","final_audit_reference","trace_reference")
-  out={"review_id":self.review_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"closure_findings":self.closure_findings,"dependency_summary":self.dependency_summary,"dependency_summary":self.dependency_summary}
+  out={"review_id":self.review_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"closure_findings":self.closure_findings,"dependency_summary":self.dependency_summary}
   for n in names: out[n]=getattr(self,n).to_dict()
   return out
  def canonical_bytes(self)->bytes:return json.dumps(_clean(self.payload()),ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")

@@ -27,7 +27,6 @@ class StagingActivationGovernanceReleaseReadinessArchiveCertificationRecord:
  release_certification_reference:ReferenceToken
  final_audit_reference:ReferenceToken
  certification_findings:tuple[str,...]=()
- boundary_assertions:tuple[str,...]=()
  boundary_assertions:dict[str,Any]=field(default_factory=dict)
  trace_reference:ReferenceToken|None=None
  certification_digest:str=field(default="",repr=False)
@@ -38,7 +37,7 @@ class StagingActivationGovernanceReleaseReadinessArchiveCertificationRecord:
   if not self.certification_digest: object.__setattr__(self,"certification_digest",self.compute_digest())
  def payload(self)->dict[str,Any]:
   names=("archive_consistency_audit_reference","master_assurance_reference","release_certification_reference","final_audit_reference","trace_reference")
-  out={"certification_id":self.certification_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"certification_findings":self.certification_findings,"boundary_assertions":self.boundary_assertions,"boundary_assertions":self.boundary_assertions}
+  out={"certification_id":self.certification_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"certification_findings":self.certification_findings,"boundary_assertions":self.boundary_assertions}
   for n in names: out[n]=getattr(self,n).to_dict()
   return out
  def canonical_bytes(self)->bytes:return json.dumps(_clean(self.payload()),ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")

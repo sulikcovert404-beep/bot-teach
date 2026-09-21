@@ -27,7 +27,6 @@ class StagingActivationGovernanceReleaseReadinessArchiveClosureDecisionRecordRec
  release_certification_reference:ReferenceToken
  final_audit_reference:ReferenceToken
  closure_outcome:tuple[str,...]=()
- decision_scope:tuple[str,...]=()
  decision_scope:dict[str,Any]=field(default_factory=dict)
  trace_reference:ReferenceToken|None=None
  decision_digest:str=field(default="",repr=False)
@@ -38,7 +37,7 @@ class StagingActivationGovernanceReleaseReadinessArchiveClosureDecisionRecordRec
   if not self.decision_digest: object.__setattr__(self,"decision_digest",self.compute_digest())
  def payload(self)->dict[str,Any]:
   names=("archive_closure_review_reference","master_assurance_reference","release_certification_reference","final_audit_reference","trace_reference")
-  out={"decision_id":self.decision_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"closure_outcome":self.closure_outcome,"decision_scope":self.decision_scope,"decision_scope":self.decision_scope}
+  out={"decision_id":self.decision_id,"release_execution":"PROHIBITED","deployment":"PROHIBITED","staging_activation":"PROHIBITED","runtime_activation":"PROHIBITED","runtime_admission":"PROHIBITED","execution":False,"closure_outcome":self.closure_outcome,"decision_scope":self.decision_scope}
   for n in names: out[n]=getattr(self,n).to_dict()
   return out
  def canonical_bytes(self)->bytes:return json.dumps(_clean(self.payload()),ensure_ascii=False,sort_keys=True,separators=(",",":")).encode("utf-8")
