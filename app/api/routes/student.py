@@ -633,7 +633,7 @@ async def get_friendly_leaderboard(
     session: AsyncSession = Depends(get_session),
 ):
     try:
-        user_id = int(subject)
+        _user_id = int(subject)
     except ValueError as exc:
         raise HTTPException(status_code=401, detail="Invalid user identity") from exc
 
@@ -651,8 +651,8 @@ async def get_engagement_telemetry(
     session: AsyncSession = Depends(get_session),
 ):
     # Aggregated engagement telemetry for platform administrators
-    total_users = await session.scalar(select(func.count(User.id))) or 0
-    total_queries = await session.scalar(select(func.count(BetaQualityAudit.id))) or 0
+    _total_users = await session.scalar(select(func.count(User.id))) or 0
+    _total_queries = await session.scalar(select(func.count(BetaQualityAudit.id))) or 0
 
     return {
         "telemetry_status": "INSUFFICIENT_PERSISTED_DATA",

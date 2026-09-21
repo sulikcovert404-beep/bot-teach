@@ -70,7 +70,7 @@ async def conduct_socratic_dialogue(
 
     # Get student persona
     persona = await session.scalar(select(CoachPersonaSetting).where(CoachPersonaSetting.user_id == user_id))
-    style = persona.persona_style if persona else "MOTIVATIONAL"
+    _style = persona.persona_style if persona else "MOTIVATIONAL"
 
     if payload.current_step == 1:
         reply = (

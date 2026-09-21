@@ -265,7 +265,7 @@ async def evaluate_ai_response(
     
     factual_score = min(100, 75 + (c_count * 8))
     citation_quality = "EXCELLENT" if c_count >= 2 else ("ADEQUATE" if c_count == 1 else "MISSING")
-    pedagogical_tone = "EMPATHIC_EDUCATIONAL"
+    _pedagogical_tone = "EMPATHIC_EDUCATIONAL"
     hallucination_risk = "LOW" if c_count >= 1 else "MEDIUM"
     
     overall_score = round((factual_score * 0.5) + (min(100, text_len / 4) * 0.3) + ((100 if req.latency_ms < 1000 else 60) * 0.2), 1)
