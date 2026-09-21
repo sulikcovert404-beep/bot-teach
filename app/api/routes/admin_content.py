@@ -47,7 +47,7 @@ def _extract_pdf(data: bytes) -> str:
                 raise HTTPException(422, "PDF extraction timed out")
             try:
                 pages.append(page.extract_text() or "")
-            except Exception:
+            except Exception:  # noqa: BLE001
                 logger.warning("PDF page extraction failed", extra={"page": page_number})
                 pages.append("")
     except HTTPException:

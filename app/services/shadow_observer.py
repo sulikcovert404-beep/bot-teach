@@ -227,7 +227,7 @@ class ShadowObserver:
         except TimeoutError:
             self.counters.timeout += 1
             return None
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.counters.failure += 1
             return None
 

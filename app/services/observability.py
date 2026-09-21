@@ -136,6 +136,6 @@ class ObservabilityHook:
         })
         try:
             self._observer.observe(metric, log)
-        except Exception:
+        except Exception:  # noqa: BLE001
             self.observer_failures += 1
         return metric

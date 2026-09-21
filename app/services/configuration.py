@@ -138,7 +138,7 @@ def resolve_configuration(context: Mapping[str, Any] | None = None) -> PipelineC
             values[section] = override
             continue
         if not isinstance(override, Mapping):
-            raise ValueError(f"{section} must be an object")
+            raise ValueError(f"{section} must be an object")  # noqa: TRY004
         allowed = set(values[section])
         extra = set(override) - allowed
         if extra:

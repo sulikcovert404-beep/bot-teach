@@ -81,14 +81,14 @@ def execute_control_plane(
         reason = str(getattr(raw, "reason_code", "ok"))
         evidence = tuple(str(x) for x in getattr(raw, "validation_evidence", ()))[:32]
         report = ExecutionReport(execution_id, trace_id, correlation_id, outcome, reason, getattr(raw, "workflow_result_reference", None), evidence, getattr(raw, "policy_reference", None))
-    except Exception:
+    except Exception:  # noqa: BLE001
         report = ExecutionReport(execution_id, trace_id, correlation_id, Outcome.INTERNAL_FAILURE, "CONTROL_PLANE_UNHANDLED_FAULT")
     audit = Projection()
     obs = Projection()
     if audit_projector:
         try: audit = Projection(reference=str(audit_projector(report)))
-        except Exception: audit = Projection(error="AUDIT_PROJECTION_FAILED")
+        except Exception: audit = Projection(error="AUDIT_PROJECTION_FAILED")  # noqa: BLE001
     if observability_projector:
         try: obs = Projection(reference=str(observability_projector(report)))
-        except Exception: obs = Projection(error="OBSERVABILITY_PROJECTION_FAILED")
+        except Exception: obs = Projection(error="OBSERVABILITY_PROJECTION_FAILED")  # noqa: BLE001
     return replace(report, audit=audit, observability=obs)

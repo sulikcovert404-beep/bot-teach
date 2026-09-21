@@ -49,7 +49,7 @@ def assert_closed_vocabulary(value: Enum | str, allowed: Iterable[str]) -> None:
 
 def assert_deeply_immutable(value: Any) -> None:
     if isinstance(value, (dict, list, set)):
-        raise AssertionError("mutable nested value in contract")
+        raise AssertionError("mutable nested value in contract")  # noqa: TRY004
     if hasattr(value, "__dataclass_fields__"):
         for name in value.__dataclass_fields__:
             assert_deeply_immutable(getattr(value, name))

@@ -287,7 +287,7 @@ async def update_student_profile(
         "field_of_study": req.field_of_study,
         "interests": req.interests,
         "target_level": req.target_level,
-        "updated_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.utcnow().isoformat(),  # noqa: DTZ003
     }
 
     await record_audit_log(

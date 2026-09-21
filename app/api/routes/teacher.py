@@ -180,7 +180,7 @@ async def update_teacher_profile(
         "school_name": req.school_name,
         "subject_specialty": req.subject_specialty,
         "grades_taught": req.grades_taught,
-        "updated_at": datetime.utcnow().isoformat(),
+        "updated_at": datetime.utcnow().isoformat(),  # noqa: DTZ003
     }
     await record_audit_log(
         session,
@@ -227,7 +227,7 @@ async def list_classrooms(
             "grade": "پایه دهم",
             "field_of_study": "علوم تجربی",
             "students_count": 28,
-            "created_at": datetime.utcnow().isoformat(),
+            "created_at": datetime.utcnow().isoformat(),  # noqa: DTZ003
         }
         classrooms.append(default_cls)
 
@@ -241,14 +241,14 @@ async def create_classroom(
     session: AsyncSession = Depends(get_session),
 ):
     teacher_id = int(subject)
-    cls_id = f"cls_{teacher_id}_{int(datetime.utcnow().timestamp())}"
+    cls_id = f"cls_{teacher_id}_{int(datetime.utcnow().timestamp())}"  # noqa: DTZ003
     data = {
         "classroom_id": cls_id,
         "title": req.title,
         "grade": req.grade,
         "field_of_study": req.field_of_study,
         "students_count": 0,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.utcnow().isoformat(),  # noqa: DTZ003
     }
     await record_audit_log(
         session,
@@ -346,7 +346,7 @@ async def create_assignment(
     session: AsyncSession = Depends(get_session),
 ):
     teacher_id = int(subject)
-    assignment_id = f"asg_{teacher_id}_{int(datetime.utcnow().timestamp())}"
+    assignment_id = f"asg_{teacher_id}_{int(datetime.utcnow().timestamp())}"  # noqa: DTZ003
     data = {
         "assignment_id": assignment_id,
         "classroom_id": req.classroom_id,
@@ -354,7 +354,7 @@ async def create_assignment(
         "lesson_topic": req.lesson_topic,
         "questions_count": req.questions_count,
         "due_days": req.due_days,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.utcnow().isoformat(),  # noqa: DTZ003
         "completion_status": "PENDING_STUDENTS",
     }
     await record_audit_log(

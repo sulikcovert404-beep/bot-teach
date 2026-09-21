@@ -15,16 +15,16 @@ Lineage Convergence Contract:
    - On reaching 0020, users.telegram_user_id is already BIGINT (idempotent no-op).
 """
 
-from typing import Sequence, Union
+from typing import Sequence, Union  # noqa: UP035
 
 import sqlalchemy as sa
 from alembic import op
 
 # revision identifiers, used by Alembic.
 revision: str = "20260912_0020"
-down_revision: Union[str, Sequence[str], None] = ("20260909_0009", "20260910_0019")
-branch_labels: Union[str, Sequence[str], None] = None
-depends_on: Union[str, Sequence[str], None] = None
+down_revision: Union[str, Sequence[str], None] = ("20260909_0009", "20260910_0019")  # noqa: UP007
+branch_labels: Union[str, Sequence[str], None] = None  # noqa: UP007
+depends_on: Union[str, Sequence[str], None] = None  # noqa: UP007
 
 
 def upgrade() -> None:

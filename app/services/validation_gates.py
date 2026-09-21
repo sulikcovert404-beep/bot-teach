@@ -104,7 +104,7 @@ def run_validation_gates(
         if not isinstance(name, str) or name not in GATE_ORDER or name in by_name:
             _bad_name = name if isinstance(name, str) else "unknown"
             result = GateResult("unknown", GateStatus.BLOCKED, GateReasonCode.INVALID_GATE, "Unknown validation gate")
-            return ValidationReport(tuple((*results, result)), "unknown")
+            return ValidationReport(tuple((*results, result)), "unknown")  # noqa: C409
         by_name[name] = gate
 
     for name in GATE_ORDER:
@@ -116,7 +116,7 @@ def run_validation_gates(
                 result = gate.evaluate(context)
                 if not isinstance(result, GateResult) or result.gate_name != name:
                     result = _blocked(name, GateReasonCode.INVALID_RESULT, "Validation gate returned an invalid result")
-            except Exception:
+            except Exception:  # noqa: BLE001
                 result = _blocked(name, GateReasonCode.GATE_EXCEPTION, "Validation gate could not be evaluated")
         results.append(result)
         if result.status in (GateStatus.FAILED, GateStatus.BLOCKED):

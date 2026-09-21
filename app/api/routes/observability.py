@@ -65,7 +65,7 @@ async def get_detailed_system_health(
         t0 = time.time()
         await session.execute(text("SELECT 1"))
         db_latency_ms = round((time.time() - t0) * 1000, 2)
-    except Exception:
+    except Exception:  # noqa: BLE001
         db_ok = False
 
     # Check Redis
@@ -78,7 +78,7 @@ async def get_detailed_system_health(
             await r.ping()
             await r.aclose()
             redis_latency_ms = round((time.time() - t0) * 1000, 2)
-        except Exception:
+        except Exception:  # noqa: BLE001
             redis_ok = False
 
     return {

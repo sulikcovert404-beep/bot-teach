@@ -175,7 +175,7 @@ async def add_question_to_bank(
     session: AsyncSession = Depends(get_session),
 ):
     teacher_id = int(teacher_sub)
-    q_id = int(datetime.utcnow().timestamp())
+    q_id = int(datetime.utcnow().timestamp())  # noqa: DTZ003
     q_data = {
         "id": q_id,
         "subject": req.subject,
@@ -188,7 +188,7 @@ async def add_question_to_bank(
         "detailed_solution": req.detailed_solution,
         "source_book_ref": req.source_book_ref,
         "author_id": teacher_id,
-        "created_at": datetime.utcnow().isoformat(),
+        "created_at": datetime.utcnow().isoformat(),  # noqa: DTZ003
     }
     await record_audit_log(
         session,

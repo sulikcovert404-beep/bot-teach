@@ -348,7 +348,7 @@ class GeminiProvider:
     def _emit(self, event: AIProviderEvent) -> None:
         try:
             self.observer.emit(event)
-        except Exception:
+        except Exception:  # noqa: BLE001,S110
             pass
 
     def _emit_failure(
