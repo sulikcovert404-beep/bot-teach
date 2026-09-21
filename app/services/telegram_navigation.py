@@ -69,7 +69,7 @@ def build_reply_keyboard(
 ) -> dict[str, object]:
     """Build a deterministic provider-neutral reply keyboard payload."""
     chosen = intents or default_intents()
-    rows: list[list[dict[str, str]]] = []
+    rows: list[list[dict[str, object]]] = []
     for intent in chosen:
         button: dict[str, object] = {"text": intent.label}
         if intent.web_app and web_app_url:
