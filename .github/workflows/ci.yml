@@ -234,6 +234,18 @@ jobs:
           GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_runtime;
           GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO app_runtime;
           SQL
+      - name: Verify disposable runtime role boundaries
+        run: |
+          docker compose exec -T db psql -At -U postgres -d education -c \
+            "SELECT rolname, rolsuper, rolcreatedb, rolcreaterole, rolbypassrls,
+                    pg_has_role('app_runtime', 'postgres', 'member'),
+                    has_database_privilege('app_runtime', 'education', 'CREATE'),
+                    has_schema_privilege('app_runtime', 'public', 'CREATE'),
+                    (SELECT pg_get_userbyid(datdba) <> 'app_runtime'
+                       FROM pg_database WHERE datname = 'education'),
+                    (SELECT nspowner <> (SELECT oid FROM pg_roles WHERE rolname = 'app_runtime')
+                       FROM pg_namespace WHERE nspname = 'public')
+             FROM pg_roles WHERE rolname = 'app_runtime';"
       - name: Start API with least-privilege runtime role
         run: docker compose up -d --build api
       - name: Wait for readiness and migration head
