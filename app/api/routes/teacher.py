@@ -571,10 +571,10 @@ async def review_submission_v1(submission_id: int, req: AssignmentReviewRequest,
     submission, assignment = item
     review = await session.scalar(select(SubmissionReview).where(SubmissionReview.submission_id == submission.id))
     if review is None:
-        review = SubmissionReview(submission_id=submission.id, tenant_id=assignment.tenant_id, review_status=req.review_status, score=req.score, teacher_feedback=req.feedback, reviewed_by=int(subject), reviewed_at=datetime.utcnow())
+        review = SubmissionReview(submission_id=submission.id, tenant_id=assignment.tenant_id, review_status=req.review_status, score=req.score, teacher_feedback=req.feedback, reviewed_by=int(subject), reviewed_at=datetime.now(UTC))
         session.add(review)
     else:
-        review.review_status = req.review_status; review.score = req.score; review.teacher_feedback = req.feedback; review.reviewed_by = int(subject); review.reviewed_at = datetime.utcnow()
+        review.review_status = req.review_status; review.score = req.score; review.teacher_feedback = req.feedback; review.reviewed_by = int(subject); review.reviewed_at = datetime.now(UTC)
     submission.status = "REVIEWED"
     await record_audit_log(session, actor_user_id=int(subject), action="SUBMISSION_REVIEWED", resource_type="submission", resource_id=str(submission.id), metadata={"assignment_id": assignment.id, "review_status": review.review_status, "score": review.score})
     await session.commit(); await session.refresh(review)
