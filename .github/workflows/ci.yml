@@ -201,9 +201,44 @@ jobs:
       - name: Prepare non-secret staging configuration
         run: |
           cp .env.example .env
-          echo "EXPECTED_MIGRATION_HEAD=20260921_0022" >> .env
-      - name: Start staging stack
-        run: docker compose up -d --build db redis migrate api
+          # Disposable-only credentials; never used by staging or production.
+          sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=postgres/' .env
+          sed -i 's/^APP_RUNTIME_PASSWORD=.*/APP_RUNTIME_PASSWORD=app-runtime-ci-only/' .env
+          sed -i 's/^EXPECTED_MIGRATION_HEAD=.*/EXPECTED_MIGRATION_HEAD=20260921_0022/' .env
+      - name: Start disposable database and cache
+        run: docker compose up -d --build db redis
+      - name: Provision disposable app runtime role
+        run: |
+          set -euo pipefail
+          set -a
+          . ./.env
+          set +a
+          until [ "$(docker compose ps --status running --services | grep -c '^db$' || true)" = "1" ]; do
+            sleep 2
+          done
+          docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d education \
+            -v runtime_password="$APP_RUNTIME_PASSWORD" \
+            -c "DO \$\$ BEGIN
+                  IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'app_runtime') THEN
+                    EXECUTE format('CREATE ROLE app_runtime LOGIN PASSWORD %L NOSUPERUSER NOCREATEDB NOCREATEROLE NOINHERIT NOBYPASSRLS', :'runtime_password');
+                  END IF;
+                END \$\$;"
+      - name: Run canonical migrations as postgres
+        run: docker compose up -d --build migrate
+      - name: Grant disposable runtime privileges
+        run: |
+          set -euo pipefail
+          until [ "$(docker compose ps --status exited --services | grep -c '^migrate$' || true)" = "1" ]; do
+            sleep 2
+          done
+          docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d education <<'SQL'
+          GRANT CONNECT ON DATABASE education TO app_runtime;
+          GRANT USAGE ON SCHEMA public TO app_runtime;
+          GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO app_runtime;
+          GRANT USAGE, SELECT, UPDATE ON ALL SEQUENCES IN SCHEMA public TO app_runtime;
+          SQL
+      - name: Start API with least-privilege runtime role
+        run: docker compose up -d --build api
       - name: Wait for readiness and migration head
         run: |
           set -euo pipefail
