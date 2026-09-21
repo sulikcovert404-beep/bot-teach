@@ -1,5 +1,3 @@
-import os
-
 import pytest
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
@@ -15,14 +13,11 @@ from app.db.models import (
     User,
 )
 
-DB_FILE = "d:/project/bot telegram teacher/test_persistence.db"
 
 @pytest.mark.asyncio
-async def test_persisted_retrieval_across_sessions_and_restarts():
-    if os.path.exists(DB_FILE):
-        os.remove(DB_FILE)
-        
-    db_url = f"sqlite+aiosqlite:///{DB_FILE}"
+async def test_persisted_retrieval_across_sessions_and_restarts(tmp_path):
+    db_file = tmp_path / "test_persistence.db"
+    db_url = f"sqlite+aiosqlite:///{db_file}"
     
     # --- PHASE 1: Seed data and completely dispose engine ---
     engine1 = create_async_engine(db_url)
@@ -96,5 +91,3 @@ async def test_persisted_retrieval_across_sessions_and_restarts():
         assert membership.student_id == prof_s.id
         
     await engine2.dispose()
-    if os.path.exists(DB_FILE):
-        os.remove(DB_FILE)
