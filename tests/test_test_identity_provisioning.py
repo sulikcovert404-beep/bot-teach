@@ -128,8 +128,12 @@ async def test_concurrent_same_key_has_one_identity_and_replay() -> None:
     from pathlib import Path
 
     db_path = Path(tempfile.mktemp(suffix=".sqlite"))
-    engine = create_async_engine(f"sqlite+aiosqlite:///{db_path}")
+    engine = create_async_engine(
+        f"sqlite+aiosqlite:///{db_path}", connect_args={"timeout": 30}
+    )
     async with engine.begin() as connection:
+        await connection.exec_driver_sql("PRAGMA journal_mode=WAL")
+        await connection.exec_driver_sql("PRAGMA busy_timeout=30000")
         await connection.run_sync(Base.metadata.create_all)
     sessions = async_sessionmaker(engine, expire_on_commit=False)
     async with sessions() as session:
