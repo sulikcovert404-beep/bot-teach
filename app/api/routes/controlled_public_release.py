@@ -1,5 +1,4 @@
 from datetime import UTC, datetime
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
@@ -51,7 +50,7 @@ class PhaseAdvanceRequest(BaseModel):
 class PremiumInterestRequest(BaseModel):
     plan_code: str = Field("STUDENT_PRO_149K")
     trigger_feature: str = Field("KONKUR_SIMULATOR_RANK_ANALYTICS")
-    price_feedback: Optional[str] = Field(None, description="REASONABLE, EXPENSIVE, CHEAP")
+    price_feedback: str | None = Field(None, description="REASONABLE, EXPENSIVE, CHEAP")
 
 # Endpoints
 @controlled_release_router.post("/record-premium-interest")

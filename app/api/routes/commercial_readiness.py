@@ -1,4 +1,3 @@
-from typing import Optional
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -96,7 +95,7 @@ class UpgradeInteractionRequest(BaseModel):
     user_id: int
     event_type: str = Field(..., description="view_upgrade, click_upgrade, or upgrade_intent")
     target_plan: str = Field(default="student_pro_149k")
-    trigger_source: Optional[str] = "AFTER_SECOND_EXAM_ANALYSIS"
+    trigger_source: str | None = "AFTER_SECOND_EXAM_ANALYSIS"
 
 # Endpoints
 @commercial_prep_router.get("/plans")

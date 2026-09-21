@@ -1,4 +1,3 @@
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
@@ -82,13 +81,13 @@ _GUARDRAILS = {
 # Schemas
 class AdmissionCheckRequest(BaseModel):
     user_id: int
-    invitation_code: Optional[str] = None
-    referral_code: Optional[str] = None
+    invitation_code: str | None = None
+    referral_code: str | None = None
 
 class AccessControlConfigRequest(BaseModel):
-    invitation_mode: Optional[bool] = None
-    quota_limit: Optional[int] = None
-    emergency_kill_switch_trigger: Optional[bool] = None
+    invitation_mode: bool | None = None
+    quota_limit: int | None = None
+    emergency_kill_switch_trigger: bool | None = None
 
 # Public Beta Admission Check Endpoint
 @public_beta_prep_router.post("/check-admission")
