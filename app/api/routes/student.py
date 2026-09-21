@@ -194,7 +194,7 @@ def extract_profile_from_audit(audit_logs: list[AuditLog]) -> dict[str, Any]:
         if a.action == "STUDENT_PROFILE_UPDATE" and a.metadata_json:
             try:
                 return json.loads(a.metadata_json)
-            except Exception:
+            except (json.JSONDecodeError, TypeError):
                 pass
     return {
         "grade": "دهم",

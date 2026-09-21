@@ -151,7 +151,7 @@ async def list_question_bank(
     for l in logs:
         try:
             items.append(json.loads(l.metadata_json))
-        except Exception:
+        except (json.JSONDecodeError, TypeError):
             pass
 
     # Empty storage is an honest empty state; sample questions belong in fixtures.

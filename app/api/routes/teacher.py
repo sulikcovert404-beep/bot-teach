@@ -160,7 +160,7 @@ async def get_teacher_profile(
     if audit and audit.metadata_json:
         try:
             data.update(json.loads(audit.metadata_json))
-        except Exception:
+        except (json.JSONDecodeError, TypeError):
             pass
 
     return {
@@ -219,7 +219,7 @@ async def list_classrooms(
     for l in logs:
         try:
             classrooms.append(json.loads(l.metadata_json))
-        except Exception:
+        except (json.JSONDecodeError, TypeError):
             pass
 
     if not classrooms:
