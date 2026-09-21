@@ -5,7 +5,9 @@ from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.db.base import Base
-from app.main import app
+from app.main import create_app
+
+app = create_app()
 from app.security.tokens import create_access_token
 
 

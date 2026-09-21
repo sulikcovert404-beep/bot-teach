@@ -10,7 +10,9 @@ from app.api.routes.telegram import (
     reply_for_text,
 )
 from app.core.config import get_settings
-from app.main import app
+from app.main import create_app
+
+app = create_app()
 from app.services.telegram_bot import TelegramAPIError
 
 

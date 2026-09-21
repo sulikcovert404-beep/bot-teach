@@ -1,7 +1,9 @@
 import pytest
 from fastapi.testclient import TestClient
 
-from app.main import app
+from app.main import create_app
+
+app = create_app()
 from app.services.study_planner import StudyTask, build_study_plan
 
 
