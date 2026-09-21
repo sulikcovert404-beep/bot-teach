@@ -61,7 +61,7 @@ class RedeemReferralRequest(BaseModel):
 async def get_or_create_referral(
     subject: str = Depends(require_user),
     session: AsyncSession = Depends(get_session),
-):
+) -> ReferralCodeResponse:
     user_id = int(subject)
     if user_id not in REFERRAL_REGISTRY:
         code = f"REF{user_id:05d}"

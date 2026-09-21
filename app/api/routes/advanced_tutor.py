@@ -60,7 +60,7 @@ async def conduct_socratic_dialogue(
     payload: SocraticQueryRequest,
     subject: str = Depends(require_user),
     session: AsyncSession = Depends(get_session),
-):
+) -> SocraticQueryResponse:
     """Guided reasoning dialogue instead of passive direct answer dumping."""
     try:
         user_id = int(subject)
