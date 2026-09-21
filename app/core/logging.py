@@ -4,6 +4,7 @@ import time
 import uuid
 from collections import Counter
 from threading import Lock
+from typing import ClassVar
 
 from starlette.types import ASGIApp, Message, Receive, Scope, Send
 
@@ -65,9 +66,9 @@ request_metrics = RequestMetrics()
 class TelegramMetrics:
     """Low-cardinality Telegram auth/webhook metrics with safe allowlists."""
 
-    AUTH_FAILURES = {"missing_init_data", "invalid_init_data", "expired_session", "provider_error", "db_error", "timeout", "unknown_safe"}
-    WEBHOOK_FAILURES = {"missing_secret", "invalid_secret", "invalid_payload", "processing_error", "dependency_error"}
-    DEPENDENCIES = {"bot_unavailable", "telegram_timeout", "database_unavailable", "redis_unavailable"}
+    AUTH_FAILURES: ClassVar[set[str]] = {"missing_init_data", "invalid_init_data", "expired_session", "provider_error", "db_error", "timeout", "unknown_safe"}
+    WEBHOOK_FAILURES: ClassVar[set[str]] = {"missing_secret", "invalid_secret", "invalid_payload", "processing_error", "dependency_error"}
+    DEPENDENCIES: ClassVar[set[str]] = {"bot_unavailable", "telegram_timeout", "database_unavailable", "redis_unavailable"}
 
     def __init__(self) -> None:
         self._lock = Lock()

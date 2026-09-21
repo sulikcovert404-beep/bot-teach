@@ -1,4 +1,4 @@
-from typing import Self
+from typing import ClassVar, Self
 
 import pytest
 
@@ -157,7 +157,7 @@ def test_structured_logging_observer_emits_redacted_event(caplog: pytest.LogCapt
 async def test_provider_emits_success_event_without_sensitive_payload(monkeypatch: pytest.MonkeyPatch) -> None:
     class Response:
         status_code = 200
-        headers: dict[str, str] = {}
+        headers: ClassVar[dict[str, str]] = {}
 
         def raise_for_status(self) -> None:
             return None
@@ -213,7 +213,7 @@ async def test_provider_emits_success_event_without_sensitive_payload(monkeypatc
 async def test_provider_emits_quota_event_with_retry_after(monkeypatch: pytest.MonkeyPatch) -> None:
     class Response:
         status_code = 429
-        headers = {"retry-after": "12"}
+        headers: ClassVar[dict[str, str]] = {"retry-after": "12"}
 
     class Client:
         async def __aenter__(self) -> Self:
@@ -250,7 +250,7 @@ async def test_provider_emits_quota_event_with_retry_after(monkeypatch: pytest.M
 async def test_provider_emits_auth_and_transient_events(monkeypatch: pytest.MonkeyPatch) -> None:
     class AuthResponse:
         status_code = 401
-        headers: dict[str, str] = {}
+        headers: ClassVar[dict[str, str]] = {}
 
     class AuthClient:
         async def __aenter__(self) -> Self:
@@ -285,7 +285,7 @@ async def test_provider_emits_auth_and_transient_events(monkeypatch: pytest.Monk
 async def test_observer_failure_does_not_change_provider_result(monkeypatch: pytest.MonkeyPatch) -> None:
     class Response:
         status_code = 200
-        headers: dict[str, str] = {}
+        headers: ClassVar[dict[str, str]] = {}
 
         def raise_for_status(self) -> None:
             return None
@@ -314,7 +314,7 @@ async def test_observer_failure_does_not_change_provider_result(monkeypatch: pyt
 async def test_gemini_provider_classifies_quota_without_retry(monkeypatch: pytest.MonkeyPatch) -> None:
     class Response:
         status_code = 429
-        headers = {"retry-after": "12"}
+        headers: ClassVar[dict[str, str]] = {"retry-after": "12"}
 
         def raise_for_status(self) -> None:
             raise AssertionError("quota responses must not be retried")
@@ -339,7 +339,7 @@ async def test_gemini_provider_classifies_quota_without_retry(monkeypatch: pytes
 async def test_gemini_provider_does_not_retry_auth_failure(monkeypatch: pytest.MonkeyPatch) -> None:
     class Response:
         status_code = 403
-        headers: dict[str, str] = {}
+        headers: ClassVar[dict[str, str]] = {}
 
     class Client:
         async def __aenter__(self) -> Self:
