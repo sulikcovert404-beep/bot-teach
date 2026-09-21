@@ -224,7 +224,7 @@ class ShadowObserver:
         """Fail-open wrapper for integration tests; never raises observer errors."""
         try:
             return await asyncio.wait_for(asyncio.to_thread(self.observe, **kwargs), self.config.budget_ms / 1000)
-        except asyncio.TimeoutError:
+        except TimeoutError:
             self.counters.timeout += 1
             return None
         except Exception:
