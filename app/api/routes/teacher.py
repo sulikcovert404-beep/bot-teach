@@ -411,17 +411,11 @@ from hashlib import sha256
 from sqlalchemy.exc import IntegrityError
 
 from app.db.models import (
-    Assignment,
     AssignmentSnapshot,
     AssignmentTarget,
-    ClassMembership,
-    Classroom,
     ContentVersion,
-    StudentProfile,
-    StudentSubmission,
     SubmissionReview,
     TeacherContentPublication,
-    TeacherProfile,
 )
 
 
