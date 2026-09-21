@@ -61,7 +61,7 @@ def test_dual_parent_lineage_convergence_0009_and_0019_to_0020():
 
     # 1. Verify single converged head
     heads = script.get_heads()
-    assert heads == ["20260919_0022"]
+    assert heads == ["20260921_0022"]
 
     rev_0021 = script.get_revision("20260912_0021")
     assert rev_0021.down_revision == "20260912_0020"

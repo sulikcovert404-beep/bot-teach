@@ -434,6 +434,28 @@ class IngestionIdempotencyKey(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
 
+class ProvisioningIdempotencyKey(Base):
+    """Durable claim record for controlled identity provisioning."""
+
+    __tablename__ = "provisioning_idempotency_keys"
+    __table_args__ = (
+        UniqueConstraint("operation", "idempotency_key", name="uq_provisioning_idempotency_operation_key"),
+        CheckConstraint("status IN ('CLAIMED', 'SUCCEEDED')", name="ck_provisioning_idempotency_status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    operation: Mapped[str] = mapped_column(String(64), index=True)
+    idempotency_key: Mapped[str] = mapped_column(String(128), index=True)
+    request_fingerprint: Mapped[str] = mapped_column(String(64))
+    status: Mapped[str] = mapped_column(String(32), default="CLAIMED", index=True)
+    actor_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
+    correlation_id: Mapped[str] = mapped_column(String(128), index=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    response_json: Mapped[str] = mapped_column(String(8000), default="{}")
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
 class BetaFeedback(Base):
     """Beta user feedback on answers, sources, UI and content gaps."""
 

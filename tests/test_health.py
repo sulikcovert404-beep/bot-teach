@@ -29,7 +29,7 @@ def test_migration_heads_are_resolved_from_source() -> None:
     heads = health_route.migration_heads()
     # The source of truth is the checked-in migration graph, now converged to a single head.
     assert heads == tuple(sorted(heads))
-    assert heads == ("20260919_0022",)
+    assert heads == ("20260921_0022",)
 
 
 def test_readiness_requires_database_configuration() -> None:
