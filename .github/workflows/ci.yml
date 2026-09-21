@@ -211,7 +211,7 @@ jobs:
         run: |
           set -euo pipefail
           runtime_password="$(sed -n 's/^APP_RUNTIME_PASSWORD=//p' .env)"
-          until [ "$(docker compose ps --status running --services | grep -c '^db$' || true)" = "1" ]; do
+          until docker compose exec -T db pg_isready -U postgres -d education >/dev/null 2>&1; do
             sleep 2
           done
           docker compose exec -T db psql -v ON_ERROR_STOP=1 -U postgres -d education \
