@@ -16,6 +16,7 @@ from app.db.models import (
     User,
     ClassMembership, StudentProfile, TeacherContentPublication, ContentVersion,
     Classroom, Subscription, Assignment, AssignmentSnapshot, AssignmentTarget, StudentSubmission,
+    AIUsageEvent,
 )
 from app.security.dependencies import require_roles
 from app.services.publication_access import can_access
@@ -114,7 +115,33 @@ async def get_assignment_v1(assignment_id: int, subject: str = Depends(require_r
     row = await session.execute(select(Assignment, AssignmentSnapshot).join(AssignmentTarget, AssignmentTarget.assignment_id == Assignment.id).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).join(AssignmentSnapshot, AssignmentSnapshot.assignment_id == Assignment.id).where(Assignment.id == assignment_id, ClassMembership.student_id == (profile.id if profile else -1), Assignment.status == "PUBLISHED").order_by(AssignmentSnapshot.version.desc()).limit(1))
     item = row.first()
     if item is None: raise HTTPException(status_code=404, detail="Assignment not found")
-    return {"assignment": _assignment_v1_payload(item[0], item[1])}
+    assignment, snapshot = item
+    now = datetime.now(timezone.utc)
+    availability = "AVAILABLE"
+    if assignment.publish_at and now < assignment.publish_at.replace(tzinfo=timezone.utc):
+        availability = "NOT_YET_PUBLISHED"
+    elif assignment.close_at and now >= assignment.close_at.replace(tzinfo=timezone.utc):
+        availability = "CLOSED"
+    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.assignment_id == assignment_id, ExamAttempt.student_id == int(subject), ExamAttempt.tenant_id == assignment.tenant_id).order_by(ExamAttempt.id.desc()).limit(1))
+    payload = _assignment_v1_payload(assignment, snapshot)
+    payload.update({"availability": availability, "attempt_id": attempt.id if attempt else None,
+                    "attempt_status": attempt.status if attempt else None,
+                    "has_submitted_attempt": bool(attempt and attempt.status in {"SUBMITTED", "GRADED"})})
+    return {"assignment": payload}
+
+
+@router.get("/v1/assignments/{assignment_id}/resume")
+async def resume_assignment_v1(assignment_id: int, subject: str = Depends(require_roles("STUDENT")), _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
+    """Return only the authenticated student's active attempt, without creating one."""
+    profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == int(subject)))
+    row = await session.execute(select(Assignment).join(AssignmentTarget).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).where(Assignment.id == assignment_id, ClassMembership.student_id == (profile.id if profile else -1), Assignment.status == "PUBLISHED").limit(1))
+    assignment = row.scalar_one_or_none()
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.assignment_id == assignment_id, ExamAttempt.student_id == int(subject), ExamAttempt.tenant_id == assignment.tenant_id, ExamAttempt.status.in_({"STARTED", "IN_PROGRESS"})).order_by(ExamAttempt.id.desc()).limit(1))
+    if attempt is None:
+        return {"assignment_id": assignment_id, "active_attempt": None}
+    return {"assignment_id": assignment_id, "active_attempt": {"attempt_id": attempt.id, "attempt_no": attempt.attempt_no, "status": attempt.status, "question_snapshot": json.loads(attempt.question_snapshot), "answers": json.loads(attempt.answer_payload or "{}")}}
 
 class AssignmentSubmissionV1Request(BaseModel):
     content: dict[str, Any] = Field(default_factory=dict)
@@ -319,6 +346,26 @@ async def get_student_progress(
     total_queries = len(audits)
     with_citations = sum(1 for a in audits if a.has_citations)
 
+    # Progress is intentionally a derived read model over existing activity
+    # records; no dedicated progress table is introduced by the vertical slice.
+    submission_count = await session.scalar(
+        select(func.count(StudentSubmission.id))
+        .join(StudentProfile, StudentProfile.id == StudentSubmission.student_id)
+        .where(StudentProfile.student_id == user_id)
+    ) or 0
+    completed_attempt_count = await session.scalar(
+        select(func.count(ExamAttempt.id)).where(
+            ExamAttempt.student_id == user_id,
+            ExamAttempt.status.in_({"SUBMITTED", "COMPLETED"}),
+        )
+    ) or 0
+    tutor_usage_count = await session.scalar(
+        select(func.count(AIUsageEvent.id)).where(
+            AIUsageEvent.user_id == user_id,
+            AIUsageEvent.task_type == "ai_tutor",
+        )
+    ) or 0
+
     # 2. Subject Mastery Estimation based on student queries
     subject_queries: dict[str, list[BetaQualityAudit]] = {
         "شیمی": [],
@@ -363,7 +410,7 @@ async def get_student_progress(
 
         mastery_breakdown[subj] = {
             "queries_count": count,
-            "mastery_score_pct": round(score, 1),
+            "mastery_score_pct": round(score, 1) if score is not None else None,
             "status": status_str,
         }
 
@@ -404,6 +451,13 @@ async def get_student_progress(
         "weaknesses": weaknesses,
         "subject_mastery": mastery_breakdown,
         "smart_recommendations": recommendations,
+        "progress_provenance": {
+            "source": ["BetaQualityAudit", "StudentSubmission", "ExamAttempt", "AIUsageEvent"],
+            "submission_count": submission_count,
+            "completed_attempt_count": completed_attempt_count,
+            "tutor_interaction_count": tutor_usage_count,
+            "empty_state": total_queries == 0 and submission_count == 0 and completed_attempt_count == 0,
+        },
     }
 
 

@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
+from app.db.models import Assignment, AssignmentTarget, ClassMembership, Classroom, StudentProfile
 from app.core.config import get_settings
 from app.domain.entitlements.models import FeatureCode
 from app.security.entitlements import require_feature_access
@@ -26,6 +28,11 @@ router = APIRouter(prefix="/tutor", tags=["ai-tutor"])
 class TutorRequest(BaseModel):
     query: str = Field(min_length=1, max_length=10_000)
     max_tokens: int = Field(default=1_200, ge=1, le=4_000)
+    # Optional for backwards-compatible generic tutor calls.  When supplied,
+    # the complete learning context is verified server-side before retrieval.
+    school_id: str | None = Field(default=None, min_length=1, max_length=64)
+    classroom_id: int | None = Field(default=None, ge=1)
+    assignment_id: int | None = Field(default=None, ge=1)
 
 
 class TutorResponse(BaseModel):
@@ -51,6 +58,29 @@ async def tutor_answer(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid user identity"
         ) from exc
+
+    context_fields = (request.school_id, request.classroom_id, request.assignment_id)
+    if any(value is not None for value in context_fields):
+        if not all(value is not None for value in context_fields):
+            raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_CONTENT, detail="Incomplete learning context")
+        context = await session.execute(
+            select(Assignment.id)
+            .join(AssignmentTarget, AssignmentTarget.assignment_id == Assignment.id)
+            .join(Classroom, Classroom.id == AssignmentTarget.classroom_id)
+            .join(ClassMembership, ClassMembership.classroom_id == Classroom.id)
+            .join(StudentProfile, StudentProfile.id == ClassMembership.student_id)
+            .where(
+                Assignment.id == request.assignment_id,
+                AssignmentTarget.classroom_id == request.classroom_id,
+                AssignmentTarget.tenant_id == request.school_id,
+                Classroom.tenant_id == request.school_id,
+                StudentProfile.student_id == user_id,
+                Assignment.status == "PUBLISHED",
+            )
+            .limit(1)
+        )
+        if context.scalar_one_or_none() is None:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Unauthorized learning context")
 
     from app.services.safety_limits import check_beta_safety_limits
     await check_beta_safety_limits(session, user_id=user_id, query=request.query)
