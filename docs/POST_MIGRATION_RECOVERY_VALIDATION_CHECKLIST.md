@@ -1,5 +1,7 @@
 # POST MIGRATION RECOVERY VALIDATION CHECKLIST
 
+> **HISTORICAL_ARCHIVE — NOT CURRENT OPERATIONAL INSTRUCTION.** This checklist records an earlier recovery/migration state. Do not execute its commands or treat its revision assumptions as current. Refer to [MIGRATIONS.md](MIGRATIONS.md) and [OPERATIONS.md](OPERATIONS.md); they do not authorize production recovery.
+
 Date: 2026-09-14
 Mode: Read-only preparation; no server or production mutation
 

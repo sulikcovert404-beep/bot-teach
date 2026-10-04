@@ -1,5 +1,7 @@
 # Recovery Operator Action Sheet — 2026-09-14
 
+> **HISTORICAL_ARCHIVE — NOT CURRENT OPERATOR INSTRUCTION.** This dated action sheet records an earlier recovery state and is not authorization to operate on any host or database. Use current guidance in [MIGRATIONS.md](MIGRATIONS.md) and [OPERATIONS.md](OPERATIONS.md); a separate Gate is required for action.
+
 ## Purpose
 Short, read-only handoff for the operator after authorized SSH access returns. This sheet does not authorize recovery by itself.
 

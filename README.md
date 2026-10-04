@@ -23,8 +23,10 @@ Telegram Mini App: `GET /mini-app/` (در محیط Telegram با `initData` مع
 Platform API: `GET /api/v1/platform`
 
 برای اجرای Compose، علاوه بر مقادیر بالا باید `APP_RUNTIME_PASSWORD` و
-`EXPECTED_MIGRATION_HEAD` نیز در `.env` تنظیم شوند. برای qualification فعلی، مقدار
-صریح head برابر `20260912_0021` است؛ از `alembic upgrade head` استفاده نکنید.
+`EXPECTED_MIGRATION_HEAD` نیز در `.env` تنظیم شوند. مقدار migration باید فقط target
+صریح و مجازشده در Gate جاری باشد؛ نمونهٔ `.env` عمداً target پیش‌فرض ندارد و Compose
+بدون آن fail-closed متوقف می‌شود. مسیر عملیاتی از profile یک‌بارهٔ
+`migration-gate` و runner کنترل‌شده استفاده می‌کند؛ `alembic upgrade head` مسیر انتشار نیست.
 
 مسیرهای اصلی فعلی:
 

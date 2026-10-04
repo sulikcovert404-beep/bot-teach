@@ -30,7 +30,13 @@ async def get_session() -> AsyncGenerator[AsyncSession, None]:
     settings = get_settings()
     if not settings.database_url:
         raise HTTPException(status_code=503, detail="Database unavailable")
-    factory = build_session_factory(settings.database_url)
+    factory = build_session_factory(
+        settings.database_url,
+        settings.writer_admission_enabled,
+        settings.writer_generation,
+        settings.writer_instance_id,
+        settings.writer_database_role,
+    )
     async with factory() as session:
         yield session
 

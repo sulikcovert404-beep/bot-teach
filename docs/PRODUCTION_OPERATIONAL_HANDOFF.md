@@ -1,5 +1,7 @@
 # PRODUCTION OPERATIONAL HANDOFF & CLOSURE PACKAGE
 
+> **HISTORICAL_ARCHIVE — NOT CURRENT OPERATIONAL INSTRUCTION.** This handoff contains superseded host, database, runtime, and migration claims. Its “operationally closed” verdict and commands are historical evidence only; do not use them for deployment, restore, or migration. Current guidance is in [MIGRATIONS.md](MIGRATIONS.md) and [OPERATIONS.md](OPERATIONS.md), and any operation still requires a separate explicit Gate.
+
 ## 1. Executive Summary & Verdict
 ```text
 MVP + MIGRATION + PRODUCTION CUTOVER

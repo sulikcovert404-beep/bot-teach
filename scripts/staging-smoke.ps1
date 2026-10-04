@@ -15,9 +15,17 @@ if ([string]::IsNullOrWhiteSpace($ExpectedMigrationHead)) {
 
 Write-Host "Starting staging services..."
 if (-not $UseExistingRuntime) {
-    docker compose up -d db migrate api
+    docker compose up -d db redis
     if ($LASTEXITCODE -ne 0) {
-        throw "Compose startup failed with exit code $LASTEXITCODE"
+        throw "Compose dependency startup failed with exit code $LASTEXITCODE"
+    }
+    docker compose --profile migration-gate run --rm migrate
+    if ($LASTEXITCODE -ne 0) {
+        throw "Canonical migration runner failed with exit code $LASTEXITCODE"
+    }
+    docker compose up -d api
+    if ($LASTEXITCODE -ne 0) {
+        throw "API startup after migration failed with exit code $LASTEXITCODE"
     }
 } else {
     Write-Host "Using existing runtime at $BaseUrl"

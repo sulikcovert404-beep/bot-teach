@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 from fastapi.responses import PlainTextResponse
 
-from app.core.logging import request_metrics, telegram_metrics
+from app.core.logging import request_metrics, telegram_metrics, writer_metrics
 
 router = APIRouter(tags=["observability"])
 
@@ -10,10 +10,11 @@ router = APIRouter(tags=["observability"])
 async def metrics() -> dict[str, object]:
     result = request_metrics.snapshot()
     result["telegram"] = telegram_metrics.snapshot()
+    result["writer"] = writer_metrics.snapshot()
     return result
 
 
 @router.get("/metrics/prometheus", response_class=PlainTextResponse, summary="Prometheus metrics")
 async def prometheus_metrics() -> PlainTextResponse:
-    body = request_metrics.prometheus() + telegram_metrics.prometheus()
+    body = request_metrics.prometheus() + telegram_metrics.prometheus() + writer_metrics.prometheus()
     return PlainTextResponse(body, media_type="text/plain; version=0.0.4")

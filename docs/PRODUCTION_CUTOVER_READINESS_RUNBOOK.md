@@ -1,4 +1,6 @@
 # RUNBOOK: PRODUCTION CUTOVER READINESS (READ-ONLY BASELINE & DISCOVERY)
+
+> **HISTORICAL_ARCHIVE — NOT CURRENT OPERATIONAL INSTRUCTION.** This 2026-09-14 document records an obsolete migration lineage and cutover plan. Do not use its targets or procedures for current operations. Current policy is in [MIGRATIONS.md](MIGRATIONS.md) and [OPERATIONS.md](OPERATIONS.md); neither grants production authorization.
 ## Phase: PRE-CUTOVER DISCOVERY & SAFETY GATE (NO MUTATION)
 
 > [!IMPORTANT]

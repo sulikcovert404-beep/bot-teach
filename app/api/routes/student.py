@@ -1,5 +1,5 @@
-from datetime import datetime, timezone
 import json
+from datetime import datetime, timezone
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -9,27 +9,51 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.routes.auth import get_session
 from app.db.models import (
+    AIUsageEvent,
+    Assignment,
+    AssignmentSnapshot,
+    AssignmentTarget,
     AuditLog,
     BetaQualityAudit,
+    ClassMembership,
+    Classroom,
+    ContentVersion,
+    ExamAttempt,
+    ExamResult,
+    StudentProfile,
+    StudentSubmission,
     StudyPlan,
     StudyPlanTask,
+    Subscription,
+    TeacherContentPublication,
     User,
-    ClassMembership, StudentProfile, TeacherContentPublication, ContentVersion,
-    Classroom, Subscription, Assignment, AssignmentSnapshot, AssignmentTarget, StudentSubmission,
-    AIUsageEvent,
 )
-from app.security.dependencies import require_roles
-from app.services.publication_access import can_access
-from app.domain.entitlements.foundation import ClassroomContentAccess, resolve_classroom_content_access
+from app.domain.entitlements.foundation import (
+    ClassroomContentAccess,
+    resolve_classroom_content_access,
+)
 from app.domain.entitlements.models import FeatureCode
+from app.security.dependencies import require_roles
 from app.security.entitlements import require_feature_access
+from app.security.tenant_context import (
+    TenantContext,
+    establish_tenant_context,
+    tenant_context_for,
+)
 from app.services.audit_repository import record_audit_log
-from app.db.models import ExamAttempt, ExamResult
-from app.services.exam_attempts import ExamAccessError, start_attempt, save_answers, submit_attempt
-from app.db.base import set_tenant_context
-from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
+from app.services.exam_attempts import ExamAccessError, save_answers, start_attempt, submit_attempt
+from app.services.publication_access import can_access
+from app.services.submission_revisions import (
+    SubmissionRevisionConflict,
+    SubmissionRevisionError,
+    create_revision,
+    read_feedback,
+)
 
 router = APIRouter(prefix="/student", tags=["student"])
+student_assignment_tenant = Depends(tenant_context_for("STUDENT"))
+student_assignment_access = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS))
+student_assignment_session = Depends(get_session)
 
 class ExamAnswersRequest(BaseModel):
     answers: dict[str, Any] = Field(default_factory=dict)
@@ -39,14 +63,9 @@ async def _student_tenant_context(session: AsyncSession, subject: str) -> str:
     """Resolve tenant from the authenticated subject before any Exam query."""
     try:
         user_id = int(subject)
-        if not session.in_transaction():
-            await session.begin()
-        tenant_id = await resolve_tenant(session, user_id=user_id)
-        await set_tenant_context(session, tenant_id)
-        return tenant_id
-    except (ValueError, TenantResolutionError) as exc:
-        await session.rollback()
-        raise HTTPException(status_code=403, detail="Tenant scope denied") from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=401, detail="Invalid user identity") from exc
+    return (await establish_tenant_context(session, user_id=user_id)).tenant_id
 
 @router.post("/exam-assignments/{assignment_id}/attempts", status_code=201)
 async def start_exam_attempt(assignment_id: int, subject: str = Depends(require_roles("STUDENT")), session: AsyncSession = Depends(get_session)):
@@ -102,17 +121,17 @@ def _assignment_v1_payload(a: Assignment, snapshot: AssignmentSnapshot | None = 
             "snapshot_digest": snapshot.content_digest if snapshot else None}
 
 @router.get("/v1/assignments")
-async def list_assignments_v1(subject: str = Depends(require_roles("STUDENT")), _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
-    profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == int(subject)))
+async def list_assignments_v1(tenant: TenantContext = student_assignment_tenant, _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
+    profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == tenant.user_id))
     if profile is None:
         return {"assignments": []}
-    rows = (await session.execute(select(Assignment, AssignmentSnapshot).join(AssignmentTarget, AssignmentTarget.assignment_id == Assignment.id).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).join(AssignmentSnapshot, AssignmentSnapshot.assignment_id == Assignment.id).where(ClassMembership.student_id == profile.id, Assignment.status == "PUBLISHED").order_by(Assignment.id.desc()))).all()
+    rows = (await session.execute(select(Assignment, AssignmentSnapshot).join(AssignmentTarget, AssignmentTarget.assignment_id == Assignment.id).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).join(AssignmentSnapshot, AssignmentSnapshot.assignment_id == Assignment.id).where(Assignment.tenant_id == tenant.tenant_id, AssignmentTarget.tenant_id == tenant.tenant_id, ClassMembership.student_id == profile.id, Assignment.status == "PUBLISHED").order_by(Assignment.id.desc()))).all()
     return {"assignments": [_assignment_v1_payload(a, s) for a, s in rows]}
 
 @router.get("/v1/assignments/{assignment_id}")
-async def get_assignment_v1(assignment_id: int, subject: str = Depends(require_roles("STUDENT")), _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
-    profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == int(subject)))
-    row = await session.execute(select(Assignment, AssignmentSnapshot).join(AssignmentTarget, AssignmentTarget.assignment_id == Assignment.id).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).join(AssignmentSnapshot, AssignmentSnapshot.assignment_id == Assignment.id).where(Assignment.id == assignment_id, ClassMembership.student_id == (profile.id if profile else -1), Assignment.status == "PUBLISHED").order_by(AssignmentSnapshot.version.desc()).limit(1))
+async def get_assignment_v1(assignment_id: int, tenant: TenantContext = student_assignment_tenant, _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
+    profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == tenant.user_id))
+    row = await session.execute(select(Assignment, AssignmentSnapshot).join(AssignmentTarget, AssignmentTarget.assignment_id == Assignment.id).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).join(AssignmentSnapshot, AssignmentSnapshot.assignment_id == Assignment.id).where(Assignment.id == assignment_id, Assignment.tenant_id == tenant.tenant_id, AssignmentTarget.tenant_id == tenant.tenant_id, ClassMembership.student_id == (profile.id if profile else -1), Assignment.status == "PUBLISHED").order_by(AssignmentSnapshot.version.desc()).limit(1))
     item = row.first()
     if item is None: raise HTTPException(status_code=404, detail="Assignment not found")
     assignment, snapshot = item
@@ -122,7 +141,7 @@ async def get_assignment_v1(assignment_id: int, subject: str = Depends(require_r
         availability = "NOT_YET_PUBLISHED"
     elif assignment.close_at and now >= assignment.close_at.replace(tzinfo=timezone.utc):
         availability = "CLOSED"
-    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.assignment_id == assignment_id, ExamAttempt.student_id == int(subject), ExamAttempt.tenant_id == assignment.tenant_id).order_by(ExamAttempt.id.desc()).limit(1))
+    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.assignment_id == assignment_id, ExamAttempt.student_id == tenant.user_id, ExamAttempt.tenant_id == tenant.tenant_id).order_by(ExamAttempt.id.desc()).limit(1))
     payload = _assignment_v1_payload(assignment, snapshot)
     payload.update({"availability": availability, "attempt_id": attempt.id if attempt else None,
                     "attempt_status": attempt.status if attempt else None,
@@ -131,40 +150,88 @@ async def get_assignment_v1(assignment_id: int, subject: str = Depends(require_r
 
 
 @router.get("/v1/assignments/{assignment_id}/resume")
-async def resume_assignment_v1(assignment_id: int, subject: str = Depends(require_roles("STUDENT")), _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
+async def resume_assignment_v1(assignment_id: int, tenant: TenantContext = student_assignment_tenant, _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
     """Return only the authenticated student's active attempt, without creating one."""
-    profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == int(subject)))
-    row = await session.execute(select(Assignment).join(AssignmentTarget).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).where(Assignment.id == assignment_id, ClassMembership.student_id == (profile.id if profile else -1), Assignment.status == "PUBLISHED").limit(1))
+    profile = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == tenant.user_id))
+    row = await session.execute(select(Assignment).join(AssignmentTarget).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).where(Assignment.id == assignment_id, Assignment.tenant_id == tenant.tenant_id, AssignmentTarget.tenant_id == tenant.tenant_id, ClassMembership.student_id == (profile.id if profile else -1), Assignment.status == "PUBLISHED").limit(1))
     assignment = row.scalar_one_or_none()
     if assignment is None:
         raise HTTPException(status_code=404, detail="Assignment not found")
-    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.assignment_id == assignment_id, ExamAttempt.student_id == int(subject), ExamAttempt.tenant_id == assignment.tenant_id, ExamAttempt.status.in_({"STARTED", "IN_PROGRESS"})).order_by(ExamAttempt.id.desc()).limit(1))
+    attempt = await session.scalar(select(ExamAttempt).where(ExamAttempt.assignment_id == assignment_id, ExamAttempt.student_id == tenant.user_id, ExamAttempt.tenant_id == tenant.tenant_id, ExamAttempt.status.in_({"STARTED", "IN_PROGRESS"})).order_by(ExamAttempt.id.desc()).limit(1))
     if attempt is None:
         return {"assignment_id": assignment_id, "active_attempt": None}
     return {"assignment_id": assignment_id, "active_attempt": {"attempt_id": attempt.id, "attempt_no": attempt.attempt_no, "status": attempt.status, "question_snapshot": json.loads(attempt.question_snapshot), "answers": json.loads(attempt.answer_payload or "{}")}}
 
 class AssignmentSubmissionV1Request(BaseModel):
+    idempotency_key: str = Field(min_length=1, max_length=128)
     content: dict[str, Any] = Field(default_factory=dict)
 
 @router.post("/v1/assignments/{assignment_id}/submissions", status_code=201)
-async def submit_assignment_v1(assignment_id: int, req: AssignmentSubmissionV1Request, subject: str = Depends(require_roles("STUDENT")), _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
-    student = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == int(subject)))
-    assignment = await session.scalar(select(Assignment).join(AssignmentTarget).join(ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id).where(Assignment.id == assignment_id, ClassMembership.student_id == (student.id if student else -1), Assignment.status == "PUBLISHED"))
-    if assignment is None: raise HTTPException(status_code=404, detail="Assignment not found")
+async def submit_assignment_v1(assignment_id: int, req: AssignmentSubmissionV1Request, tenant: TenantContext = student_assignment_tenant, _entitled: str = Depends(require_feature_access(FeatureCode.ASSIGNMENT_ACCESS)), session: AsyncSession = Depends(get_session)):
+    tenant_id = tenant.tenant_id
+    student = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == tenant.user_id))
+    assignment = await session.scalar(
+        select(Assignment).join(AssignmentTarget).join(
+            ClassMembership, ClassMembership.classroom_id == AssignmentTarget.classroom_id
+        ).where(
+            Assignment.id == assignment_id,
+            Assignment.tenant_id == tenant_id,
+            AssignmentTarget.tenant_id == tenant_id,
+            ClassMembership.student_id == (student.id if student else -1),
+            Assignment.status == "PUBLISHED",
+        ).limit(1)
+    )
+    if assignment is None or student is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
     now = datetime.now(timezone.utc)
-    if assignment.close_at and now >= assignment.close_at.replace(tzinfo=timezone.utc): raise HTTPException(status_code=409, detail="Assignment is closed")
-    existing = await session.scalar(select(StudentSubmission).where(StudentSubmission.assignment_id == assignment_id, StudentSubmission.student_id == student.id))
-    if existing:
-        existing.content_json = json.dumps(req.content, ensure_ascii=False, sort_keys=True); existing.revision += 1; existing.submitted_at = now
-        await record_audit_log(session, actor_user_id=int(subject), action="SUBMISSION_CREATED", resource_type="submission", resource_id=str(existing.id), metadata={"assignment_id": assignment_id, "revision": existing.revision})
-        await session.commit(); await session.refresh(existing)
-        return {"submission_id": existing.id, "revision": existing.revision, "replayed": True}
-    submission = StudentSubmission(assignment_id=assignment_id, student_id=student.id, tenant_id=assignment.tenant_id, status="SUBMITTED", content_json=json.dumps(req.content, ensure_ascii=False, sort_keys=True), submitted_at=now)
-    session.add(submission)
-    await session.flush()
-    await record_audit_log(session, actor_user_id=int(subject), action="SUBMISSION_CREATED", resource_type="submission", resource_id=str(submission.id), metadata={"assignment_id": assignment_id, "revision": 1})
-    await session.commit(); await session.refresh(submission)
-    return {"submission_id": submission.id, "revision": submission.revision, "replayed": False}
+    if assignment.close_at and now >= assignment.close_at.replace(tzinfo=timezone.utc):
+        raise HTTPException(status_code=409, detail="Assignment is closed")
+    try:
+        result = await create_revision(
+            session, assignment_id=assignment_id, student_profile_id=student.id,
+            tenant_id=tenant_id, idempotency_key=req.idempotency_key, content=req.content,
+        )
+        response = {
+            "submission_id": result.submission.id,
+            "submission_revision_id": result.revision.id,
+            "revision": result.revision.revision_no,
+            "replayed": result.replayed,
+        }
+        if not result.replayed:
+            await record_audit_log(
+                session, actor_user_id=tenant.user_id, action="SUBMISSION_CREATED",
+                resource_type="submission", resource_id=str(result.submission.id),
+                metadata={"assignment_id": assignment_id, "revision": result.revision.revision_no},
+            )
+        await session.commit()
+        return response
+    except SubmissionRevisionConflict as exc:
+        await session.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except SubmissionRevisionError as exc:
+        await session.rollback()
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+@router.get("/v1/submissions/{submission_id}/feedback")
+async def get_submission_feedback_v1(
+    submission_id: int,
+    tenant: TenantContext = student_assignment_tenant,
+    _entitled: str = student_assignment_access,
+    session: AsyncSession = student_assignment_session,
+):
+    profile = await session.scalar(select(StudentProfile).where(
+        StudentProfile.student_id == tenant.user_id
+    ))
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Submission not found")
+    try:
+        return await read_feedback(
+            session, submission_id=submission_id,
+            student_profile_id=profile.id, tenant_id=tenant.tenant_id,
+        )
+    except SubmissionRevisionError as exc:
+        raise HTTPException(status_code=404, detail="Submission not found") from exc
+
 
 @router.get("/v2/classroom-content")
 async def list_accessible_classroom_content(

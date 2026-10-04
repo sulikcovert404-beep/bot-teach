@@ -1,5 +1,7 @@
 # Final Pre-Cutover Verification & Provenance Record
 
+> **HISTORICAL_ARCHIVE — NOT CURRENT OPERATIONAL INSTRUCTION.** This record contains prior-host and prior-database evidence. It must not be used as current provenance, a backup instruction, or migration guidance. Use current policy in [MIGRATIONS.md](MIGRATIONS.md) and [OPERATIONS.md](OPERATIONS.md), subject to a separate explicit Gate.
+
 ## 1. Live Production Ground Truth (Server: `107.173.47.76`)
 - **Live Revision**: `20260909_0009` (Confirmed via `SELECT version_num FROM alembic_version;`)
 - **Live Database Size**: `9,607 kB` (`9.6 MB`)

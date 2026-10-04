@@ -1,5 +1,7 @@
 # Release Candidate 0021 Manifest
 
+> **HISTORICAL_ARCHIVE — NOT A CURRENT CANDIDATE.** Revision 0021 and all associated artifacts are historical. This document does not identify a current build, release, or migration target. Current migration policy is in [MIGRATIONS.md](MIGRATIONS.md); a new candidate requires a separately qualified manifest and Gate.
+
 ## Scope
 
 Canonical, provider-neutral release reference. Documentation only; this file does not authorize deployment, rollback, migration, or configuration changes.

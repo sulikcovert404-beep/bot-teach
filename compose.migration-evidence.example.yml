@@ -1,0 +1,12 @@
+# Optional, explicit, read-only runtime evidence input for the final contract target.
+# Use only with an approved Gate and a real evidence artifact. No evidence is baked
+# into the image or supplied by this overlay.
+services:
+  migrate:
+    volumes:
+      - type: bind
+        source: ${GATE738P_HARD_CRASH_EVIDENCE_HOST_PATH:?Set the approved host evidence file path}
+        target: /run/migration-gate/qualification-evidence.json
+        read_only: true
+        bind:
+          create_host_path: false

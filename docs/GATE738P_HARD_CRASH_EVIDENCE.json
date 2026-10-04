@@ -1,0 +1,22 @@
+{
+  "gate": "Gate738P",
+  "test_run_id": "b44538bc",
+  "database": "gate738e_gate738p_74fee46611",
+  "candidate_generation": "candidate_08f02ed0cf",
+  "old_generation": "legacy",
+  "old_container_id": "9a3bc6d56a57e7d26161250a94399a5c679a9e4763d9b2b788dae22dd21d477c",
+  "old_container_exit_code": 137,
+  "old_container_hard_killed": true,
+  "inflight_transaction_rolled_back": true,
+  "fence_persisted_after_restart": true,
+  "restarted_old_write_denied": true,
+  "candidate_health_remained_ready": true,
+  "candidate_write_succeeded": true,
+  "contract_targets": [
+    "20261003_0030",
+    "20261003_0031",
+    "20261004_0033"
+  ],
+  "final_head": "20261004_0033",
+  "final_candidate_health_ready": true
+}

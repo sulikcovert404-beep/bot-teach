@@ -10,16 +10,27 @@ Rules:
 - foreign keys, unique constraints, indexes and rollback impact must be reviewed;
 - backups belong to the managed PostgreSQL provider and must be tested with a restore drill;
 - local SQLite is only for tests and development, never production.
-## Production database
+## Controlled migration invocation
 
-Production uses PostgreSQL through `DATABASE_URL` with the `asyncpg` driver. The
-Docker Compose stack provisions PostgreSQL with a persistent named volume and
-waits for its health check before starting the API. Run migrations explicitly
-before serving traffic:
+Operational migration is a one-shot, explicitly gated service. The normal API
+startup does not run migrations. Set `EXPECTED_MIGRATION_HEAD` to the exact
+allow-listed target authorized by the applicable Gate, then invoke the canonical
+runner through the migration-only Compose profile:
 
 ```powershell
-docker compose run --rm api alembic upgrade head
+docker compose --profile migration-gate run --rm migrate
 ```
+
+The runner requires a non-empty, exact allow-listed target and rejects `head`,
+unknown revisions, and missing values. Contract targets also require the exact
+candidate-readiness and drain/fence/quiescence checks in order. The final 0033
+target additionally requires genuine hard-crash evidence at runtime; never bake
+or synthesize evidence into the image. Supply it only through the optional
+read-only overlay in `compose.migration-evidence.example.yml`, using an explicitly
+approved host file path. A missing or invalid evidence file fails closed.
+
+Direct `alembic upgrade ...` commands are limited to clearly labeled local or
+historical test fixtures. They are not release or production procedures.
 
 The FastAPI lifespan disposes the cached SQLAlchemy engine on shutdown. Readiness
 (`GET /health/ready`) performs a live `SELECT 1` against the configured database and

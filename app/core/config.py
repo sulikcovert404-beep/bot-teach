@@ -4,6 +4,7 @@ from urllib.parse import urlparse
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine import make_url
 
 
 class Settings(BaseSettings):
@@ -23,6 +24,10 @@ class Settings(BaseSettings):
     # models; task-specific callers may still provide a lower explicit limit.
     ai_default_max_output_tokens: int = 1024
     expected_migration_head: str = ""
+    writer_admission_enabled: bool = False
+    writer_generation: str = ""
+    writer_instance_id: str = ""
+    writer_database_role: str = ""
     jwt_secret: str = ""
     rate_limit_requests: int = 60
     rate_limit_window_seconds: int = 60
@@ -39,6 +44,26 @@ class Settings(BaseSettings):
     def validate_production_requirements(self) -> "Settings":
         if not 1 <= self.ai_default_max_output_tokens <= 4_000:
             raise ValueError("AI_DEFAULT_MAX_OUTPUT_TOKENS must be between 1 and 4000")
+        if self.writer_admission_enabled:
+            import re
+
+            generation = self.writer_generation.strip()
+            instance_id = self.writer_instance_id.strip()
+            database_role = self.writer_database_role.strip()
+            if not re.fullmatch(r"[A-Za-z0-9._-]{1,40}", generation):
+                raise ValueError("WRITER_GENERATION must be a non-secret release identifier")
+            if not re.fullmatch(r"[A-Za-z0-9._-]{1,16}", instance_id):
+                raise ValueError("WRITER_INSTANCE_ID must be a non-secret instance identifier")
+            if not re.fullmatch(r"[A-Za-z0-9._-]{1,63}", database_role):
+                raise ValueError("WRITER_DATABASE_ROLE must identify the registered PostgreSQL role")
+            if generation == "legacy" and database_role != "app_runtime":
+                raise ValueError("legacy writer admission must use app_runtime")
+            if generation != "legacy" and database_role == "app_runtime":
+                raise ValueError("candidate writer admission requires a distinct PostgreSQL login role")
+            if self.database_url and make_url(self.database_url).username != database_role:
+                raise ValueError("DATABASE_URL role does not match WRITER_DATABASE_ROLE")
+            if len(f"aitw:{generation}:{instance_id}") > 63:
+                raise ValueError("writer attribution must fit PostgreSQL application_name")
         if self.app_env.lower() != "production":
             return self
         required = {

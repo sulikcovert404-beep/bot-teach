@@ -107,6 +107,83 @@ class TelegramMetrics:
 telegram_metrics = TelegramMetrics()
 
 
+class WriterMetrics:
+    """Local active-writer diagnostics; PostgreSQL remains the zero oracle."""
+
+    def __init__(self) -> None:
+        self._lock = Lock()
+        self._active: Counter[tuple[str, str]] = Counter()
+        self._completed: Counter[tuple[str, str]] = Counter()
+        self._duration_millis: Counter[tuple[str, str]] = Counter()
+
+    def enter(self, generation: str, instance_id: str) -> None:
+        with self._lock:
+            self._active[(generation, instance_id)] += 1
+
+    def leave(self, generation: str, instance_id: str, duration_seconds: float) -> None:
+        with self._lock:
+            key = (generation, instance_id)
+            self._active[key] = max(0, self._active[key] - 1)
+            self._completed[key] += 1
+            self._duration_millis[key] += int(max(0, duration_seconds) * 1000)
+
+    def snapshot(self) -> dict[str, object]:
+        with self._lock:
+            return {
+                "active_write_count": {
+                    f'{generation}|{instance}': count
+                    for (generation, instance), count in self._active.items()
+                },
+                "completed_write_transactions": {
+                    f'{generation}|{instance}': count
+                    for (generation, instance), count in self._completed.items()
+                },
+                "write_transaction_duration_millis": {
+                    f'{generation}|{instance}': count
+                    for (generation, instance), count in self._duration_millis.items()
+                },
+            }
+
+    def prometheus(self) -> str:
+        with self._lock:
+            lines = [
+                "# HELP ai_teacher_active_write_transactions Local diagnostic gauge; query PostgreSQL for authoritative zero.",
+                "# TYPE ai_teacher_active_write_transactions gauge",
+            ]
+            for (generation, instance), count in sorted(self._active.items()):
+                lines.append(
+                    f'ai_teacher_active_write_transactions{{release_generation="{generation}",instance_id="{instance}"}} {count}'
+                )
+            lines.extend([
+                "# HELP ai_teacher_write_transactions_total Completed writer transactions.",
+                "# TYPE ai_teacher_write_transactions_total counter",
+            ])
+            for (generation, instance), count in sorted(self._completed.items()):
+                lines.append(
+                    f'ai_teacher_write_transactions_total{{release_generation="{generation}",instance_id="{instance}"}} {count}'
+                )
+            lines.extend([
+                "# HELP ai_teacher_write_transaction_duration_seconds_sum Duration sum for completed writer transactions.",
+                "# TYPE ai_teacher_write_transaction_duration_seconds_sum counter",
+            ])
+            for (generation, instance), count in sorted(self._duration_millis.items()):
+                lines.append(
+                    f'ai_teacher_write_transaction_duration_seconds_sum{{release_generation="{generation}",instance_id="{instance}"}} {count / 1000:.3f}'
+                )
+            lines.extend([
+                "# HELP ai_teacher_write_transaction_duration_seconds_count Completed writer transaction count for duration summary.",
+                "# TYPE ai_teacher_write_transaction_duration_seconds_count counter",
+            ])
+            for (generation, instance), count in sorted(self._completed.items()):
+                lines.append(
+                    f'ai_teacher_write_transaction_duration_seconds_count{{release_generation="{generation}",instance_id="{instance}"}} {count}'
+                )
+            return "\n".join(lines) + "\n"
+
+
+writer_metrics = WriterMetrics()
+
+
 class RequestLoggingMiddleware:
     def __init__(self, app: ASGIApp) -> None:
         self.app = app

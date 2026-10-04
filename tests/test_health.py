@@ -29,7 +29,7 @@ def test_migration_heads_are_resolved_from_source() -> None:
     heads = health_route.migration_heads()
     # The source of truth is the checked-in migration graph, now converged to a single head.
     assert heads == tuple(sorted(heads))
-    assert heads == ("20260919_0022",)
+    assert heads == ("20261004_0033",)
 
 
 def test_readiness_requires_database_configuration() -> None:
@@ -48,6 +48,9 @@ async def test_readiness_checks_redis_when_configured(monkeypatch: pytest.Monkey
             return self.value
 
     class Session:
+        async def scalar(self, query) -> str:
+            return "postgres"
+
         async def execute(self, query) -> Result:
             return Result(1 if "SELECT 1" in str(query) else health_route.EXPECTED_MIGRATION_HEAD)
 
@@ -76,10 +79,11 @@ async def test_readiness_checks_redis_when_configured(monkeypatch: pytest.Monkey
     monkeypatch.setattr(settings, "database_url", "sqlite+aiosqlite://")
     monkeypatch.setattr(settings, "redis_url", "redis://localhost:6379/0")
     monkeypatch.setattr(settings, "expected_migration_head", health_route.EXPECTED_MIGRATION_HEAD)
-    monkeypatch.setattr(health_route, "build_session_factory", lambda _url: Factory())
+    monkeypatch.setattr(health_route, "build_session_factory", lambda *_args: Factory())
     monkeypatch.setattr(health_route, "Redis", Redis)
 
     assert await health_route.readiness() == {
         "status": "ready",
         "migration_head": health_route.EXPECTED_MIGRATION_HEAD,
+        "writer_identity_verified": False,
     }

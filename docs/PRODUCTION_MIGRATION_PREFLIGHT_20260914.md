@@ -1,5 +1,7 @@
 # Production Migration Preflight Result — 2026-09-14
 
+> **GATE_EVIDENCE_ONLY — HISTORICAL PREFLIGHT.** This result describes an earlier target and access state. Do not treat it as current readiness or an execution instruction. Current operational policy is in [MIGRATIONS.md](MIGRATIONS.md) and [OPERATIONS.md](OPERATIONS.md).
+
 Status: STOP
 
 ## Health

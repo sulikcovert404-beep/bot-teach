@@ -4,11 +4,21 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
+import app.security.tenant_context as tenant_context_module
+from app.api.routes.auth import get_session
 from app.core.config import get_settings
 from app.db.base import Base
-from app.db.models import Classroom, ClassMembership, SchoolTenant, StudentProfile, TeacherProfile, User
-from app.api.routes.auth import get_session
+from app.db.models import (
+    ClassMembership,
+    Classroom,
+    SchoolTenant,
+    StudentProfile,
+    TeacherProfile,
+    User,
+    UserTenantMembership,
+)
 from app.main import app
+from app.security.tenant_context import TenantContext
 from app.security.tokens import create_access_token
 
 
@@ -33,7 +43,11 @@ async def test_pilot_http_assignment_publish_and_student_access(tmp_path: Path, 
         teacher_b = TeacherProfile(teacher_id=204, tenant_id="http-b")
         student_a = StudentProfile(student_id=202)
         student_b = StudentProfile(student_id=203)
-        session.add_all([teacher_a, teacher_b, student_a, student_b])
+        session.add_all([
+            teacher_a, teacher_b, student_a, student_b,
+            UserTenantMembership(user_id=202, tenant_id="http-a", status="ACTIVE"),
+            UserTenantMembership(user_id=203, tenant_id="http-b", status="ACTIVE"),
+        ])
         await session.flush()
         class_a = Classroom(classroom_key="http-class-a", tenant_id="http-a", teacher_profile_id=teacher_a.id)
         class_b = Classroom(classroom_key="http-class-b", tenant_id="http-b", teacher_profile_id=teacher_b.id)
@@ -47,7 +61,12 @@ async def test_pilot_http_assignment_publish_and_student_access(tmp_path: Path, 
         async with sessions() as session:
             yield session
 
+    async def sqlite_tenant_context(session, *, user_id):
+        tenant_id = "http-a" if user_id == 202 else "http-b"
+        return TenantContext(user_id=user_id, tenant_id=tenant_id)
+
     app.dependency_overrides[get_session] = override_session
+    monkeypatch.setattr(tenant_context_module, "establish_tenant_context", sqlite_tenant_context)
     secret = "x" * 32
     monkeypatch.setattr(get_settings(), "jwt_secret", secret)
     teacher_token = create_access_token("201", secret, role="TEACHER")

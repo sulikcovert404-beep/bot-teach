@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Any
 
 from alembic.config import Config
 from alembic.script import ScriptDirectory
@@ -11,7 +12,7 @@ from app.db.base import build_session_factory
 
 router = APIRouter(tags=["health"])
 
-EXPECTED_MIGRATION_HEAD = "20260907_0008"
+EXPECTED_MIGRATION_HEAD = "20261004_0033"
 
 
 def migration_heads() -> tuple[str, ...]:
@@ -32,16 +33,28 @@ async def health() -> dict[str, str]:
 
 
 @router.get("/health/ready", summary="Readiness check")
-async def readiness() -> dict[str, str]:
+async def readiness() -> dict[str, Any]:
     settings = get_settings()
     if not settings.database_url:
         raise HTTPException(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE, detail="Database unavailable"
         )
     try:
-        factory = build_session_factory(settings.database_url)
+        writer_identity_verified = False
+        factory = build_session_factory(
+            settings.database_url,
+            settings.writer_admission_enabled,
+            settings.writer_generation,
+            settings.writer_instance_id,
+            settings.writer_database_role,
+        )
         async with factory() as session:
-            await session.execute(text("SELECT 1"))
+            principal = await session.scalar(text("SELECT session_user"))
+            if settings.writer_admission_enabled and principal != settings.writer_database_role:
+                raise HTTPException(status_code=503, detail="Writer database role mismatch")
+            writer_identity_verified = (
+                settings.writer_admission_enabled and principal == settings.writer_database_role
+            )
             result = await session.execute(text("SELECT version_num FROM alembic_version"))
             migration_head = result.scalar_one_or_none()
             expected = settings.expected_migration_head.strip() or EXPECTED_MIGRATION_HEAD
@@ -60,4 +73,8 @@ async def readiness() -> dict[str, str]:
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
             detail="Database unavailable",
         ) from exc
-    return {"status": "ready", "migration_head": expected}
+    return {
+        "status": "ready",
+        "migration_head": expected,
+        "writer_identity_verified": writer_identity_verified,
+    }

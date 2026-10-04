@@ -123,7 +123,7 @@ async def test_persisted_key_replays_and_rejects_fingerprint_conflict() -> None:
 
 
 @pytest.mark.asyncio
-async def test_concurrent_same_key_has_one_identity_and_replay() -> None:
+async def test_concurrent_same_key_has_one_identity_and_safe_result() -> None:
     import tempfile
     from pathlib import Path
 
@@ -155,9 +155,16 @@ async def test_concurrent_same_key_has_one_identity_and_replay() -> None:
     # at most one identity is created and no unhandled exception escapes.
     if engine.dialect.name == "sqlite":
         assert statuses in (["CREATED"], ["CREATED", "REPLAY"])
+        errors = [result for result in results if isinstance(result, Exception)]
+        if statuses == ["CREATED"]:
+            assert len(errors) == 1
+            assert isinstance(errors[0], ProvisioningDenied)
+            assert str(errors[0]) == "idempotency claim is in progress"
+        else:
+            assert errors == []
     else:
         assert statuses == ["CREATED", "REPLAY"]
-    assert not any(isinstance(result, Exception) for result in results)
+        assert not any(isinstance(result, Exception) for result in results)
     async with sessions() as session:
         assert len((await session.scalars(select(User))).all()) == 2
     await engine.dispose()

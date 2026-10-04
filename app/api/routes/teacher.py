@@ -35,9 +35,12 @@ from app.services.publication_access import PublicationContext, can_publish
 from app.services.usage_repository import record_usage
 from app.security.teacher_scope import resolve_teacher_scope
 from app.db.base import set_tenant_context
+from app.security.tenant_context import TenantContext, tenant_context_for
 from app.security.tenant_resolver import TenantResolutionError, resolve_tenant
+from app.services.submission_revisions import SubmissionRevisionError, bind_review
 
 router = APIRouter(prefix="/teacher", tags=["teacher-classroom-intelligence"])
+teacher_submission_tenant = Depends(tenant_context_for("TEACHER", "ADMIN"))
 
 
 # --- Schemas ---
@@ -407,7 +410,7 @@ async def get_teaching_recommendations(
 
 # --- Persistence-backed classroom integration ---
 from sqlalchemy.exc import IntegrityError
-from app.db.models import Classroom, ClassMembership, StudentProfile, TeacherProfile, ContentVersion, TeacherContentPublication, Assignment, AssignmentSnapshot, AssignmentTarget, StudentSubmission, SubmissionReview
+from app.db.models import Classroom, ClassMembership, StudentProfile, TeacherProfile, ContentVersion, TeacherContentPublication, Assignment, AssignmentSnapshot, AssignmentTarget, StudentSubmission
 from hashlib import sha256
 
 class PersistentClassroomCreateRequest(BaseModel):
@@ -416,6 +419,9 @@ class PersistentClassroomCreateRequest(BaseModel):
 
 class PersistentStudentRequest(BaseModel):
     student_id: int = Field(ge=1)
+
+class LegacyMembershipRetiredResponse(BaseModel):
+    detail: str
 
 class AssignmentV1CreateRequest(BaseModel):
     classroom_id: int = Field(ge=1)
@@ -426,6 +432,7 @@ class AssignmentV1CreateRequest(BaseModel):
     idempotency_key: str | None = Field(default=None, min_length=1, max_length=128)
 
 class AssignmentReviewRequest(BaseModel):
+    submission_revision_id: int = Field(gt=0)
     review_status: str = Field(default="REVIEWED", min_length=1, max_length=32)
     score: float | None = Field(default=None, ge=0)
     feedback: str | None = Field(default=None, max_length=10000)
@@ -511,11 +518,26 @@ async def close_assignment_v1(assignment_id: int, subject: str = Depends(require
     return {"assignment": _assignment_payload(a)}
 
 @router.get("/v1/assignments/{assignment_id}/submissions")
-async def list_assignment_submissions_v1(assignment_id: int, subject: str = Depends(require_roles("TEACHER", "ADMIN")), session: AsyncSession = Depends(get_session)):
-    a = await session.scalar(select(Assignment).where(Assignment.id == assignment_id, Assignment.teacher_id == int(subject)))
-    if a is None: raise HTTPException(status_code=404, detail="Assignment not found")
-    rows = (await session.execute(select(StudentSubmission).where(StudentSubmission.assignment_id == assignment_id, StudentSubmission.tenant_id == a.tenant_id).order_by(StudentSubmission.id))).scalars().all()
-    return {"submissions": [{"id": s.id, "student_id": s.student_id, "status": s.status, "revision": s.revision, "submitted_at": s.submitted_at.isoformat() if s.submitted_at else None} for s in rows]}
+async def list_assignment_submissions_v1(assignment_id: int, tenant: TenantContext = teacher_submission_tenant, session: AsyncSession = Depends(get_session)):
+    teacher_id = tenant.user_id
+    tenant_id = tenant.tenant_id
+    assignment = await session.scalar(select(Assignment).where(
+        Assignment.id == assignment_id, Assignment.teacher_id == teacher_id,
+        Assignment.tenant_id == tenant_id,
+    ))
+    if assignment is None:
+        raise HTTPException(status_code=404, detail="Assignment not found")
+    rows = (await session.execute(select(StudentSubmission).where(
+        StudentSubmission.assignment_id == assignment_id,
+        StudentSubmission.tenant_id == tenant_id,
+    ).order_by(StudentSubmission.id))).scalars().all()
+    return {"submissions": [
+        {"id": item.id, "student_id": item.student_id, "status": item.status,
+         "revision": item.revision, "current_revision_id": item.current_revision_id,
+         "content": json.loads(item.content_json) if item.content_json is not None else None,
+         "submitted_at": item.submitted_at.isoformat() if item.submitted_at else None}
+        for item in rows
+    ]}
 
 
 @router.get("/exam-results")
@@ -555,21 +577,33 @@ async def list_exam_results_v1(
     ]}
 
 @router.post("/v1/submissions/{submission_id}/review", status_code=201)
-async def review_submission_v1(submission_id: int, req: AssignmentReviewRequest, subject: str = Depends(require_roles("TEACHER", "ADMIN")), session: AsyncSession = Depends(get_session)):
-    row = await session.execute(select(StudentSubmission, Assignment).join(Assignment, Assignment.id == StudentSubmission.assignment_id).where(StudentSubmission.id == submission_id, Assignment.teacher_id == int(subject)))
-    item = row.first()
-    if item is None: raise HTTPException(status_code=404, detail="Submission not found")
-    submission, assignment = item
-    review = await session.scalar(select(SubmissionReview).where(SubmissionReview.submission_id == submission.id))
-    if review is None:
-        review = SubmissionReview(submission_id=submission.id, tenant_id=assignment.tenant_id, review_status=req.review_status, score=req.score, teacher_feedback=req.feedback, reviewed_by=int(subject), reviewed_at=datetime.utcnow())
-        session.add(review)
-    else:
-        review.review_status = req.review_status; review.score = req.score; review.teacher_feedback = req.feedback; review.reviewed_by = int(subject); review.reviewed_at = datetime.utcnow()
-    submission.status = "REVIEWED"
-    await record_audit_log(session, actor_user_id=int(subject), action="SUBMISSION_REVIEWED", resource_type="submission", resource_id=str(submission.id), metadata={"assignment_id": assignment.id, "review_status": review.review_status, "score": review.score})
-    await session.commit(); await session.refresh(review)
-    return {"review_id": review.id, "submission_id": submission.id, "status": review.review_status, "score": review.score, "feedback": review.teacher_feedback}
+async def review_submission_v1(submission_id: int, req: AssignmentReviewRequest, tenant: TenantContext = teacher_submission_tenant, session: AsyncSession = Depends(get_session)):
+    teacher_id = tenant.user_id
+    tenant_id = tenant.tenant_id
+    try:
+        review, is_current = await bind_review(
+            session, submission_id=submission_id,
+            revision_id=req.submission_revision_id, teacher_user_id=teacher_id,
+            tenant_id=tenant_id, review_status=req.review_status,
+            score=req.score, feedback=req.feedback,
+        )
+        response = {
+            "review_id": review.id, "submission_id": submission_id,
+            "submission_revision_id": review.submission_revision_id,
+            "is_current_revision": is_current, "status": review.review_status,
+            "score": review.score, "feedback": review.teacher_feedback,
+        }
+        await record_audit_log(
+            session, actor_user_id=teacher_id, action="SUBMISSION_REVIEWED",
+            resource_type="submission", resource_id=str(submission_id),
+            metadata={"submission_revision_id": review.submission_revision_id,
+                      "review_status": review.review_status},
+        )
+        await session.commit()
+        return response
+    except SubmissionRevisionError as exc:
+        await session.rollback()
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
 
 @router.post("/v2/classrooms", status_code=201)
 async def create_persistent_classroom(
@@ -606,28 +640,27 @@ async def list_persistent_classrooms(
     )).scalars().all()
     return {"classrooms": [{"id": c.id, "classroom_key": c.classroom_key, "tenant_id": c.tenant_id} for c in rows]}
 
-@router.post("/v2/classrooms/{classroom_id}/members", status_code=201)
+@router.post(
+    "/v2/classrooms/{classroom_id}/members",
+    status_code=status.HTTP_410_GONE,
+    deprecated=True,
+    description="Retired endpoint. Authenticated requests receive 410 Gone; no membership mutation is performed.",
+    responses={
+        status.HTTP_410_GONE: {
+            "model": LegacyMembershipRetiredResponse,
+            "description": "Legacy classroom membership mutation is disabled.",
+        }
+    },
+)
 async def add_persistent_member(
     classroom_id: int,
     req: PersistentStudentRequest,
     subject: str = Depends(require_roles("TEACHER", "ADMIN")),
-    session: AsyncSession = Depends(get_session),
 ):
-    teacher_id = int(subject)
-    classroom = await session.scalar(select(Classroom).join(TeacherProfile).where(Classroom.id == classroom_id, TeacherProfile.teacher_id == teacher_id))
-    if classroom is None:
-        raise HTTPException(status_code=404, detail="Classroom not found")
-    student = await session.scalar(select(StudentProfile).where(StudentProfile.student_id == req.student_id))
-    if student is None:
-        raise HTTPException(status_code=404, detail="Student not found")
-    membership = ClassMembership(classroom_id=classroom.id, student_id=student.id)
-    session.add(membership)
-    try:
-        await session.commit()
-    except IntegrityError as exc:
-        await session.rollback()
-        raise HTTPException(status_code=409, detail="Student is already a member") from exc
-    return {"id": membership.id, "classroom_id": classroom.id, "student_id": req.student_id}
+    raise HTTPException(
+        status_code=status.HTTP_410_GONE,
+        detail="Legacy classroom membership mutation is disabled",
+    )
 
 class PublishContentRequest(BaseModel):
     content_version_id: int = Field(ge=1)

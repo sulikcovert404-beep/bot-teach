@@ -12,6 +12,7 @@ from sqlalchemy import (
     DateTime,
     Float,
     ForeignKey,
+    ForeignKeyConstraint,
     Integer,
     String,
     Text,
@@ -77,10 +78,16 @@ class UserTenantMembership(Base):
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), index=True)
-    tenant_id: Mapped[str] = mapped_column(String(64), index=True)
-    status: Mapped[str] = mapped_column(String(20), default="ACTIVE", index=True)
-    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    tenant_id: Mapped[str] = mapped_column(
+        String(64), ForeignKey("school_tenants.tenant_id"), nullable=False, index=True
+    )
+    status: Mapped[str] = mapped_column(
+        String(20), nullable=False, default="ACTIVE", server_default="ACTIVE", index=True
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), nullable=False, server_default=func.now()
+    )
     created_by: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     revoked_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 
@@ -432,6 +439,28 @@ class IngestionIdempotencyKey(Base):
     status: Mapped[str] = mapped_column(String(32), default="ACCEPTED", index=True)
     response_json: Mapped[str] = mapped_column(String(8000), default="{}")
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+
+
+class ProvisioningIdempotencyKey(Base):
+    """ORM mapping for the verified canonical provisioning persistence contract."""
+
+    __tablename__ = "provisioning_idempotency_keys"
+    __table_args__ = (
+        UniqueConstraint("operation", "idempotency_key", name="uq_provisioning_idempotency_operation_key"),
+        CheckConstraint("status IN ('CLAIMED', 'SUCCEEDED')", name="ck_provisioning_idempotency_status"),
+    )
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    operation: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    idempotency_key: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    request_fingerprint: Mapped[str] = mapped_column(String(64), nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False, server_default="CLAIMED", index=True)
+    actor_user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, index=True)
+    correlation_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    user_id: Mapped[int | None] = mapped_column(ForeignKey("users.id"), nullable=True, index=True)
+    response_json: Mapped[str] = mapped_column(String(8000), nullable=False, server_default="{}")
+    completed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now())
 
 
 class BetaFeedback(Base):
@@ -1946,10 +1975,22 @@ class StudentSubmission(Base):
     __tablename__ = "student_submissions"
     __table_args__ = (
         UniqueConstraint("assignment_id", "student_id", name="uq_student_submissions_current"),
+        UniqueConstraint("id", "tenant_id", name="uq_submission_identity_tenant"),
+        ForeignKeyConstraint(
+            ["current_revision_id", "id", "tenant_id"],
+            ["submission_revisions.id", "submission_revisions.submission_id", "submission_revisions.tenant_id"],
+            name="fk_submission_current_revision", deferrable=True, initially="DEFERRED",
+        ),
+        CheckConstraint(
+            "(status = 'NOT_SUBMITTED' AND current_revision_id IS NULL) OR "
+            "(status IN ('SUBMITTED', 'REVIEWED') AND current_revision_id IS NOT NULL)",
+            name="ck_submission_current_revision",
+        ),
         CheckConstraint("status IN ('NOT_SUBMITTED', 'SUBMITTED', 'REVIEWED')", name="ck_student_submissions_status"),
     )
 
-    id: Mapped[int] = mapped_column(primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True, autoincrement="ignore_fk")
+    current_revision_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
     assignment_id: Mapped[int] = mapped_column(ForeignKey("assignments.id", ondelete="CASCADE"), index=True)
     student_id: Mapped[int] = mapped_column(ForeignKey("student_profiles.id"), index=True)
     tenant_id: Mapped[str] = mapped_column(String(64), index=True)
@@ -1963,9 +2004,23 @@ class StudentSubmission(Base):
 
 class SubmissionReview(Base):
     __tablename__ = "submission_reviews"
+    __table_args__ = (
+        UniqueConstraint("submission_revision_id", name="uq_review_revision"),
+        ForeignKeyConstraint(
+            ["submission_revision_id", "submission_id", "tenant_id"],
+            ["submission_revisions.id", "submission_revisions.submission_id", "submission_revisions.tenant_id"],
+            name="fk_review_revision_owner", ondelete="RESTRICT",
+        ),
+        CheckConstraint(
+            "association_provenance IN ('MIGRATION_BASELINE_ONLY', 'EXACT_REVISION', 'LEGACY_COMPAT')",
+            name="ck_review_provenance",
+        ),
+    )
+    submission_revision_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    association_provenance: Mapped[str] = mapped_column(String(32), nullable=False)
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    submission_id: Mapped[int] = mapped_column(ForeignKey("student_submissions.id", ondelete="CASCADE"), unique=True)
+    submission_id: Mapped[int] = mapped_column(ForeignKey("student_submissions.id", ondelete="RESTRICT"))
     tenant_id: Mapped[str] = mapped_column(String(64), index=True)
     review_status: Mapped[str] = mapped_column(String(32), default="PENDING")
     score: Mapped[float | None] = mapped_column(Float, nullable=True)
@@ -1974,6 +2029,39 @@ class SubmissionReview(Base):
     reviewed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
+
+
+class SubmissionRevision(Base):
+    """Retained content snapshot; subsequent submissions create new rows."""
+
+    __tablename__ = "submission_revisions"
+    __table_args__ = (
+        UniqueConstraint("submission_id", "revision_no", name="uq_submission_revision_number"),
+        UniqueConstraint("submission_id", "submit_idempotency_key", name="uq_submission_revision_key"),
+        UniqueConstraint("id", "submission_id", "tenant_id", name="uq_revision_parent_tenant"),
+        ForeignKeyConstraint(
+            ["submission_id", "tenant_id"], ["student_submissions.id", "student_submissions.tenant_id"],
+            name="fk_revision_parent_tenant", ondelete="RESTRICT",
+        ),
+        CheckConstraint("revision_no > 0", name="ck_revision_positive"),
+        CheckConstraint(
+            "(provenance IN ('BASELINE_BACKFILL', 'LEGACY_COMPAT') AND "
+            "submit_idempotency_key IS NULL AND request_fingerprint IS NULL) OR "
+            "(provenance = 'SUBMITTED' AND submit_idempotency_key IS NOT NULL AND "
+            "length(submit_idempotency_key) > 0 AND request_fingerprint IS NOT NULL AND length(request_fingerprint) = 64)",
+            name="ck_revision_provenance_key",
+        ),
+    )
+    id: Mapped[int] = mapped_column(primary_key=True)
+    submission_id: Mapped[int] = mapped_column(Integer, nullable=False)
+    tenant_id: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
+    revision_no: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_json: Mapped[str | None] = mapped_column(Text, nullable=True)
+    submitted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
+    provenance: Mapped[str] = mapped_column(String(32), nullable=False)
+    submit_idempotency_key: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    request_fingerprint: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
 
 class AssignmentStatus(Base):

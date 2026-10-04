@@ -26,40 +26,44 @@ pg_dump --format=custom --file=education-$(Get-Date -Format yyyyMMdd-HHmm).dump 
 این ابزار `pg_dump` با فرمت custom، `pg_restore --list` و SHA-256 را اجرا می‌کند؛
 restore باید طبق بخش بعدی روی یک PostgreSQL جداگانه انجام شود.
 
-## Restore drill
+## Local disposable restore drill
 
-Restore را ابتدا روی یک PostgreSQL جداگانه انجام دهید، نه روی دیتابیس اصلی:
+Restore drill فعلاً فقط روی PostgreSQL محلی و disposable مجاز است. تا زمان معرفی
+Environment B و صدور Gate مستقل، backup production را منتقل یا restore نکنید. مقصد
+باید loopback و نام آن با `gate738aa_restore_` شروع شود؛ مقصد مبهم یا remote رد می‌شود.
+برای جلوگیری از اجرای restore خارج از guard، `pg_restore` را دستی اجرا نکنید؛ از wrapper
+پایین استفاده کنید.
 
 ```powershell
-createdb education_restore
-pg_restore --clean --if-exists --dbname=$env:RESTORE_DATABASE_URL .\education-backup.dump
-$env:DATABASE_URL = $env:RESTORE_DATABASE_URL
-python -m alembic upgrade head
-Invoke-WebRequest http://localhost:8000/health/ready
+createdb gate738aa_restore_example
 ```
 
-موفقیت restore زمانی تأیید می‌شود که migration head، readiness و یک query نمونهٔ
-خواندنی همگی موفق باشند. نتیجه و زمان آخرین restore drill باید ثبت شود.
+اسکریپت wrapper archive را بررسی می‌کند، سپس `pg_restore --clean` را فقط روی مقصدی اجرا
+می‌کند که از guard loopback و Gate-owned name عبور کرده است. تا Environment B فراهم
+نشود backup production وارد این فرآیند نمی‌شود.
 
-برای اجرای قابل‌تکرار این فرآیند از اسکریپت زیر استفاده کنید. مقدار
-`RestoreDatabaseUrl` باید به یک دیتابیس اختصاصی restore اشاره کند؛ مقصد اصلی عمداً
-باید جدا باشد:
+برای اجرای قابل‌تکرار از اسکریپت زیر استفاده کنید. اسکریپت قبل از هر restore، host
+را به loopback، database name را به Gate-owned disposable prefix و target را به
+canonical migration allowlist محدود می‌کند. Migration از Gate738P runner عبور
+می‌کند؛ پس از اجرا readiness باید دقیقاً همان `MigrationTarget` را گزارش کند.
 
 ```powershell
 .\scripts\restore-drill.ps1 `
   -DumpPath .\backups\education-20260901-220000.dump `
   -RestoreDatabaseUrl $env:RESTORE_DATABASE_URL `
+  -MigrationTarget 20261003_0029 `
   -ReadinessUrl http://localhost:8000/health/ready
 ```
 
-اسکریپت archive را بررسی می‌کند، با `pg_restore --clean --if-exists` روی مقصد جداگانه
-restore می‌کند، migrationها را تا head ارتقا می‌دهد و readiness را بررسی می‌کند.
+`pg_restore --clean` فقط از داخل wrapper و پس از عبور از تمام guardهای مقصد disposable
+اجرا می‌شود. Restore success به‌تنهایی مجوز rollout migration یا انتشار نیست. پاسخ readiness نیز
+باید `status=ready` و `migration_head` برابر target صریح باشد.
 
 ## Release sequence
 
 1. backup موفق و قابل‌خواندن تهیه کنید؛
 2. image را build و در staging smoke-test کنید؛
-3. `alembic upgrade head` را اجرا کنید؛
+3. فقط target revision صریحی را از migration-gate runner اجرا کنید که Gate انتشار مجاز کرده است؛
 4. readiness و مسیرهای اصلی API را بررسی کنید؛
 5. ترافیک را به release جدید منتقل کنید؛
 6. در صورت خطا، ابتدا ترافیک را برگردانید و سپس rollback سازگار با migration را
@@ -80,3 +84,7 @@ healthcheck خود کانتینر API نیز readiness را هدف می‌گیر
 image سرویس API نیز با کاربر غیرroot (`appuser`, UID 10001) اجرا می‌شود.
 
 SQLite فقط برای development و test است و نباید محل دادهٔ production باشد.
+
+`alembic upgrade head` مسیر انتشار یا production نیست. برای lineage فعلی،
+ترتیب staged و کنترل‌شده در گزارش Gate738P ثبت شده است؛ contract بدون
+آمادگی candidate و اثبات drain/fence/quiescence مجاز نیست.

@@ -2,13 +2,11 @@ from pathlib import Path
 
 import pytest
 import sqlalchemy as sa
-from alembic import command
 from alembic.config import Config
 from alembic.script import ScriptDirectory
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.db.base import Base
-from app.db.models import SchoolAdminMembership, SchoolTenant, User
 
 
 @pytest.mark.asyncio
@@ -58,10 +56,24 @@ def test_dual_parent_lineage_convergence_0009_and_0019_to_0020():
 
     # 1. Verify single converged head
     heads = script.get_heads()
-    assert heads == ["20260919_0022"]
+    assert heads == ["20261004_0033"]
 
     rev_0021 = script.get_revision("20260912_0021")
     assert rev_0021.down_revision == "20260912_0020"
+    rev_0026 = script.get_revision("20261003_0026")
+    rev_0027 = script.get_revision("20261003_0027")
+    assert rev_0026.down_revision == "20261003_0025"
+    rev_0030 = script.get_revision("20261003_0030")
+    rev_0031 = script.get_revision("20261003_0031")
+    rev_0032 = script.get_revision("20261004_0032")
+    rev_0033 = script.get_revision("20261004_0033")
+    rev_0024 = script.get_revision("20261003_0024")
+    assert rev_0032.down_revision == "20261003_0029"
+    assert rev_0030.down_revision == "20261004_0032"
+    assert rev_0024.down_revision == "20260921_0022"
+    assert rev_0027.down_revision == "20261003_0026"
+    assert rev_0031.down_revision == "20261003_0030"
+    assert rev_0033.down_revision == "20261003_0031"
 
     # 2. Verify merge revision points to both 0009 and 0019
     rev_0020 = script.get_revision("20260912_0020")

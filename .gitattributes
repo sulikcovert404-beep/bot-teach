@@ -1,0 +1,28 @@
+# Canonicalize repository text to LF in Git blobs and checkouts.
+*.css text eol=lf
+*.dockerignore text eol=lf
+*.example text eol=lf
+*.gitignore text eol=lf
+*.gitkeep text eol=lf
+*.html text eol=lf
+*.ini text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.lock text eol=lf
+*.mako text eol=lf
+*.md text eol=lf
+*.mjs text eol=lf
+*.ps1 text eol=lf
+*.py text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+.env.example text eol=lf
+.gitattributes text eol=lf
+.dockerignore text eol=lf
+Dockerfile text eol=lf
+
+# Preserve repository binary artifacts without text conversion.
+*.docx -text
+*.pdf -text
+# Preserve this active verification fixture byte-for-byte.
+docs/GATE738P_HARD_CRASH_EVIDENCE.json -text -eol

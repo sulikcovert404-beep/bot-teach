@@ -13,6 +13,7 @@ from app.api.routes.agent_orchestration import agents_admin_router
 from app.api.routes.ai import router as ai_router
 from app.api.routes.analytics import router as analytics_router
 from app.api.routes.auth import router as auth_router
+from app.api.routes.class_enrollment import router as class_enrollment_router
 from app.api.routes.collaboration import parent_router, school_router
 from app.api.routes.collaborative_network import collaborative_admin_router, collaborative_router
 from app.api.routes.controlled_beta_cohort import cohort_admin_router, cohort_router
@@ -52,6 +53,7 @@ from app.api.routes.study_plan import router as study_plan_router
 from app.api.routes.subscriptions import router as subscriptions_router
 from app.api.routes.teacher import router as teacher_router
 from app.api.routes.telegram import router as telegram_router
+from app.api.routes.tenant_memberships import router as tenant_membership_router
 from app.api.routes.trust_safety import trust_admin_router
 from app.api.routes.tutor import router as tutor_router
 from app.api.routes.v1 import router as v1_router
@@ -66,7 +68,17 @@ settings = get_settings()
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    factory = build_session_factory(settings.database_url) if settings.database_url else None
+    factory = (
+        build_session_factory(
+            settings.database_url,
+            settings.writer_admission_enabled,
+            settings.writer_generation,
+            settings.writer_instance_id,
+            settings.writer_database_role,
+        )
+        if settings.database_url
+        else None
+    )
     try:
         yield
     finally:
@@ -172,6 +184,8 @@ app.include_router(decision_engine_admin_router, prefix="/api/v1")
 app.include_router(trust_admin_router, prefix="/api/v1")
 app.include_router(agents_admin_router, prefix="/api/v1")
 app.include_router(school_ops_router, prefix="/api/v1")
+app.include_router(tenant_membership_router, prefix="/api/v1")
+app.include_router(class_enrollment_router, prefix="/api/v1")
 app.include_router(enterprise_router, prefix="/api/v1")
 app.include_router(cohort_router, prefix="/api/v1")
 app.include_router(cohort_admin_router, prefix="/api/v1")

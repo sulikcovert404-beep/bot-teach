@@ -1,3 +1,4 @@
+import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy.exc import IntegrityError
 
@@ -12,6 +13,28 @@ from app.api.routes.telegram import (
 from app.core.config import get_settings
 from app.main import app
 from app.services.telegram_bot import TelegramAPIError
+
+
+class StubSession:
+    def add(self, _object) -> None:
+        return None
+
+    async def flush(self) -> None:
+        return None
+
+    async def commit(self) -> None:
+        return None
+
+    async def rollback(self) -> None:
+        return None
+
+
+@pytest.fixture
+def webhook_session():
+    session = StubSession()
+    app.dependency_overrides[get_session] = lambda: session
+    yield session
+    app.dependency_overrides.pop(get_session, None)
 
 
 def test_mini_app_config_contract() -> None:
@@ -45,13 +68,14 @@ def test_unknown_callback_uses_safe_fallback() -> None:
     assert callback_reply("open:tutor") is None
 
 
-def test_webhook_rejects_missing_secret(monkeypatch) -> None:
+def test_webhook_rejects_missing_secret(monkeypatch, webhook_session) -> None:
     monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
+    monkeypatch.setattr(get_settings(), "telegram_bot_token", "test-token")
     response = TestClient(app).post("/api/v1/telegram/webhook", json={"update_id": 1})
     assert response.status_code == 401
 
 
-def test_webhook_accepts_valid_secret(monkeypatch) -> None:
+def test_webhook_accepts_valid_secret(monkeypatch, webhook_session) -> None:
     monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
     monkeypatch.setattr(get_settings(), "telegram_bot_token", "test-token")
     response = TestClient(app).post(
@@ -63,8 +87,9 @@ def test_webhook_accepts_valid_secret(monkeypatch) -> None:
     assert response.json() == {"accepted": True}
 
 
-def test_webhook_sends_ack_for_text_update(monkeypatch) -> None:
+def test_webhook_sends_ack_for_text_update(monkeypatch, webhook_session) -> None:
     monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
+    monkeypatch.setattr(get_settings(), "telegram_bot_token", "test-token")
     sent: list[tuple[int, str]] = []
 
     class FakeBot:
@@ -84,8 +109,9 @@ def test_webhook_sends_ack_for_text_update(monkeypatch) -> None:
         app.dependency_overrides.pop(get_bot_client, None)
 
 
-def test_webhook_maps_telegram_provider_failure(monkeypatch) -> None:
+def test_webhook_maps_telegram_provider_failure(monkeypatch, webhook_session) -> None:
     monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
+    monkeypatch.setattr(get_settings(), "telegram_bot_token", "test-token")
 
     class FailingBot:
         async def send_text(self, chat_id: int, text: str) -> None:
@@ -103,8 +129,9 @@ def test_webhook_maps_telegram_provider_failure(monkeypatch) -> None:
         app.dependency_overrides.pop(get_bot_client, None)
 
 
-def test_webhook_maps_structured_telegram_api_failure(monkeypatch) -> None:
+def test_webhook_maps_structured_telegram_api_failure(monkeypatch, webhook_session) -> None:
     monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
+    monkeypatch.setattr(get_settings(), "telegram_bot_token", "test-token")
 
     class FailingBot:
         async def send_text(self, chat_id: int, text: str) -> None:
@@ -130,6 +157,7 @@ def test_webhook_maps_structured_telegram_api_failure(monkeypatch) -> None:
 
 def test_webhook_ignores_duplicate_update(monkeypatch) -> None:
     monkeypatch.setattr(get_settings(), "telegram_webhook_secret", "secret")
+    monkeypatch.setattr(get_settings(), "telegram_bot_token", "test-token")
     sent: list[tuple[int, str]] = []
 
     class FakeBot:

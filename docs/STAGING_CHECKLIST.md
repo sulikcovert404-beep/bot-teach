@@ -1,5 +1,7 @@
 # Staging Checklist
 
+> **HISTORICAL_ARCHIVE — NOT CURRENT OPERATIONAL INSTRUCTION.** This checklist contains superseded targets and procedures (including an obsolete migration head). Do not run it for staging or release. Use [the current migration policy](MIGRATIONS.md) and [current operations guide](OPERATIONS.md); execution still requires a separate explicit Gate.
+
 این checklist برای اجرای دستی یا CI روی محیط staging است. تا وقتی Docker daemon و
 secretهای staging آماده نیستند، موارد اجراشده را حدس نزنید و به‌صورت `PENDING` ثبت کنید.
 

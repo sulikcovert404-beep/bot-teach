@@ -26,7 +26,11 @@ services:
     env_file:
       - .env
     environment:
-      DATABASE_URL: postgresql+asyncpg://app_runtime:${APP_RUNTIME_PASSWORD:?APP_RUNTIME_PASSWORD must be set}@db:5432/education
+      DATABASE_URL: ${WRITER_DATABASE_URL:-postgresql+asyncpg://app_runtime:${APP_RUNTIME_PASSWORD:?APP_RUNTIME_PASSWORD must be set}@db:5432/education}
+      WRITER_ADMISSION_ENABLED: ${WRITER_ADMISSION_ENABLED:-false}
+      WRITER_GENERATION: ${WRITER_GENERATION:-}
+      WRITER_INSTANCE_ID: ${WRITER_INSTANCE_ID:-}
+      WRITER_DATABASE_ROLE: ${WRITER_DATABASE_ROLE:-app_runtime}
       REDIS_URL: redis://redis:6379/0
       EXPECTED_MIGRATION_HEAD: ${EXPECTED_MIGRATION_HEAD:?EXPECTED_MIGRATION_HEAD must be set}
     depends_on:
@@ -34,8 +38,6 @@ services:
         condition: service_healthy
       redis:
         condition: service_healthy
-      migrate:
-        condition: service_completed_successfully
     healthcheck:
       test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health/ready')"]
       interval: 30s
@@ -43,18 +45,25 @@ services:
       retries: 3
 
   migrate:
+    profiles: ["migration-gate"]
     build: .
     env_file:
       - .env
     environment:
       DATABASE_URL: postgresql+asyncpg://postgres:${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set}@db:5432/education
       EXPECTED_MIGRATION_HEAD: ${EXPECTED_MIGRATION_HEAD:?EXPECTED_MIGRATION_HEAD must be set}
+      WRITER_GENERATION: ${WRITER_GENERATION:-}
+      WRITER_DATABASE_ROLE: ${WRITER_DATABASE_ROLE:-}
+      WRITER_ADMISSION_ENABLED: ${WRITER_ADMISSION_ENABLED:-false}
+      GATE738P_ACTION: ${GATE738P_ACTION:-}
+      GATE738P_CANDIDATE_HEALTH_URL: ${GATE738P_CANDIDATE_HEALTH_URL:-}
+      GATE738P_HARD_CRASH_EVIDENCE_FILE: /run/migration-gate/qualification-evidence.json
     depends_on:
       db:
         condition: service_healthy
       redis:
         condition: service_healthy
-    command: ["sh", "-c", "alembic upgrade \"$EXPECTED_MIGRATION_HEAD\""]
+    command: ["python", "-B", "scripts/gate738p_contract_upgrade.py"]
 
 volumes:
   postgres_data:

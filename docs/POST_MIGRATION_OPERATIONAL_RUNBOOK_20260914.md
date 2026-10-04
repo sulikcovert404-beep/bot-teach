@@ -1,5 +1,7 @@
 # POST MIGRATION OPERATIONAL RUNBOOK
 
+> **HISTORICAL_ARCHIVE — NOT CURRENT OPERATIONAL INSTRUCTION.** This dated runbook describes an earlier migration state. Do not use its commands or revision assumptions for current operations. Refer to [MIGRATIONS.md](MIGRATIONS.md) and [OPERATIONS.md](OPERATIONS.md); they do not authorize production activity.
+
 Date: 2026-09-14
 Scope: Controlled recovery procedure and evidence requirements
 Authority: Commander gate required before every production mutation

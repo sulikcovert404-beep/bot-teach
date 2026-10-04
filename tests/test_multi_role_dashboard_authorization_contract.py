@@ -14,7 +14,12 @@ from app.main import app
 from app.security.dependencies import require_roles
 from app.security.tokens import create_access_token
 
-SECRET = get_settings().jwt_secret
+SECRET = get_settings().jwt_secret or "gate736a-test-secret-32-bytes-min"
+
+
+@pytest.fixture(autouse=True)
+def configure_test_jwt_secret(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr(get_settings(), "jwt_secret", SECRET)
 
 
 def credentials(role: str, subject: str = "42") -> HTTPAuthorizationCredentials:
