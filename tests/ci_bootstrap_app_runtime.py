@@ -15,19 +15,48 @@ class BootstrapError(RuntimeError):
     """A fail-closed CI role-prerequisite error without connection details."""
 
 
+def _normalize_server_address(value):
+    """Normalize only representations documented for this inet query."""
+    if value is None:
+        return None
+    value_type = type(value)
+    if value_type in (ipaddress.IPv4Address, ipaddress.IPv6Address):
+        return value
+    elif value_type in (ipaddress.IPv4Interface, ipaddress.IPv6Interface):
+        # asyncpg decodes PostgreSQL inet as an interface when a prefix is present.
+        # inet_server_addr() is a host address; reject unexpected network prefixes.
+        if value.network.prefixlen != value.max_prefixlen:
+            return None
+        return value.ip
+    elif value_type is str:
+        try:
+            return ipaddress.ip_address(value)
+        except ValueError:
+            return None
+    return None
+
+
 def _server_address_class(value) -> str:
     """Classify the server address without ever exposing its raw value."""
     if value is None:
         return "NULL"
-    try:
-        address = ipaddress.ip_address(value)
-    except (TypeError, ValueError):
+    address = _normalize_server_address(value)
+    if address is None:
         return "UNPARSEABLE"
     if address.version == 4 and address.is_loopback:
         return "LOOPBACK_IPV4"
     if address.version == 6 and address.is_loopback:
         return "LOOPBACK_IPV6"
     return "NON_LOOPBACK"
+
+
+def _server_address_matches(value) -> bool:
+    """Preserve the original exact 127.0.0.1/::1 acceptance set."""
+    address = _normalize_server_address(value)
+    return address in {
+        ipaddress.IPv4Address("127.0.0.1"),
+        ipaddress.IPv6Address("::1"),
+    }
 
 
 def _emit_identity_diagnostic(identity) -> None:
@@ -38,7 +67,7 @@ def _emit_identity_diagnostic(identity) -> None:
     database_match = row_present and identity["database_name"] == "ai_teacher_migrations"
     address = identity["server_address"] if row_present else None
     address_class = _server_address_class(address)
-    address_match = row_present and address in {"127.0.0.1", "::1"}
+    address_match = row_present and _server_address_matches(address)
     actor_superuser = row_present and bool(identity["actor_superuser"])
     diagnostic = {
         "identity_row_present": row_present,
@@ -90,7 +119,7 @@ async def ensure_app_runtime_role(connection, password_factory=secrets.token_url
     identity = await connection.fetchrow("""
         SELECT current_user AS current_user, session_user AS session_user,
                current_database() AS database_name,
-               inet_server_addr()::text AS server_address,
+               inet_server_addr() AS server_address,
                actor.rolsuper AS actor_superuser
           FROM pg_catalog.pg_roles AS actor
          WHERE actor.rolname = current_user
@@ -100,7 +129,7 @@ async def ensure_app_runtime_role(connection, password_factory=secrets.token_url
         or identity["current_user"] != "ci_migrations"
         or identity["session_user"] != "ci_migrations"
         or identity["database_name"] != "ai_teacher_migrations"
-        or identity["server_address"] not in {"127.0.0.1", "::1"}
+        or not _server_address_matches(identity["server_address"])
         or not identity["actor_superuser"]
     ):
         _emit_identity_diagnostic(identity)

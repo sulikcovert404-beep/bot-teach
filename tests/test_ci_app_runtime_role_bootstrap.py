@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import ipaddress
 import json
 
 import pytest
@@ -164,10 +165,23 @@ def test_server_address_classification_distinguishes_loopback_families():
     ("address", "expected_class", "expected_match"),
     [
         ("203.0.113.7", "NON_LOOPBACK", False),
+        (ipaddress.IPv4Address("172.17.0.2"), "NON_LOOPBACK", False),
+        (ipaddress.IPv4Address("10.0.0.2"), "NON_LOOPBACK", False),
+        (ipaddress.IPv6Address("2001:db8::1"), "NON_LOOPBACK", False),
         (None, "NULL", False),
         ("127.0.0.1", "LOOPBACK_IPV4", True),
         ("::1", "LOOPBACK_IPV6", True),
+        (ipaddress.IPv4Address("127.0.0.1"), "LOOPBACK_IPV4", True),
+        (ipaddress.IPv6Address("::1"), "LOOPBACK_IPV6", True),
+        (ipaddress.IPv4Interface("127.0.0.1/32"), "LOOPBACK_IPV4", True),
+        (ipaddress.IPv6Interface("::1/128"), "LOOPBACK_IPV6", True),
+        (ipaddress.IPv4Address("127.0.0.2"), "LOOPBACK_IPV4", False),
+        (ipaddress.IPv4Interface("127.0.0.1/24"), "UNPARSEABLE", False),
+        ("localhost", "UNPARSEABLE", False),
+        ("not-an-ip", "UNPARSEABLE", False),
         ("not-an-address", "UNPARSEABLE", False),
+        (b"127.0.0.1", "UNPARSEABLE", False),
+        (object(), "UNPARSEABLE", False),
     ],
 )
 @pytest.mark.asyncio
