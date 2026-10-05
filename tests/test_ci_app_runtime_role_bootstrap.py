@@ -1,9 +1,12 @@
 from __future__ import annotations
 
+import json
+
 import pytest
 
 from tests.ci_bootstrap_app_runtime import (
     BootstrapError,
+    _server_address_class,
     _verify_role,
     ensure_app_runtime_role,
     validate_database_url,
@@ -13,6 +16,7 @@ VALID_URL = (
     "postgresql+asyncpg://ci_migrations:ci-only@127.0.0.1:5432/"
     "ai_teacher_migrations"
 )
+DEFAULT_IDENTITY = object()
 
 
 @pytest.mark.parametrize(
@@ -38,14 +42,14 @@ def test_database_target_accepts_dedicated_loopback_ci_url():
 
 
 class FakeConnection:
-    def __init__(self, *, identity=None, role=None, memberships=0):
-        self.identity = identity or {
+    def __init__(self, *, identity=DEFAULT_IDENTITY, role=None, memberships=0):
+        self.identity = {
             "current_user": "ci_migrations",
             "session_user": "ci_migrations",
             "database_name": "ai_teacher_migrations",
             "server_address": "127.0.0.1",
             "actor_superuser": True,
-        }
+        } if identity is DEFAULT_IDENTITY else identity
         self.role = role
         self.memberships = memberships
         self.executed = []
@@ -88,7 +92,7 @@ class FakeConnection:
     ],
 )
 @pytest.mark.asyncio
-async def test_bootstrap_rejects_wrong_database_identity(key, value):
+async def test_bootstrap_rejects_wrong_database_identity(key, value, capsys):
     identity = {
         "current_user": "ci_migrations",
         "session_user": "ci_migrations",
@@ -101,6 +105,117 @@ async def test_bootstrap_rejects_wrong_database_identity(key, value):
 
     with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
         await ensure_app_runtime_role(connection, lambda _: "ephemeral-only")
+    diagnostic = json.loads(
+        capsys.readouterr().out.strip().removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
+    )
+    if key == "actor_superuser":
+        assert diagnostic["actor_superuser"] is False
+    elif key == "server_address":
+        assert diagnostic["server_address_class"] == "NON_LOOPBACK"
+        assert diagnostic["server_address_match"] is False
+    assert connection.executed == []
+
+
+@pytest.mark.parametrize(
+    ("key", "value", "diagnostic_key", "diagnostic_value"),
+    [
+        ("current_user", "unexpected_actor", "current_user_match", False),
+        ("session_user", "unexpected_session", "session_user_match", False),
+        ("database_name", "unexpected_database", "database_match", False),
+    ],
+)
+@pytest.mark.asyncio
+async def test_identity_failure_emits_only_the_failing_actor_or_database_predicate(
+    key, value, diagnostic_key, diagnostic_value, capsys
+):
+    identity = {
+        "current_user": "ci_migrations",
+        "session_user": "ci_migrations",
+        "database_name": "ai_teacher_migrations",
+        "server_address": "127.0.0.1",
+        "actor_superuser": True,
+    }
+    identity[key] = value
+    connection = FakeConnection(identity=identity)
+
+    with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
+        await ensure_app_runtime_role(connection, lambda _: "diagnostic-secret")
+
+    line = capsys.readouterr().out.strip()
+    assert line.startswith("CI_DB_IDENTITY_DIAGNOSTIC ")
+    data = json.loads(line.removeprefix("CI_DB_IDENTITY_DIAGNOSTIC "))
+    assert data[diagnostic_key] is diagnostic_value
+    assert sum(
+        data[key] is False
+        for key in ("current_user_match", "session_user_match", "database_match")
+    ) == 1
+    assert value not in line
+    assert connection.executed == []
+
+
+def test_server_address_classification_distinguishes_loopback_families():
+    assert _server_address_class("127.0.0.1") == "LOOPBACK_IPV4"
+    assert _server_address_class("::1") == "LOOPBACK_IPV6"
+    assert _server_address_class("203.0.113.7") == "NON_LOOPBACK"
+    assert _server_address_class(None) == "NULL"
+
+
+@pytest.mark.parametrize(
+    ("address", "expected_class", "expected_match"),
+    [
+        ("203.0.113.7", "NON_LOOPBACK", False),
+        (None, "NULL", False),
+        ("127.0.0.1", "LOOPBACK_IPV4", True),
+        ("::1", "LOOPBACK_IPV6", True),
+        ("not-an-address", "UNPARSEABLE", False),
+    ],
+)
+@pytest.mark.asyncio
+async def test_server_address_diagnostic_is_classified_and_redacted(
+    address, expected_class, expected_match, capsys
+):
+    identity = {
+        "current_user": "ci_migrations",
+        "session_user": "ci_migrations",
+        "database_name": "ai_teacher_migrations",
+        "server_address": address,
+        "actor_superuser": True,
+    }
+    connection = FakeConnection(identity=identity)
+
+    if expected_match:
+        await ensure_app_runtime_role(connection, lambda _: "diagnostic-secret")
+        output = capsys.readouterr().out
+        assert output == ""
+        assert len(connection.executed) == 1
+        return
+
+    with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
+        await ensure_app_runtime_role(connection, lambda _: "diagnostic-secret")
+
+    output = capsys.readouterr().out.strip()
+    line = output.removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
+    data = json.loads(line)
+    assert data["server_address_class"] == expected_class
+    assert data["server_address_match"] is False
+    assert "203.0.113.7" not in output
+    assert "diagnostic-secret" not in output
+    assert "postgresql" not in output
+    assert connection.executed == []
+
+
+@pytest.mark.asyncio
+async def test_absent_identity_row_is_diagnosed_and_fails_before_role_creation(capsys):
+    connection = FakeConnection(identity=None)
+
+    with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
+        await ensure_app_runtime_role(connection)
+
+    data = json.loads(
+        capsys.readouterr().out.strip().removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
+    )
+    assert data["identity_row_present"] is False
+    assert data["server_address_class"] == "NULL"
     assert connection.executed == []
 
 

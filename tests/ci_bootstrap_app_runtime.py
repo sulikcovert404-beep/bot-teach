@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import asyncio
+import ipaddress
+import json
 import os
 import secrets
 from urllib.parse import urlsplit
@@ -11,6 +13,46 @@ import asyncpg
 
 class BootstrapError(RuntimeError):
     """A fail-closed CI role-prerequisite error without connection details."""
+
+
+def _server_address_class(value) -> str:
+    """Classify the server address without ever exposing its raw value."""
+    if value is None:
+        return "NULL"
+    try:
+        address = ipaddress.ip_address(value)
+    except (TypeError, ValueError):
+        return "UNPARSEABLE"
+    if address.version == 4 and address.is_loopback:
+        return "LOOPBACK_IPV4"
+    if address.version == 6 and address.is_loopback:
+        return "LOOPBACK_IPV6"
+    return "NON_LOOPBACK"
+
+
+def _emit_identity_diagnostic(identity) -> None:
+    """Emit deterministic predicate evidence, never identity values or a DSN."""
+    row_present = identity is not None
+    current_user_match = row_present and identity["current_user"] == "ci_migrations"
+    session_user_match = row_present and identity["session_user"] == "ci_migrations"
+    database_match = row_present and identity["database_name"] == "ai_teacher_migrations"
+    address = identity["server_address"] if row_present else None
+    address_class = _server_address_class(address)
+    address_match = row_present and address in {"127.0.0.1", "::1"}
+    actor_superuser = row_present and bool(identity["actor_superuser"])
+    diagnostic = {
+        "identity_row_present": row_present,
+        "current_user_match": current_user_match,
+        "session_user_match": session_user_match,
+        "database_match": database_match,
+        "server_address_match": address_match,
+        "server_address_class": address_class,
+        "actor_superuser": actor_superuser,
+        "current_equals_session": (
+            row_present and identity["current_user"] == identity["session_user"]
+        ),
+    }
+    print("CI_DB_IDENTITY_DIAGNOSTIC " + json.dumps(diagnostic, separators=(",", ":")))
 
 
 def validate_database_url(value: str) -> None:
@@ -61,6 +103,7 @@ async def ensure_app_runtime_role(connection, password_factory=secrets.token_url
         or identity["server_address"] not in {"127.0.0.1", "::1"}
         or not identity["actor_superuser"]
     ):
+        _emit_identity_diagnostic(identity)
         raise BootstrapError("DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES")
 
     role = await connection.fetchrow("""
