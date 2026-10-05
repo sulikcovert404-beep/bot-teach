@@ -22,6 +22,7 @@ DIAGNOSTIC_RE = re.compile(
     r"(?P<message>.*?)(?:\s+\[(?P<code>[a-zA-Z0-9_-]+)\])?$"
 )
 SUMMARY_RE = re.compile(r"^Found (?P<count>\d+) errors? in (?P<files>\d+) files? \(checked \d+ source files?\)$")
+CONFIG_FINGERPRINT_ALGORITHM = "sha256-text-lf-v1"
 
 
 class BaselineError(ValueError):
@@ -93,6 +94,17 @@ def _identity_key(identity: tuple[str, int, int | None, str, str]) -> tuple[str,
     return (identity[0], identity[1], identity[2] if identity[2] is not None else 0, identity[3], identity[4])
 
 
+def canonicalize_text_line_endings(data: bytes) -> bytes:
+    """Normalize CRLF and lone CR line endings to LF, preserving all other bytes."""
+    return data.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
+
+
+def config_fingerprint(data: bytes) -> tuple[str, int]:
+    """Return the versioned SHA-256 and byte length of canonical config bytes."""
+    canonical = canonicalize_text_line_endings(data)
+    return hashlib.sha256(canonical).hexdigest(), len(canonical)
+
+
 def compare_findings(
     current: list[dict[str, Any]], baseline: list[dict[str, Any]]
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]]]:
@@ -118,7 +130,9 @@ def _load_baseline(path: Path) -> dict[str, Any]:
     required = {
         "schema_version",
         "mypy_version",
+        "config_fingerprint_algorithm",
         "config_sha256",
+        "config_canonical_bytes",
         "command",
         "originating_commit",
         "finding_count",
@@ -147,9 +161,13 @@ def _load_baseline(path: Path) -> dict[str, Any]:
             or not item["message"]
         ):
             raise BaselineError("baseline contains an invalid finding identity")
-    for field in ("mypy_version", "config_sha256", "originating_commit"):
+    for field in ("mypy_version", "config_fingerprint_algorithm", "config_sha256", "originating_commit"):
         if not isinstance(value[field], str) or not value[field]:
             raise BaselineError(f"baseline {field} must be a non-empty string")
+    if value["config_fingerprint_algorithm"] != CONFIG_FINGERPRINT_ALGORITHM:
+        raise BaselineError("unsupported config fingerprint algorithm")
+    if type(value["config_canonical_bytes"]) is not int or value["config_canonical_bytes"] < 0:
+        raise BaselineError("baseline config_canonical_bytes must be a non-negative integer")
     if not isinstance(value["command"], list) or any(not isinstance(arg, str) for arg in value["command"]):
         raise BaselineError("baseline command must be a list of strings")
     for field in ("finding_count", "file_count"):
@@ -162,10 +180,12 @@ def _load_baseline(path: Path) -> dict[str, Any]:
 
 def _validate_metadata(baseline: dict[str, Any], root: Path) -> None:
     actual_version = importlib.metadata.version("mypy")
-    actual_config_hash = hashlib.sha256((root / "pyproject.toml").read_bytes()).hexdigest()
+    actual_config_hash, actual_config_bytes = config_fingerprint((root / "pyproject.toml").read_bytes())
     expected = {
         "mypy_version": actual_version,
+        "config_fingerprint_algorithm": CONFIG_FINGERPRINT_ALGORITHM,
         "config_sha256": actual_config_hash,
+        "config_canonical_bytes": actual_config_bytes,
         "command": COMMAND,
         "originating_commit": "ad9bb4e58618aa340b273bc2d7aa6f5763cb3d24",
     }

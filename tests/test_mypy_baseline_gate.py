@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import hashlib
 import json
+import os
+import re
 from pathlib import Path
-from subprocess import CompletedProcess
+from subprocess import CompletedProcess, check_output
 
 import pytest
 
@@ -109,11 +110,52 @@ def test_baseline_file_is_deterministic_json() -> None:
     assert baseline["file_count"] == len({item["path"] for item in baseline["findings"]})
 
 
+def test_config_fingerprint_normalizes_only_line_endings() -> None:
+    lf = b"[tool.mypy]\nstrict = true\n"
+    crlf = lf.replace(b"\n", b"\r\n")
+    classic_mac = lf.replace(b"\n", b"\r")
+
+    assert mypy_baseline_gate.config_fingerprint(lf) == mypy_baseline_gate.config_fingerprint(crlf)
+    assert mypy_baseline_gate.config_fingerprint(lf) == mypy_baseline_gate.config_fingerprint(classic_mac)
+    assert mypy_baseline_gate.config_fingerprint(lf)[1] == len(lf)
+    assert mypy_baseline_gate.config_fingerprint(lf + b" ")[0] != mypy_baseline_gate.config_fingerprint(lf)[0]
+    assert mypy_baseline_gate.config_fingerprint(b"\xef\xbb\xbf" + lf)[0] != mypy_baseline_gate.config_fingerprint(lf)[0]
+
+
+def test_config_fingerprint_matches_canonical_git_blob() -> None:
+    worktree_bytes = (ROOT / "pyproject.toml").read_bytes()
+    git_file = ROOT / ".git"
+    if git_file.is_dir():
+        git_blob = check_output(["git", "show", "HEAD:pyproject.toml"], cwd=ROOT)
+    else:
+        git_dir = git_file.read_text(encoding="utf-8").strip().split(":", maxsplit=1)[1].strip()
+        if os.name != "nt" and (windows_path := re.fullmatch(r"([A-Za-z]):[/\\](.*)", git_dir)):
+            git_dir = f"/mnt/{windows_path.group(1).lower()}/{windows_path.group(2).replace(chr(92), '/')}"
+        git_blob = check_output(
+            ["git", f"--git-dir={git_dir}", f"--work-tree={ROOT}", "show", "HEAD:pyproject.toml"],
+            cwd=ROOT,
+        )
+
+    assert mypy_baseline_gate.config_fingerprint(worktree_bytes) == mypy_baseline_gate.config_fingerprint(git_blob)
+    assert mypy_baseline_gate.config_fingerprint(git_blob)[0] == "c655590428298b5f3bfe697ba9fca311125a909152a64cfd0a4b20624704db55"
+
+
 def test_malformed_baseline_fails_closed(tmp_path: Path) -> None:
     path = tmp_path / "baseline.json"
     path.write_text(json.dumps({"errors": 568}), encoding="utf-8")
     with pytest.raises(BaselineError, match="fields"):
         mypy_baseline_gate._load_baseline(path)
+
+
+def test_unknown_config_fingerprint_algorithm_fails_closed(tmp_path: Path) -> None:
+    path = ROOT / "scripts" / "mypy_baseline.json"
+    baseline = json.loads(path.read_text(encoding="utf-8"))
+    baseline["config_fingerprint_algorithm"] = "sha256-whitespace-trim-v1"
+    candidate = tmp_path / "baseline.json"
+    candidate.write_text(json.dumps(baseline), encoding="utf-8")
+
+    with pytest.raises(BaselineError, match="unsupported config fingerprint algorithm"):
+        mypy_baseline_gate._load_baseline(candidate)
 
 
 def test_mypy_execution_failure_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -131,7 +173,9 @@ def _write_tiny_baseline(root: Path, path: Path, items: list[dict[str, object]])
     payload = {
         "schema_version": 1,
         "mypy_version": "1.20.2",
-        "config_sha256": hashlib.sha256(config.read_bytes()).hexdigest(),
+        "config_fingerprint_algorithm": mypy_baseline_gate.CONFIG_FINGERPRINT_ALGORITHM,
+        "config_sha256": mypy_baseline_gate.config_fingerprint(config.read_bytes())[0],
+        "config_canonical_bytes": mypy_baseline_gate.config_fingerprint(config.read_bytes())[1],
         "command": mypy_baseline_gate.COMMAND,
         "originating_commit": "ad9bb4e58618aa340b273bc2d7aa6f5763cb3d24",
         "finding_count": len(items),

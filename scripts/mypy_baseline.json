@@ -6,7 +6,9 @@
     "app",
     "--show-error-codes"
   ],
-  "config_sha256": "ab03de6e642afd901782612a25c94f8ae144ee51afb115e06903d260a98b97c5",
+  "config_canonical_bytes": 1067,
+  "config_fingerprint_algorithm": "sha256-text-lf-v1",
+  "config_sha256": "c655590428298b5f3bfe697ba9fca311125a909152a64cfd0a4b20624704db55",
   "file_count": 110,
   "finding_count": 579,
   "findings": [
