@@ -75,9 +75,15 @@ def _candidate_ready(expected_head: str) -> None:
              "candidate readiness did not verify its PostgreSQL login identity")
 
 
-def _require_hard_crash_evidence(candidate: str) -> None:
+def _require_hard_crash_evidence(
+    candidate: str, expected_source_sha: str, expected_image_digest: str
+) -> None:
     evidence_path = os.environ.get("GATE738P_HARD_CRASH_EVIDENCE_FILE", "").strip()
     _require(bool(evidence_path), "hard-crash evidence file is required before final contract")
+    _require(bool(re.fullmatch(r"[0-9a-f]{40}", expected_source_sha)),
+             "expected source SHA must be an exact Git commit SHA")
+    _require(bool(re.fullmatch(r"sha256:[0-9a-f]{64}", expected_image_digest)),
+             "expected candidate image digest must be immutable sha256")
     try:
         evidence = json.loads(Path(evidence_path).read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -96,7 +102,9 @@ def _require_hard_crash_evidence(candidate: str) -> None:
              and evidence.get("old_container_exit_code") == 137
              and all(evidence.get(key) is True for key in required_true)
              and bool(evidence.get("test_run_id"))
-             and bool(evidence.get("old_container_id")),
+             and bool(evidence.get("old_container_id"))
+             and evidence.get("source_sha") == expected_source_sha
+             and evidence.get("candidate_image_digest") == expected_image_digest,
              "hard-crash evidence does not prove every required scenario")
 
 
@@ -198,7 +206,11 @@ def main() -> int:
     expected_head = CONTRACT_TARGETS[target]
     _candidate_ready(expected_head)
     if target == "20261004_0033":
-        _require_hard_crash_evidence(generation)
+        _require_hard_crash_evidence(
+            generation,
+            os.environ.get("GATE738P_EXPECTED_SOURCE_SHA", "").strip(),
+            os.environ.get("GATE738P_EXPECTED_CANDIDATE_IMAGE_DIGEST", "").strip(),
+        )
     return _run_alembic(target)
 
 

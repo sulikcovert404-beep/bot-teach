@@ -9,6 +9,7 @@ from __future__ import annotations
 import asyncio
 import json
 import os
+import re
 import subprocess
 import sys
 import time
@@ -23,9 +24,46 @@ import asyncpg
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
-IMAGE = "codex-gate738p-candidate-20261004"
-EVIDENCE = ROOT / "docs" / "GATE738P_HARD_CRASH_EVIDENCE.json"
+IMAGE_REF = os.environ.get("GATE738P_CANDIDATE_IMAGE_REF", "").strip()
+EVIDENCE_OUTPUT = os.environ.get("GATE738P_HARD_CRASH_EVIDENCE_OUTPUT", "").strip()
+SOURCE_SHA = os.environ.get("GATE738P_SOURCE_SHA", "").strip()
 ADMIN_DSN = os.environ.get("GATE738P_ADMIN_URL", "").strip()
+
+
+def _validate_provenance() -> str:
+    if not re.fullmatch(r"[0-9a-f]{40}", SOURCE_SHA):
+        raise RuntimeError("GATE738P_SOURCE_SHA must be an exact Git commit SHA")
+    try:
+        current_sha = subprocess.run(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, check=True,
+            capture_output=True, text=True, timeout=10,
+        ).stdout.strip()
+    except (OSError, subprocess.SubprocessError):
+        raise RuntimeError("source commit identity could not be verified") from None
+    if current_sha != SOURCE_SHA:
+        raise RuntimeError("source SHA does not match the checked-out Git commit")
+    match = re.fullmatch(r"[^@\s]+@sha256:([0-9a-f]{64})", IMAGE_REF)
+    if match is None:
+        raise RuntimeError("GATE738P_CANDIDATE_IMAGE_REF must use an immutable sha256 digest")
+    if not EVIDENCE_OUTPUT:
+        raise RuntimeError("GATE738P_HARD_CRASH_EVIDENCE_OUTPUT is required")
+    evidence_path = Path(EVIDENCE_OUTPUT).resolve()
+    historical_path = (ROOT / "docs" / "GATE738P_HARD_CRASH_EVIDENCE.json").resolve()
+    if evidence_path == historical_path or evidence_path.exists():
+        raise RuntimeError("new hard-crash evidence output must be a fresh non-historical path")
+    try:
+        repo_digests = json.loads(_docker([
+            "image", "inspect", "--format", "{{json .RepoDigests}}", IMAGE_REF,
+        ]))
+    except (RuntimeError, json.JSONDecodeError):
+        raise RuntimeError("immutable candidate image digest could not be verified") from None
+    expected_digest = f"sha256:{match.group(1)}"
+    if not isinstance(repo_digests, list) or not any(
+        isinstance(item, str) and item.endswith("@" + expected_digest)
+        for item in repo_digests
+    ):
+        raise RuntimeError("candidate image RepoDigest does not match the immutable reference")
+    return expected_digest
 
 
 def _target_dsn(database: str, *, sqlalchemy: bool = False) -> str:
@@ -75,6 +113,11 @@ def _docker(args: list[str], *, timeout: int = 180) -> str:
     return _run(["docker", *args], timeout=timeout).strip()
 
 
+def _write_evidence(path: str, evidence: dict[str, object], mode: str) -> None:
+    with Path(path).open(mode, encoding="utf-8") as handle:
+        handle.write(json.dumps(evidence, indent=2) + "\n")
+
+
 def _ready(url: str, *, attempts: int = 80) -> dict[str, object]:
     last_error: Exception | None = None
     for _ in range(attempts):
@@ -118,7 +161,7 @@ def _start_candidate(name: str, database: str, role: str, generation: str,
         "--env", "WRITER_INSTANCE_ID=candidate1",
         "--env", f"WRITER_DATABASE_ROLE={role}",
         "--env", f"EXPECTED_MIGRATION_HEAD={expected_head}",
-        IMAGE,
+        IMAGE_REF,
     ])
     port = _docker([
         "inspect", "--format",
@@ -145,7 +188,7 @@ def _start_writer(name: str, mode: str, database: str, role: str,
         "--env", "WRITER_INSTANCE_ID=candidate1",
         "--env", f"WRITER_DATABASE_ROLE={role}",
         "--entrypoint", "python",
-        IMAGE, "scripts/gate738p_crash_writer.py",
+        IMAGE_REF, "scripts/gate738p_crash_writer.py",
     ])
     return name
 
@@ -188,6 +231,7 @@ async def _candidate_write(database: str, role: str, generation: str, user_id: i
 
 
 async def qualify() -> dict[str, object]:
+    image_digest = _validate_provenance()
     if not ADMIN_DSN:
         raise RuntimeError("GATE738P_ADMIN_URL must identify the local disposable Gate738P PostgreSQL")
     parsed = urlsplit(ADMIN_DSN)
@@ -285,6 +329,8 @@ async def qualify() -> dict[str, object]:
 
         evidence: dict[str, object] = {
             "gate": "Gate738P",
+            "source_sha": SOURCE_SHA,
+            "candidate_image_digest": image_digest,
             "test_run_id": name_token,
             "database": database,
             "candidate_generation": generation,
@@ -303,7 +349,7 @@ async def qualify() -> dict[str, object]:
         }
         if not all(value is True for key, value in evidence.items() if key.endswith(("rolled_back", "persisted_after_restart", "denied", "remained_ready", "succeeded"))):
             raise RuntimeError("hard-crash qualification evidence did not satisfy every required assertion")
-        EVIDENCE.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
+        await asyncio.to_thread(_write_evidence, EVIDENCE_OUTPUT, evidence, "x")
 
         # Exercise every explicit contract target only after crash/fence proof.
         _migration(database_url, "20261003_0030", generation=generation, role=candidate_role,
@@ -318,7 +364,7 @@ async def qualify() -> dict[str, object]:
         _ready(health_url)
         final_env = _migration_env(database_url, "20261004_0033", generation, candidate_role,
                                    health_url=health_url)
-        final_env["GATE738P_HARD_CRASH_EVIDENCE_FILE"] = str(EVIDENCE)
+        final_env["GATE738P_HARD_CRASH_EVIDENCE_FILE"] = EVIDENCE_OUTPUT
         _run([sys.executable, "-B", "-m", "scripts.gate738p_contract_upgrade"], env=final_env)
         _docker(["rm", "--force", api_name])
         health_url = _start_candidate(api_name, database, candidate_role, generation, "20261004_0033")
@@ -338,7 +384,7 @@ async def qualify() -> dict[str, object]:
         evidence["contract_targets"] = ["20261003_0030", "20261003_0031", "20261004_0033"]
         evidence["final_head"] = final_head
         evidence["final_candidate_health_ready"] = True
-        EVIDENCE.write_text(json.dumps(evidence, indent=2) + "\n", encoding="utf-8")
+        await asyncio.to_thread(_write_evidence, EVIDENCE_OUTPUT, evidence, "w")
         print(json.dumps(evidence, indent=2))
         return evidence
     finally:

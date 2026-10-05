@@ -1,8 +1,7 @@
-"""Static safety contract for CI's disposable PostgreSQL migration verifier."""
+"""Static safety contract for split-writer Class A CI qualification."""
 
 from copy import deepcopy
 from pathlib import Path
-from urllib.parse import urlsplit
 
 import pytest
 import yaml
@@ -18,48 +17,16 @@ EXPECTED_DATABASE_URL = (
 )
 
 
-def _step(quality, name):
-    return next((step for step in quality["steps"] if step.get("name") == name), None)
-
-
-def _database_is_ci_local(value):
-    if not isinstance(value, str):
-        return False
-    parsed = urlsplit(value)
-    return (
-        parsed.scheme == "postgresql+asyncpg"
-        and parsed.hostname == "127.0.0.1"
-        and parsed.port == 5432
-        and parsed.username == "ci_migrations"
-        and parsed.password == "ci_only_ephemeral_migrations_password"
-        and parsed.path == "/ai_teacher_migrations"
-    )
-
-
-def _vector_assertion_is_present(step):
-    if step is None or not _database_is_ci_local(step.get("env", {}).get("DATABASE_URL")):
-        return False
-
-    run = step.get("run", "").lower()
-    normalized = " ".join(run.split())
-    return (
-        "select extversion from pg_extension where extname = 'vector'" in normalized
-        and "len(rows) != 1" in normalized
-        and 'rows[0]["extversion"]' in normalized
-        and "raise systemexit(" in normalized
-    )
-
-
 def _migration_contract_violations(workflow):
     violations = []
-    quality = workflow.get("jobs", {}).get("quality", {})
-    services = quality.get("services", {})
-    postgres = services.get("postgres", {})
-    postgres_env = postgres.get("env", {})
-
+    job = workflow.get("jobs", {}).get("migration-contract", {})
+    matrix = job.get("strategy", {}).get("matrix", {})
+    if matrix.get("replay") != [1, 2]:
+        violations.append("Class A must use two independent replay matrix jobs")
+    postgres = job.get("services", {}).get("postgres", {})
     if postgres.get("image") != EXPECTED_IMAGE:
         violations.append("postgres image must retain the approved immutable pgvector/PG16 digest")
-    if postgres_env != {
+    if postgres.get("env") != {
         "POSTGRES_USER": "ci_migrations",
         "POSTGRES_PASSWORD": "ci_only_ephemeral_migrations_password",
         "POSTGRES_DB": "ai_teacher_migrations",
@@ -68,107 +35,65 @@ def _migration_contract_violations(workflow):
     if "127.0.0.1:5432:5432" not in postgres.get("ports", []):
         violations.append("postgres service must bind only to loopback")
 
-    steps = quality.get("steps", [])
+    steps = job.get("steps", [])
     names = [step.get("name", "") for step in steps]
-    required_names = [
+    required = [
         "Check disposable PostgreSQL capabilities",
         "Verify disposable app_runtime role prerequisite",
-        "Verify migration chain",
-        "Verify pgvector installed after migration",
-        "Verify migration rollback and re-upgrade",
-        "Verify pgvector installed after re-upgrade",
+        "Bootstrap disposable candidate writer role",
+        "Verify explicit pre-control migration",
+        "Verify writer control migration",
+        "Assert Gate738K database contract",
     ]
-    missing_names = [name for name in required_names if name not in names]
-    if missing_names:
-        return violations + [f"required isolated migration-verification step is missing: {name}" for name in missing_names]
-
-    positions = [names.index(name) for name in required_names]
+    missing = [name for name in required if name not in names]
+    if missing:
+        return violations + [f"required isolated Class A step is missing: {name}" for name in missing]
+    positions = [names.index(name) for name in required]
     if positions != sorted(positions):
-        violations.append("capability check, role prerequisite, explicit migration, rollback, and assertions are out of order")
+        violations.append("PG capability, principal bootstrap, migration, and assertions are out of order")
+    by_name = {step.get("name"): step for step in steps}
 
-    role_bootstrap = _step(quality, required_names[1])
-    if role_bootstrap:
-        if not _database_is_ci_local(role_bootstrap.get("env", {}).get("DATABASE_URL")):
-            violations.append("app_runtime prerequisite must target only its synthetic loopback PostgreSQL service")
-        if role_bootstrap.get("run") != "python -B tests/ci_bootstrap_app_runtime.py":
-            violations.append("app_runtime prerequisite must use the reviewed CI-only bootstrap helper")
-
-    pre_migration_run = "\n".join(
-        step.get("run", "") for step in steps[positions[0] : positions[2]]
-    )
-    if "CREATE EXTENSION" in pre_migration_run.upper():
-        violations.append("pre-migration setup must not execute CREATE EXTENSION")
-
-    capabilities = _step(quality, required_names[0])
-    capability_run = capabilities.get("run", "") if capabilities else ""
-    if (
-        "SHOW server_version_num" not in capability_run
-        or "pg_available_extensions" not in capability_run
-        or "EXPECTED_POSTGRESQL_MAJOR_16" not in capability_run
-        or "PGVECTOR_EXTENSION_UNAVAILABLE" not in capability_run
-        or "CREATE EXTENSION" in capability_run.upper()
+    for name in required[1:]:
+        if by_name[name].get("env", {}).get("DATABASE_URL") != EXPECTED_DATABASE_URL:
+            violations.append(f"{name} must target only its synthetic loopback PostgreSQL service")
+    for name in (required[1], required[2], required[5]):
+        if by_name[name].get("env", {}).get("CI_POSTGRES_SERVICE_ID") != "${{ job.services.postgres.id }}":
+            violations.append(f"{name} must attest the exact PostgreSQL service container")
+    if by_name[required[1]].get("run") != "python -B tests/ci_bootstrap_app_runtime.py":
+        violations.append("app_runtime prerequisite must use the reviewed CI-only bootstrap helper")
+    if by_name[required[2]].get("run") != "python -B tests/ci_bootstrap_writer_candidate.py":
+        violations.append("candidate role must use the reviewed CI-only bootstrap helper")
+    if by_name[required[5]].get("run") != (
+        "python -B tests/ci_bootstrap_writer_candidate.py --assert-contract"
     ):
-        violations.append("read-only PostgreSQL 16/vector availability precheck is missing or mutating")
+        violations.append("Class A contract assertions must use the read-only CI verifier")
 
-    migration = _step(quality, required_names[2])
-    rollback = _step(quality, required_names[4])
-    if migration:
-        migration_env = migration.get("env", {})
-        migration_run = migration.get("run", "")
-        if not _database_is_ci_local(migration_env.get("DATABASE_URL")):
-            violations.append("migration verifier must target only its synthetic loopback PostgreSQL service")
-        if migration_env.get("EXPECTED_MIGRATION_HEAD") != "20261004_0033":
-            violations.append("migration target must be explicit revision 20261004_0033")
-        if (
-            'alembic upgrade "$EXPECTED_MIGRATION_HEAD"' not in migration_run
-            or 'test "$(python -m alembic current 2>/dev/null | awk \'{print $1}\')" = "$EXPECTED_MIGRATION_HEAD"'
-            not in migration_run
-        ):
-            violations.append("migration must explicitly upgrade and verify revision 20261004_0033")
-        if "upgrade head" in migration_run.lower() or "sqlite:///" in migration_run.lower():
-            violations.append("migration verifier must not use upgrade head or SQLite")
+    expand, control = by_name[required[3]], by_name[required[4]]
+    if expand.get("env", {}).get("EXPECTED_MIGRATION_HEAD") != "20261003_0029":
+        violations.append("Class A must explicitly target expand revision 20261003_0029")
+    if control.get("env", {}).get("EXPECTED_MIGRATION_HEAD") != "20261004_0032":
+        violations.append("Class A must stop at explicit control revision 20261004_0032")
+    for step in (expand, control):
+        run = step.get("run", "")
+        if "python -B -m scripts.gate738p_contract_upgrade" not in run:
+            violations.append("Class A migration must use the canonical fail-closed runner")
+        if "alembic upgrade head" in run.lower() or "downgrade" in run.lower():
+            violations.append("Class A must not use head or downgrade semantics")
+    if control.get("env", {}).get("WRITER_GENERATION") != "${{ steps.candidate.outputs.writer_generation }}":
+        violations.append("WRITER_GENERATION must be bound to the candidate created in this replay")
+    if control.get("env", {}).get("WRITER_DATABASE_ROLE") != "${{ steps.candidate.outputs.writer_role }}":
+        violations.append("WRITER_DATABASE_ROLE must be bound to the candidate created in this replay")
+    if control.get("env", {}).get("WRITER_ADMISSION_ENABLED") != "true":
+        violations.append("writer admission must be explicitly enabled for Class A contract migration")
 
-    if rollback:
-        rollback_env = rollback.get("env", {})
-        rollback_run = rollback.get("run", "")
-        if not _database_is_ci_local(rollback_env.get("DATABASE_URL")):
-            violations.append("rollback verifier must target only its synthetic loopback PostgreSQL service")
-        if rollback_env.get("EXPECTED_MIGRATION_HEAD") != "20261004_0033":
-            violations.append("re-upgrade target must be explicit revision 20261004_0033")
-        if rollback_env.get("ROLLBACK_MIGRATION_TARGET") != "20261003_0031":
-            violations.append("rollback target must be explicit revision 20261003_0031")
-        if (
-            'alembic downgrade "$ROLLBACK_MIGRATION_TARGET"' not in rollback_run
-            or 'alembic upgrade "$EXPECTED_MIGRATION_HEAD"' not in rollback_run
-            or 'test "$(python -m alembic current 2>/dev/null | awk \'{print $1}\')" = "$ROLLBACK_MIGRATION_TARGET"'
-            not in rollback_run
-            or 'test "$(python -m alembic current 2>/dev/null | awk \'{print $1}\')" = "$EXPECTED_MIGRATION_HEAD"'
-            not in rollback_run
-        ):
-            violations.append("rollback/re-upgrade must use both explicit qualified revisions")
-        if "upgrade head" in rollback_run.lower() or "sqlite:///" in rollback_run.lower():
-            violations.append("rollback verifier must not use upgrade head or SQLite")
-
-    for name in (required_names[3], required_names[5]):
-        assertion = _step(quality, name)
-        if not _vector_assertion_is_present(assertion):
-            violations.append(f"{name} must independently verify installed vector and nonempty extversion")
-
-    # Limit this destination audit to the service and migration-verifier steps.
-    # Other jobs intentionally have separate staging/release behavior.
-    scoped_objects = [postgres]
-    scoped_objects.extend(_step(quality, name) for name in required_names)
-    scoped_text = "\n".join(str(item) for item in scoped_objects if item is not None).lower()
-    if any(marker in scoped_text for marker in ("codesho", "production", "staging", "secrets.")):
-        violations.append("migration verifier must not reference shared, Production, Staging, or secret DB bindings")
-    for item in scoped_objects:
-        if item is None:
-            continue
-        for key, value in item.get("env", {}).items():
-            if "DATABASE_URL" in key and not _database_is_ci_local(value):
-                violations.append("every migration-check DATABASE_URL must resolve to its isolated CI service")
-                break
-
+    scoped = "\n".join(str(item) for item in [job.get("services", {}), *steps]).lower()
+    if any(marker in scoped for marker in ("codesho", "production", "staging", "secrets.")):
+        violations.append("Class A must not reference shared, Production, Staging, or secret DB bindings")
+    if any(marker in scoped for marker in (
+        "20261004_0033", "upgrade head", "alembic downgrade", "sigkill",
+        "docker build", "candidate api startup", "old writer runtime",
+    )):
+        violations.append("hosted Class A must not claim Class B or revision 0033 qualification")
     return violations
 
 
@@ -176,83 +101,65 @@ def _load_workflow():
     return yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text(encoding="utf-8"))
 
 
-def test_ci_migration_verifier_satisfies_isolated_postgres_contract():
-    assert _migration_contract_violations(_load_workflow()) == []
+def test_ci_qualifies_only_class_a_with_two_fresh_replays():
+    workflow = _load_workflow()
+    assert _migration_contract_violations(workflow) == []
+    assert "migration-contract" in workflow["jobs"]["staging-smoke"]["needs"]
+    assert "staging-smoke" in workflow["jobs"]["docker"]["needs"]
 
 
 @pytest.mark.parametrize(
     ("mutate", "expected_fragment"),
     [
         ("digest", "immutable pgvector/PG16 digest"),
-        ("availability", "step is missing"),
-        ("manual_extension", "pre-migration setup"),
-        ("post_upgrade", "after migration"),
-        ("post_reupgrade", "after re-upgrade"),
-        ("shared_host", "loopback PostgreSQL service"),
-        ("production_reference", "shared, Production, Staging"),
-        ("staging_reference", "shared, Production, Staging"),
-        ("upgrade_head", "explicitly upgrade"),
-        ("wrong_target", "20261004_0033"),
-        ("runtime_bootstrap_missing", "step is missing"),
-        ("runtime_bootstrap_after_migration", "out of order"),
-        ("runtime_bootstrap_shared_database", "synthetic loopback PostgreSQL"),
-        ("runtime_bootstrap_wrong_database", "synthetic loopback PostgreSQL"),
-        ("runtime_bootstrap_arbitrary_command", "reviewed CI-only bootstrap helper"),
-        ("runtime_bootstrap_shared_reference", "shared, Production, Staging"),
+        ("single_replay", "two independent replay matrix jobs"),
+        ("non_loopback", "bind only to loopback"),
+        ("candidate_missing", "step is missing"),
+        ("candidate_target", "synthetic loopback PostgreSQL"),
+        ("candidate_shared_reference", "shared, Production, Staging"),
+        ("service_identity", "exact PostgreSQL service container"),
+        ("candidate_static_role", "WRITER_DATABASE_ROLE must be bound"),
+        ("generation_static", "WRITER_GENERATION must be bound"),
+        ("wrong_expand", "20261003_0029"),
+        ("wrong_control", "20261004_0032"),
+        ("class_b_target", "0033 qualification"),
+        ("downgrade", "head or downgrade"),
+        ("skip_contract", "step is missing"),
     ],
 )
 def test_ci_migration_verifier_rejects_unsafe_contract_mutations(mutate, expected_fragment):
     workflow = deepcopy(_load_workflow())
-    quality = workflow["jobs"]["quality"]
-    steps = quality["steps"]
+    job = workflow["jobs"]["migration-contract"]
+    steps = job["steps"]
     by_name = {step.get("name"): step for step in steps}
-
     if mutate == "digest":
-        quality["services"]["postgres"]["image"] = "postgres:16"
-    elif mutate == "availability":
-        steps.remove(by_name["Check disposable PostgreSQL capabilities"])
-    elif mutate == "manual_extension":
-        by_name["Check disposable PostgreSQL capabilities"]["run"] += "\nCREATE EXTENSION vector;"
-    elif mutate == "post_upgrade":
-        steps.remove(by_name["Verify pgvector installed after migration"])
-    elif mutate == "post_reupgrade":
-        steps.remove(by_name["Verify pgvector installed after re-upgrade"])
-    elif mutate == "shared_host":
-        by_name["Verify migration chain"]["env"]["DATABASE_URL"] = (
-            EXPECTED_DATABASE_URL.replace("127.0.0.1", "shared-db")
-        )
-    elif mutate == "production_reference":
-        by_name["Verify migration chain"]["env"]["DATABASE_URL"] = (
-            EXPECTED_DATABASE_URL.replace("127.0.0.1", "production-db")
-        )
-    elif mutate == "staging_reference":
-        by_name["Verify migration chain"]["env"]["DATABASE_URL"] = (
-            EXPECTED_DATABASE_URL.replace("127.0.0.1", "staging-db")
-        )
-    elif mutate == "upgrade_head":
-        by_name["Verify migration chain"]["run"] = "python -m alembic upgrade head"
-    elif mutate == "wrong_target":
-        by_name["Verify migration chain"]["env"]["EXPECTED_MIGRATION_HEAD"] = "20261003_0031"
-    elif mutate == "runtime_bootstrap_missing":
-        steps.remove(by_name["Verify disposable app_runtime role prerequisite"])
-    elif mutate == "runtime_bootstrap_after_migration":
-        steps.remove(by_name["Verify disposable app_runtime role prerequisite"])
-        steps.insert(
-            steps.index(by_name["Verify migration chain"]) + 1,
-            by_name["Verify disposable app_runtime role prerequisite"],
-        )
-    elif mutate == "runtime_bootstrap_shared_database":
-        by_name["Verify disposable app_runtime role prerequisite"]["env"]["DATABASE_URL"] = (
-            EXPECTED_DATABASE_URL.replace("127.0.0.1", "shared-db")
-        )
-    elif mutate == "runtime_bootstrap_wrong_database":
-        by_name["Verify disposable app_runtime role prerequisite"]["env"]["DATABASE_URL"] = (
-            EXPECTED_DATABASE_URL.replace("ai_teacher_migrations", "production")
-        )
-    elif mutate == "runtime_bootstrap_arbitrary_command":
-        by_name["Verify disposable app_runtime role prerequisite"]["run"] = "python scripts/admin.py"
-    elif mutate == "runtime_bootstrap_shared_reference":
-        by_name["Verify disposable app_runtime role prerequisite"]["env"]["DATABASE_URL"] += " # staging"
+        job["services"]["postgres"]["image"] = "postgres:16"
+    elif mutate == "single_replay":
+        job["strategy"]["matrix"]["replay"] = [1]
+    elif mutate == "non_loopback":
+        job["services"]["postgres"]["ports"] = ["5432:5432"]
+    elif mutate == "candidate_missing":
+        steps.remove(by_name["Bootstrap disposable candidate writer role"])
+    elif mutate == "candidate_target":
+        by_name["Bootstrap disposable candidate writer role"]["env"]["DATABASE_URL"] = EXPECTED_DATABASE_URL.replace("127.0.0.1", "shared-db")
+    elif mutate == "candidate_shared_reference":
+        by_name["Bootstrap disposable candidate writer role"]["run"] += " # staging"
+    elif mutate == "service_identity":
+        by_name["Assert Gate738K database contract"]["env"].pop("CI_POSTGRES_SERVICE_ID")
+    elif mutate == "candidate_static_role":
+        by_name["Verify writer control migration"]["env"]["WRITER_DATABASE_ROLE"] = "app_runtime"
+    elif mutate == "generation_static":
+        by_name["Verify writer control migration"]["env"]["WRITER_GENERATION"] = "candidate"
+    elif mutate == "wrong_expand":
+        by_name["Verify explicit pre-control migration"]["env"]["EXPECTED_MIGRATION_HEAD"] = "20261003_0031"
+    elif mutate == "wrong_control":
+        by_name["Verify writer control migration"]["env"]["EXPECTED_MIGRATION_HEAD"] = "20261004_0033"
+    elif mutate == "class_b_target":
+        by_name["Verify writer control migration"]["run"] += "\npython -m alembic upgrade 20261004_0033"
+    elif mutate == "downgrade":
+        by_name["Verify writer control migration"]["run"] += "\npython -m alembic downgrade base"
+    elif mutate == "skip_contract":
+        steps.remove(by_name["Assert Gate738K database contract"])
 
     violations = _migration_contract_violations(workflow)
     assert any(expected_fragment in violation for violation in violations), violations
