@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import os
 import re
 import subprocess
@@ -31,6 +32,76 @@ class CandidateBootstrapError(RuntimeError):
 _SOURCE_SHA = re.compile(r"\A[0-9a-f]{40}\Z")
 _ROLE = re.compile(r"\Agpc_[0-9a-f]{12}_[12]\Z")
 _GENERATION = re.compile(r"\Aci_[0-9a-f]{12}_[12]\Z")
+
+# These module-level values are used only by the one-shot CI assertion process.
+# Keep stages fixed and never copy exception messages, SQL, params, or URLs into
+# diagnostics.
+_ASSERTION_DIAGNOSTICS: dict[str, object] | None = None
+
+
+def _exception_metadata(exc: Exception) -> dict[str, object]:
+    """Return only allowlisted, structured driver metadata."""
+    driver_diag = getattr(exc, "diag", None)
+    fields: dict[str, object] = {}
+    for name in ("schema_name", "table_name", "column_name", "constraint_name"):
+        value = getattr(driver_diag, name, None) if driver_diag is not None else None
+        if value is None:
+            value = getattr(exc, name, None)
+        fields[name] = value if isinstance(value, str) and value else None
+    sqlstate = getattr(exc, "sqlstate", None) or getattr(exc, "pgcode", None)
+    fields["sqlstate"] = sqlstate if isinstance(sqlstate, str) else None
+    fields["exception_class"] = type(exc).__name__
+    return fields
+
+
+def _format_assertion_diagnostic(
+    stage: str, session: dict[str, object] | None, exc: Exception
+) -> str:
+    """Serialize a bounded diagnostic record without exception text."""
+    record: dict[str, object] = {
+        "event": "GATE738K_ASSERTION_FAILURE",
+        "stage": stage,
+        "session": session or {
+            "current_database": None,
+            "current_schema": None,
+            "current_schemas": None,
+            "search_path": None,
+            "session_user": None,
+            "current_user": None,
+            "alembic_version_relation": None,
+            "writer_state_relation": None,
+        },
+        "error": _exception_metadata(exc),
+    }
+    return "GATE738K_ASSERTION_DIAGNOSTIC " + json.dumps(
+        record, sort_keys=True, separators=(",", ":")
+    )
+
+
+def _emit_assertion_diagnostic(exc: Exception) -> None:
+    if _ASSERTION_DIAGNOSTICS is not None:
+        print(_format_assertion_diagnostic(
+            str(_ASSERTION_DIAGNOSTICS["stage"]),
+            _ASSERTION_DIAGNOSTICS.get("session"),
+            exc,
+        ))
+
+
+async def _assertion_session_facts(connection) -> dict[str, object]:
+    """Read safe session/schema facts through the already-verified connection."""
+    facts = await connection.fetchrow("""
+        SELECT current_database() AS current_database,
+               current_schema() AS current_schema,
+               current_schemas(true) AS current_schemas,
+               current_setting('search_path') AS search_path,
+               session_user AS session_user,
+               current_user AS current_user,
+               pg_catalog.to_regclass('public.alembic_version')::text
+                   AS alembic_version_relation,
+               pg_catalog.to_regclass('public.ai_teacher_writer_generation_state')::text
+                   AS writer_state_relation
+    """)
+    return dict(facts)
 
 
 def _candidate_names() -> tuple[str, str]:
@@ -171,25 +242,41 @@ def _append_github_output(output: str, role_name: str, generation: str) -> None:
 
 
 async def assert_contract() -> None:
+    global _ASSERTION_DIAGNOSTICS
+    _ASSERTION_DIAGNOSTICS = {"stage": "candidate_identity", "session": None}
     role_name, generation = _candidate_names()
+    _ASSERTION_DIAGNOSTICS["stage"] = "verified_database_connection"
     connection = await _connect_verified()
     try:
+        _ASSERTION_DIAGNOSTICS["stage"] = "assertion_session_context"
+        _ASSERTION_DIAGNOSTICS["session"] = await _assertion_session_facts(connection)
+
+        _ASSERTION_DIAGNOSTICS["stage"] = "app_runtime_role_contract"
         await _app_runtime_attributes(connection)
+
+        _ASSERTION_DIAGNOSTICS["stage"] = "candidate_role_contract"
         await _verify_candidate(connection, role_name, generation)
+
+        _ASSERTION_DIAGNOSTICS["stage"] = "alembic_revision"
         head = await connection.fetchval("SELECT version_num FROM public.alembic_version")
         if head != "20261004_0032":
             raise CandidateBootstrapError("CLASS_A_MIGRATION_HEAD_MISMATCH")
+
+        _ASSERTION_DIAGNOSTICS["stage"] = "vector_extension"
         vector_version = await connection.fetchval(
             "SELECT extversion FROM pg_catalog.pg_extension WHERE extname='vector'"
         )
         if not vector_version:
             raise CandidateBootstrapError("PGVECTOR_EXTENSION_NOT_INSTALLED_AFTER_CLASS_A")
 
+        _ASSERTION_DIAGNOSTICS["stage"] = "writer_state_relation"
         state_relation = await connection.fetchval(
             "SELECT pg_catalog.to_regclass('public.ai_teacher_writer_generation_state')"
         )
         if state_relation is None:
             raise CandidateBootstrapError("WRITER_STATE_TABLE_MISSING")
+
+        _ASSERTION_DIAGNOSTICS["stage"] = "writer_generation_rows"
         states = await connection.fetch("""
             SELECT generation, database_role, state
               FROM public.ai_teacher_writer_generation_state
@@ -203,6 +290,7 @@ async def assert_contract() -> None:
         if {tuple(row.values()) for row in states} != expected_states:
             raise CandidateBootstrapError("WRITER_GENERATION_STATE_MISMATCH")
 
+        _ASSERTION_DIAGNOSTICS["stage"] = "writer_state_constraints"
         constraints = await connection.fetchval("""
             SELECT count(*) FROM pg_catalog.pg_constraint AS c
               JOIN pg_catalog.pg_class AS r ON r.oid=c.conrelid
@@ -214,6 +302,7 @@ async def assert_contract() -> None:
         if constraints != 2:
             raise CandidateBootstrapError("WRITER_STATE_CONSTRAINTS_MISSING")
 
+        _ASSERTION_DIAGNOSTICS["stage"] = "writer_admission_functions"
         functions = await connection.fetch("""
             SELECT p.proname, p.prosecdef, p.proconfig,
                    EXISTS (
@@ -234,6 +323,7 @@ async def assert_contract() -> None:
         ):
             raise CandidateBootstrapError("WRITER_ADMISSION_FUNCTION_CONTRACT_MISMATCH")
 
+        _ASSERTION_DIAGNOSTICS["stage"] = "writer_fence_trigger_coverage"
         trigger_coverage = await connection.fetchrow("""
             SELECT count(*) AS expected_count,
                    count(*) FILTER (WHERE t.oid IS NOT NULL) AS covered_count
@@ -252,6 +342,7 @@ async def assert_contract() -> None:
         ):
             raise CandidateBootstrapError("WRITER_FENCE_TRIGGER_COVERAGE_MISMATCH")
 
+        _ASSERTION_DIAGNOSTICS["stage"] = "writer_state_public_acl"
         public_table_grants = await connection.fetchval("""
             SELECT EXISTS (
               SELECT 1 FROM pg_catalog.aclexplode(
@@ -265,6 +356,7 @@ async def assert_contract() -> None:
             raise CandidateBootstrapError("WRITER_STATE_PUBLIC_PRIVILEGE_NOT_REVOKED")
     finally:
         await connection.close()
+    _ASSERTION_DIAGNOSTICS = None
 
 
 async def main() -> None:
@@ -278,8 +370,10 @@ async def main() -> None:
         else:
             raise CandidateBootstrapError("UNSUPPORTED_MODE")
     except CandidateBootstrapError as exc:
+        _emit_assertion_diagnostic(exc)
         raise SystemExit(str(exc)) from None
     except Exception as exc:  # noqa: BLE001 -- redact driver and connection details.
+        _emit_assertion_diagnostic(exc)
         raise SystemExit(f"CI_CANDIDATE_BOOTSTRAP_FAILED ({type(exc).__name__})") from None
 
 
