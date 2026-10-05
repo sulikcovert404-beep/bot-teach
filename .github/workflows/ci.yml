@@ -88,20 +88,74 @@ jobs:
       - name: Verify migration chain
         env:
           DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
-          EXPECTED_MIGRATION_HEAD: 20261004_0033
+          EXPECTED_MIGRATION_HEAD: "20261004_0033"
         run: |
           python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
           test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
+      - name: Verify pgvector installed after migration
+        env:
+          DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
+        run: |
+          python - <<'PY'
+          import asyncio
+          import os
+
+          import asyncpg
+
+          async def main():
+              connection = await asyncpg.connect(
+                  os.environ["DATABASE_URL"].replace(
+                      "postgresql+asyncpg://", "postgresql://", 1
+                  )
+              )
+              try:
+                  rows = await connection.fetch(
+                      "SELECT extversion FROM pg_extension WHERE extname = 'vector'"
+                  )
+                  if len(rows) != 1 or not rows[0]["extversion"]:
+                      raise SystemExit("PGVECTOR_EXTENSION_NOT_INSTALLED_AFTER_MIGRATION")
+              finally:
+                  await connection.close()
+
+          asyncio.run(main())
+          PY
       - name: Verify migration rollback and re-upgrade
         env:
           DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
-          EXPECTED_MIGRATION_HEAD: 20261004_0033
-          ROLLBACK_MIGRATION_TARGET: 20261003_0031
+          EXPECTED_MIGRATION_HEAD: "20261004_0033"
+          ROLLBACK_MIGRATION_TARGET: "20261003_0031"
         run: |
           python -m alembic downgrade "$ROLLBACK_MIGRATION_TARGET"
           test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$ROLLBACK_MIGRATION_TARGET"
           python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
           test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
+      - name: Verify pgvector installed after re-upgrade
+        env:
+          DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
+        run: |
+          python - <<'PY'
+          import asyncio
+          import os
+
+          import asyncpg
+
+          async def main():
+              connection = await asyncpg.connect(
+                  os.environ["DATABASE_URL"].replace(
+                      "postgresql+asyncpg://", "postgresql://", 1
+                  )
+              )
+              try:
+                  rows = await connection.fetch(
+                      "SELECT extversion FROM pg_extension WHERE extname = 'vector'"
+                  )
+                  if len(rows) != 1 or not rows[0]["extversion"]:
+                      raise SystemExit("PGVECTOR_EXTENSION_NOT_INSTALLED_AFTER_REUPGRADE")
+              finally:
+                  await connection.close()
+
+          asyncio.run(main())
+          PY
 
   docker:
     runs-on: ubuntu-latest
