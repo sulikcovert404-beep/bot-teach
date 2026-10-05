@@ -46,8 +46,8 @@ def test_database_target_rejects_non_dedicated_ci_urls(value):
 
 
 def test_database_target_accepts_dedicated_loopback_ci_url():
-    validate_database_url(VALID_URL)
-    validate_database_url(VALID_URL.replace("127.0.0.1", "[::1]"))
+    assert validate_database_url(VALID_URL) is True
+    assert validate_database_url(VALID_URL.replace("127.0.0.1", "[::1]")) is True
 
 
 def test_database_target_rejects_hostname_alias():
@@ -68,6 +68,7 @@ class FakeConnection:
         self.memberships = memberships
         self.executed = []
         self.created_role = False
+        self.role_statement_query = None
 
     async def fetchrow(self, query):
         if "current_user AS current_user" in query:
@@ -85,8 +86,9 @@ class FakeConnection:
         return self.role
 
     async def fetchval(self, query, *args):
-        if "format('CREATE ROLE app_runtime" in query:
-            assert len(args) == 1 and args[0] == "ephemeral-only"
+        if "SELECT format(" in query:
+            assert len(args) == 1
+            self.role_statement_query = (query, args)
             return "CREATE ROLE app_runtime [password redacted]"
         return self.memberships
 
@@ -121,6 +123,7 @@ async def test_bootstrap_rejects_wrong_database_identity(key, value, capsys):
         await ensure_app_runtime_role(
             connection,
             attested_address=SERVICE_ADDRESS,
+            client_target_loopback=True,
             password_factory=lambda _: "ephemeral-only",
         )
     diagnostic = json.loads(
@@ -129,8 +132,9 @@ async def test_bootstrap_rejects_wrong_database_identity(key, value, capsys):
     if key == "actor_superuser":
         assert diagnostic["actor_superuser"] is False
     elif key == "server_address":
-        assert diagnostic["server_address_class"] == "NON_LOOPBACK"
+        assert diagnostic["server_address_class"] == "EXACT_SERVICE_CONTAINER_MISMATCH"
         assert diagnostic["server_address_match"] is False
+    assert diagnostic["client_target_loopback"] is True
     assert connection.executed == []
 
 
@@ -160,6 +164,7 @@ async def test_identity_failure_emits_only_the_failing_actor_or_database_predica
         await ensure_app_runtime_role(
             connection,
             attested_address=SERVICE_ADDRESS,
+            client_target_loopback=True,
             password_factory=lambda _: "diagnostic-secret",
         )
 
@@ -308,16 +313,25 @@ async def test_server_address_diagnostic_is_classified_and_redacted(
         "actor_superuser": True,
     }
     connection = FakeConnection(identity=identity)
+    assert _server_address_class(address) == expected_class
 
     if expected_match:
         expected_address = _to_ip_address(address) if expected_match else SERVICE_ADDRESS
         await ensure_app_runtime_role(
             connection,
             attested_address=expected_address,
+            client_target_loopback=True,
             password_factory=lambda _: "diagnostic-secret",
         )
         output = capsys.readouterr().out
         assert "EXACT_SERVICE_CONTAINER_MATCH" in output
+        diagnostic = json.loads(
+            output.strip().removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
+        )
+        assert diagnostic["client_target_loopback"] is True
+        assert diagnostic["service_address_attestation_present"] is True
+        assert diagnostic["server_address_match"] is True
+        assert diagnostic["server_address_class"] == "EXACT_SERVICE_CONTAINER_MATCH"
         assert len(connection.executed) == 1
         return
 
@@ -325,13 +339,15 @@ async def test_server_address_diagnostic_is_classified_and_redacted(
         await ensure_app_runtime_role(
             connection,
             attested_address=SERVICE_ADDRESS,
+            client_target_loopback=True,
             password_factory=lambda _: "diagnostic-secret",
         )
 
     output = capsys.readouterr().out.strip()
     line = output.removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
     data = json.loads(line)
-    assert data["server_address_class"] == expected_class
+    assert data["server_address_class"] == "EXACT_SERVICE_CONTAINER_MISMATCH"
+    assert data["client_target_loopback"] is True
     assert data["server_address_match"] is False
     assert "203.0.113.7" not in output
     assert "diagnostic-secret" not in output
@@ -344,14 +360,67 @@ async def test_absent_identity_row_is_diagnosed_and_fails_before_role_creation(c
     connection = FakeConnection(identity=None)
 
     with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
-        await ensure_app_runtime_role(connection, attested_address=SERVICE_ADDRESS)
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=SERVICE_ADDRESS,
+            client_target_loopback=True,
+        )
 
     data = json.loads(
         capsys.readouterr().out.strip().removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
     )
     assert data["identity_row_present"] is False
-    assert data["server_address_class"] == "NULL"
+    assert data["server_address_class"] == "EXACT_SERVICE_CONTAINER_MISMATCH"
+    assert data["client_target_loopback"] is True
     assert connection.executed == []
+
+
+@pytest.mark.asyncio
+async def test_non_loopback_client_target_fails_before_database_access(capsys):
+    connection = FakeConnection()
+
+    with pytest.raises(BootstrapError, match="DATABASE_TARGET_NOT_DEDICATED_CI_POSTGRES"):
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=SERVICE_ADDRESS,
+            client_target_loopback=False,
+        )
+
+    data = json.loads(
+        capsys.readouterr().out.strip().removeprefix("CI_SERVICE_ADDRESS_ATTESTATION ")
+    )
+    assert data == {
+        "client_target_loopback": False,
+        "service_address_attestation_present": False,
+        "server_address_match": False,
+        "server_address_class": "ATTESTATION_UNAVAILABLE",
+    }
+    assert connection.executed == []
+    assert connection.role_statement_query is None
+
+
+@pytest.mark.asyncio
+async def test_missing_service_attestation_fails_before_database_access(capsys):
+    connection = FakeConnection()
+
+    with pytest.raises(BootstrapError, match="CI_SERVICE_ADDRESS_ATTESTATION_FAILED"):
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=None,
+            client_target_loopback=True,
+        )
+
+    data = json.loads(
+        capsys.readouterr().out.strip().removeprefix("CI_SERVICE_ADDRESS_ATTESTATION ")
+    )
+    assert data == {
+        "client_target_loopback": True,
+        "service_address_attestation_present": False,
+        "server_address_match": False,
+        "server_address_class": "ATTESTATION_UNAVAILABLE",
+    }
+    assert connection.executed == []
+    assert connection.role_statement_query is None
 
 
 @pytest.mark.parametrize(
@@ -393,7 +462,11 @@ async def test_existing_role_is_verified_without_mutation():
         "rolbypassrls": False,
     }
     connection = FakeConnection(role=role)
-    await ensure_app_runtime_role(connection, attested_address=SERVICE_ADDRESS)
+    await ensure_app_runtime_role(
+        connection,
+        attested_address=SERVICE_ADDRESS,
+        client_target_loopback=True,
+    )
     assert connection.executed == []
 
 
@@ -410,7 +483,11 @@ async def test_role_with_membership_fails_closed_without_role_mutation():
     }
     connection = FakeConnection(role=role, memberships=1)
     with pytest.raises(BootstrapError, match="APP_RUNTIME_ROLE_MEMBERSHIP_NOT_EMPTY"):
-        await ensure_app_runtime_role(connection, attested_address=SERVICE_ADDRESS)
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=SERVICE_ADDRESS,
+            client_target_loopback=True,
+        )
     assert connection.executed == []
 
 
@@ -420,9 +497,16 @@ async def test_absent_role_is_created_with_ephemeral_credential_then_verified():
     await ensure_app_runtime_role(
         connection,
         attested_address=SERVICE_ADDRESS,
+        client_target_loopback=True,
         password_factory=lambda _: "ephemeral-only",
     )
     assert len(connection.executed) == 1
     assert "CREATE ROLE app_runtime" in connection.executed[0]
     assert "ALTER ROLE" not in connection.executed[0]
     assert "ephemeral-only" not in connection.executed[0]
+    assert connection.role_statement_query is not None
+    query, args = connection.role_statement_query
+    assert "CAST($1 AS text)" in query
+    assert "PASSWORD %L" in query
+    assert len(args) == 1
+    assert "ephemeral-only" not in query

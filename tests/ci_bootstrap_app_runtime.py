@@ -21,14 +21,23 @@ _SERVICE_CONTAINER_ID = re.compile(r"\A[0-9a-f]{64}\Z")
 _INSPECT_NETWORKS_FORMAT = "{{json .NetworkSettings.Networks}}"
 
 
+def _service_address_class(attestation_present: bool, exact_match: bool) -> str:
+    if not attestation_present:
+        return "ATTESTATION_UNAVAILABLE"
+    if exact_match:
+        return "EXACT_SERVICE_CONTAINER_MATCH"
+    return "EXACT_SERVICE_CONTAINER_MISMATCH"
+
+
 def _emit_service_address_attestation(
-    present: bool, exact_match: bool, classification: str
+    client_target_loopback: bool, present: bool, exact_match: bool
 ) -> None:
     """Emit only safe attestation metadata, never a raw container address."""
     diagnostic = {
+        "client_target_loopback": client_target_loopback,
         "service_address_attestation_present": present,
-        "server_address_exact_match": exact_match,
-        "classification": classification,
+        "server_address_match": exact_match,
+        "server_address_class": _service_address_class(present, exact_match),
     }
     print(
         "CI_SERVICE_ADDRESS_ATTESTATION "
@@ -128,14 +137,15 @@ def _server_address_matches(value, attested_address) -> bool:
     )
 
 
-def _emit_identity_diagnostic(identity, attested_address) -> None:
+def _emit_identity_diagnostic(
+    identity, attested_address, client_target_loopback: bool
+) -> None:
     """Emit deterministic predicate evidence, never identity values or a DSN."""
     row_present = identity is not None
     current_user_match = row_present and identity["current_user"] == "ci_migrations"
     session_user_match = row_present and identity["session_user"] == "ci_migrations"
     database_match = row_present and identity["database_name"] == "ai_teacher_migrations"
     address = identity["server_address"] if row_present else None
-    address_class = _server_address_class(address)
     address_match = row_present and _server_address_matches(address, attested_address)
     attestation_present = type(attested_address) in (
         ipaddress.IPv4Address,
@@ -147,16 +157,11 @@ def _emit_identity_diagnostic(identity, attested_address) -> None:
         "current_user_match": current_user_match,
         "session_user_match": session_user_match,
         "database_match": database_match,
+        "client_target_loopback": client_target_loopback,
         "server_address_match": address_match,
-        "server_address_class": address_class,
         "service_address_attestation_present": attestation_present,
-        "server_address_exact_match": address_match,
-        "service_address_class": (
-            "ATTESTATION_UNAVAILABLE"
-            if not attestation_present
-            else "EXACT_SERVICE_CONTAINER_MATCH"
-            if address_match
-            else "EXACT_SERVICE_CONTAINER_MISMATCH"
+        "server_address_class": _service_address_class(
+            attestation_present, address_match
         ),
         "actor_superuser": actor_superuser,
         "current_equals_session": (
@@ -166,7 +171,7 @@ def _emit_identity_diagnostic(identity, attested_address) -> None:
     print("CI_DB_IDENTITY_DIAGNOSTIC " + json.dumps(diagnostic, separators=(",", ":")))
 
 
-def validate_database_url(value: str) -> None:
+def validate_database_url(value: str) -> bool:
     """Restrict this helper to the dedicated local CI PostgreSQL service."""
     parsed = urlsplit(value)
     if (
@@ -180,6 +185,7 @@ def validate_database_url(value: str) -> None:
         or parsed.fragment
     ):
         raise BootstrapError("DATABASE_TARGET_NOT_DEDICATED_CI_POSTGRES")
+    return True
 
 
 def _verify_role(role) -> None:
@@ -197,11 +203,18 @@ def _verify_role(role) -> None:
 
 
 async def ensure_app_runtime_role(
-    connection, *, attested_address, password_factory=secrets.token_urlsafe
+    connection,
+    *,
+    attested_address,
+    client_target_loopback: bool,
+    password_factory=secrets.token_urlsafe,
 ) -> None:
     """Create the role only when absent; never mutate a pre-existing role."""
+    if client_target_loopback is not True:
+        _emit_service_address_attestation(False, False, False)
+        raise BootstrapError("DATABASE_TARGET_NOT_DEDICATED_CI_POSTGRES")
     if type(attested_address) not in (ipaddress.IPv4Address, ipaddress.IPv6Address):
-        _emit_service_address_attestation(False, False, "ATTESTATION_UNAVAILABLE")
+        _emit_service_address_attestation(client_target_loopback, False, False)
         raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
     identity = await connection.fetchrow("""
         SELECT current_user AS current_user, session_user AS session_user,
@@ -219,10 +232,10 @@ async def ensure_app_runtime_role(
         or not _server_address_matches(identity["server_address"], attested_address)
         or not identity["actor_superuser"]
     ):
-        _emit_identity_diagnostic(identity, attested_address)
+        _emit_identity_diagnostic(identity, attested_address, client_target_loopback)
         raise BootstrapError("DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES")
 
-    _emit_identity_diagnostic(identity, attested_address)
+    _emit_identity_diagnostic(identity, attested_address, client_target_loopback)
 
     role = await connection.fetchrow("""
         SELECT rolcanlogin, rolinherit, rolsuper, rolcreatedb, rolcreaterole,
@@ -236,7 +249,7 @@ async def ensure_app_runtime_role(
             """SELECT format(
                 'CREATE ROLE app_runtime LOGIN INHERIT NOSUPERUSER '
                 'NOCREATEDB NOCREATEROLE NOREPLICATION NOBYPASSRLS PASSWORD %L',
-                $1
+                CAST($1 AS text)
             )""",
             password,
         )
@@ -262,23 +275,25 @@ async def ensure_app_runtime_role(
 async def main() -> None:
     database_url = os.environ.get("DATABASE_URL", "")
     try:
-        validate_database_url(database_url)
+        client_target_loopback = validate_database_url(database_url)
         if os.environ.get("GITHUB_ACTIONS") != "true":
-            _emit_service_address_attestation(False, False, "ATTESTATION_UNAVAILABLE")
+            _emit_service_address_attestation(client_target_loopback, False, False)
             raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
         try:
             attested_address = _attest_service_container_address(
                 os.environ.get("CI_POSTGRES_SERVICE_ID")
             )
         except BootstrapError:
-            _emit_service_address_attestation(False, False, "ATTESTATION_UNAVAILABLE")
+            _emit_service_address_attestation(client_target_loopback, False, False)
             raise
         connection = await asyncpg.connect(
             database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
         )
         try:
             await ensure_app_runtime_role(
-                connection, attested_address=attested_address
+                connection,
+                attested_address=attested_address,
+                client_target_loopback=client_target_loopback,
             )
         finally:
             await connection.close()
