@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     services:
       postgres:
-        image: postgres:16
+        image: pgvector/pgvector:0.8.7-pg16@sha256:7b822b0aac60967beb1ea5e576b8602c94c300a157d187f385ae3e0da199b90a
         env:
           POSTGRES_USER: ci_migrations
           POSTGRES_PASSWORD: ci_only_ephemeral_migrations_password
@@ -53,6 +53,38 @@ jobs:
           GEMINI_API_KEY: ci-only-gemini-key
           REDIS_URL: redis://localhost:6379/0
         run: python -c "from app.core.config import Settings; Settings()"
+      - name: Check disposable PostgreSQL capabilities
+        env:
+          DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
+        run: |
+          python - <<'PY'
+          import asyncio
+          import os
+
+          import asyncpg
+
+          async def main():
+              connection = await asyncpg.connect(
+                  os.environ["DATABASE_URL"].replace(
+                      "postgresql+asyncpg://", "postgresql://", 1
+                  )
+              )
+              try:
+                  version = int(await connection.fetchval("SHOW server_version_num"))
+                  if version // 10000 != 16:
+                      raise SystemExit("EXPECTED_POSTGRESQL_MAJOR_16")
+
+                  extensions = await connection.fetch(
+                      "SELECT name, default_version "
+                      "FROM pg_available_extensions WHERE name = 'vector'"
+                  )
+                  if len(extensions) != 1 or not extensions[0]["default_version"]:
+                      raise SystemExit("PGVECTOR_EXTENSION_UNAVAILABLE")
+              finally:
+                  await connection.close()
+
+          asyncio.run(main())
+          PY
       - name: Verify migration chain
         env:
           DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
