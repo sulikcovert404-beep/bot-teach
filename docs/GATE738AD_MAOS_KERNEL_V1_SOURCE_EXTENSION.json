@@ -1,0 +1,87 @@
+{
+  "schema_version": 1,
+  "purpose": "MAOS_KERNEL_V1",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "files": [
+    {
+      "path": "app/maos/__init__.py",
+      "git_blob": "1a4ca20facb5beffa5265951c6146683bdaa0955",
+      "sha256": "34ebc4b8a540607bf20fda0552417603b402d8b5d295383ad963ca9b59f3b11d",
+      "size_bytes": 196
+    },
+    {
+      "path": "app/maos/kernel_v1/__init__.py",
+      "git_blob": "ba0220f57d935f9af299c4db58e9b3f232c47534",
+      "sha256": "ac72cda4dd2518e78864d53d867b49809c16bc1c0355512c60a10b401d2fa56b",
+      "size_bytes": 2943
+    },
+    {
+      "path": "app/maos/kernel_v1/agents.py",
+      "git_blob": "569342519eb941c9a805f37fb409ea5f9eabfdbd",
+      "sha256": "fb91b311e9d60f8e7fbca8f289f4dc7f2309d4f5d8dcfdf7adb8c3b7c8bc380c",
+      "size_bytes": 2320
+    },
+    {
+      "path": "app/maos/kernel_v1/authority.py",
+      "git_blob": "4a44147f7480fceb9584c21e639b0f329867c128",
+      "sha256": "f7139fad48ab9b84084c9ab87674c7142ed96a789a59b2f423ce96145dee61a1",
+      "size_bytes": 4309
+    },
+    {
+      "path": "app/maos/kernel_v1/contracts.py",
+      "git_blob": "035ebb6d644884f4ca2d916a397414c18cb5935e",
+      "sha256": "4028ac68577ef6f85c2d599265ce861714c7c89cc36d774aeb4b766e0d0ef40e",
+      "size_bytes": 1650
+    },
+    {
+      "path": "app/maos/kernel_v1/evidence.py",
+      "git_blob": "3e1724a5818c74f548119dbc9aafaec1b990faa5",
+      "sha256": "6c94fcc180ae3a4a754a1b05b515492bd6bd95f1cb6f43c23ccb5009fa0db4e5",
+      "size_bytes": 5757
+    },
+    {
+      "path": "app/maos/kernel_v1/failure.py",
+      "git_blob": "38aae79c384515e5f984c2541ca593e4ac19122e",
+      "sha256": "1ed7e509d9878c1ad51b0b29eea6d651202dc178edd6c90e095129360e294dd6",
+      "size_bytes": 4399
+    },
+    {
+      "path": "app/maos/kernel_v1/identity.py",
+      "git_blob": "c08a0370f25e6b42b317981da3205351d2404c8e",
+      "sha256": "933d7140bb1eef5e7431b5dcc08f37b873135ddafa1cf1b1ea74e50ce45a6df8",
+      "size_bytes": 522
+    },
+    {
+      "path": "app/maos/kernel_v1/lifecycle.py",
+      "git_blob": "e2a0e2ef94af63ea1827003a1c0a7c25520624ca",
+      "sha256": "5806606f38be4254a6e8845dcda8325ace6bbbe46c74e8f5d242bc1f3fd6af3f",
+      "size_bytes": 8040
+    },
+    {
+      "path": "app/maos/kernel_v1/models.py",
+      "git_blob": "dba56ac5b1dd23a6b9f40e9f5b516ef9cb3819a7",
+      "sha256": "5caf5cc278b4467aa70ac782b1983f5d91ed43a608e9ddc13063092de154f98d",
+      "size_bytes": 4901
+    },
+    {
+      "path": "app/maos/kernel_v1/ports.py",
+      "git_blob": "09a861df1464c5f350d1eeb75dbbdd27e4f3536a",
+      "sha256": "9321a2dbbf4b35653c0a276fbfc2531f27f7b3b9b5204c8a8b432e3b8d15e2e2",
+      "size_bytes": 2125
+    },
+    {
+      "path": "app/maos/kernel_v1/risk.py",
+      "git_blob": "44661479402df0df9489036ca98fa22b7e884a2c",
+      "sha256": "a8a21fb392d9461afbddfbbeba81860e4d8484735df959ca5ccd086e805b9cd8",
+      "size_bytes": 1283
+    },
+    {
+      "path": "app/maos/kernel_v1/tenant.py",
+      "git_blob": "c4d5e6bcc460443a86f2a997e14b7d1b50eaabec",
+      "sha256": "d4699999540d88b7e4982932f195a4c1ebade3b4d5924511868f6c230417389a",
+      "size_bytes": 831
+    }
+  ]
+}

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-import json
 import re
 import tomllib
 from pathlib import Path
+
+from scripts.gate738ad_maos_source_extension import load_effective_candidate_paths
 
 ROOT = Path(__file__).resolve().parents[1]
 LOCK_PATH = ROOT / "requirements-linux-py312.lock"
@@ -43,8 +44,7 @@ def test_image_install_uses_platform_lock_and_pinned_build_backend() -> None:
 
 
 def test_docker_copy_sources_are_candidate_manifest_covered() -> None:
-    manifest = json.loads((ROOT / "docs/GATE738AD_CANDIDATE_MANIFEST.json").read_text())
-    candidate_paths = {item["path"] for item in manifest["candidate_files"]}
+    candidate_paths = load_effective_candidate_paths(ROOT)
     dockerfile = (ROOT / "Dockerfile").read_text(encoding="utf-8")
     copy_sources: list[str] = []
     for line in dockerfile.splitlines():
