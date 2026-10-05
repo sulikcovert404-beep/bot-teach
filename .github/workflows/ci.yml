@@ -10,6 +10,20 @@ permissions:
 jobs:
   quality:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: ci_migrations
+          POSTGRES_PASSWORD: ci_only_ephemeral_migrations_password
+          POSTGRES_DB: ai_teacher_migrations
+        ports:
+          - 127.0.0.1:5432:5432
+        options: >-
+          --health-cmd "pg_isready -U ci_migrations -d ai_teacher_migrations"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,19 +54,20 @@ jobs:
           REDIS_URL: redis://localhost:6379/0
         run: python -c "from app.core.config import Settings; Settings()"
       - name: Verify migration chain
-        # Historical SQLite migration-fixture coverage only; not a release invocation.
         env:
-          DATABASE_URL: sqlite:///ci-migrations.sqlite
-          EXPECTED_MIGRATION_HEAD: 20260912_0021
+          DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
+          EXPECTED_MIGRATION_HEAD: 20261004_0033
         run: |
           python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
           test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
       - name: Verify migration rollback and re-upgrade
         env:
-          DATABASE_URL: sqlite:///ci-migrations.sqlite
-          EXPECTED_MIGRATION_HEAD: 20260912_0021
+          DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
+          EXPECTED_MIGRATION_HEAD: 20261004_0033
+          ROLLBACK_MIGRATION_TARGET: 20261003_0031
         run: |
-          python -m alembic downgrade -1
+          python -m alembic downgrade "$ROLLBACK_MIGRATION_TARGET"
+          test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$ROLLBACK_MIGRATION_TARGET"
           python -m alembic upgrade "$EXPECTED_MIGRATION_HEAD"
           test "$(python -m alembic current 2>/dev/null | awk '{print $1}')" = "$EXPECTED_MIGRATION_HEAD"
 
