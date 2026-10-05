@@ -72,6 +72,7 @@ def _migration_contract_violations(workflow):
     names = [step.get("name", "") for step in steps]
     required_names = [
         "Check disposable PostgreSQL capabilities",
+        "Verify disposable app_runtime role prerequisite",
         "Verify migration chain",
         "Verify pgvector installed after migration",
         "Verify migration rollback and re-upgrade",
@@ -83,7 +84,14 @@ def _migration_contract_violations(workflow):
 
     positions = [names.index(name) for name in required_names]
     if positions != sorted(positions):
-        violations.append("capability check, explicit migration, rollback, and assertions are out of order")
+        violations.append("capability check, role prerequisite, explicit migration, rollback, and assertions are out of order")
+
+    role_bootstrap = _step(quality, required_names[1])
+    if role_bootstrap:
+        if not _database_is_ci_local(role_bootstrap.get("env", {}).get("DATABASE_URL")):
+            violations.append("app_runtime prerequisite must target only its synthetic loopback PostgreSQL service")
+        if role_bootstrap.get("run") != "python -B tests/ci_bootstrap_app_runtime.py":
+            violations.append("app_runtime prerequisite must use the reviewed CI-only bootstrap helper")
 
     pre_migration_run = "\n".join(
         step.get("run", "") for step in steps[positions[0] : positions[2]]
@@ -102,8 +110,8 @@ def _migration_contract_violations(workflow):
     ):
         violations.append("read-only PostgreSQL 16/vector availability precheck is missing or mutating")
 
-    migration = _step(quality, required_names[1])
-    rollback = _step(quality, required_names[3])
+    migration = _step(quality, required_names[2])
+    rollback = _step(quality, required_names[4])
     if migration:
         migration_env = migration.get("env", {})
         migration_run = migration.get("run", "")
@@ -141,7 +149,7 @@ def _migration_contract_violations(workflow):
         if "upgrade head" in rollback_run.lower() or "sqlite:///" in rollback_run.lower():
             violations.append("rollback verifier must not use upgrade head or SQLite")
 
-    for name in (required_names[2], required_names[4]):
+    for name in (required_names[3], required_names[5]):
         assertion = _step(quality, name)
         if not _vector_assertion_is_present(assertion):
             violations.append(f"{name} must independently verify installed vector and nonempty extversion")
@@ -185,6 +193,12 @@ def test_ci_migration_verifier_satisfies_isolated_postgres_contract():
         ("staging_reference", "shared, Production, Staging"),
         ("upgrade_head", "explicitly upgrade"),
         ("wrong_target", "20261004_0033"),
+        ("runtime_bootstrap_missing", "step is missing"),
+        ("runtime_bootstrap_after_migration", "out of order"),
+        ("runtime_bootstrap_shared_database", "synthetic loopback PostgreSQL"),
+        ("runtime_bootstrap_wrong_database", "synthetic loopback PostgreSQL"),
+        ("runtime_bootstrap_arbitrary_command", "reviewed CI-only bootstrap helper"),
+        ("runtime_bootstrap_shared_reference", "shared, Production, Staging"),
     ],
 )
 def test_ci_migration_verifier_rejects_unsafe_contract_mutations(mutate, expected_fragment):
@@ -219,6 +233,26 @@ def test_ci_migration_verifier_rejects_unsafe_contract_mutations(mutate, expecte
         by_name["Verify migration chain"]["run"] = "python -m alembic upgrade head"
     elif mutate == "wrong_target":
         by_name["Verify migration chain"]["env"]["EXPECTED_MIGRATION_HEAD"] = "20261003_0031"
+    elif mutate == "runtime_bootstrap_missing":
+        steps.remove(by_name["Verify disposable app_runtime role prerequisite"])
+    elif mutate == "runtime_bootstrap_after_migration":
+        steps.remove(by_name["Verify disposable app_runtime role prerequisite"])
+        steps.insert(
+            steps.index(by_name["Verify migration chain"]) + 1,
+            by_name["Verify disposable app_runtime role prerequisite"],
+        )
+    elif mutate == "runtime_bootstrap_shared_database":
+        by_name["Verify disposable app_runtime role prerequisite"]["env"]["DATABASE_URL"] = (
+            EXPECTED_DATABASE_URL.replace("127.0.0.1", "shared-db")
+        )
+    elif mutate == "runtime_bootstrap_wrong_database":
+        by_name["Verify disposable app_runtime role prerequisite"]["env"]["DATABASE_URL"] = (
+            EXPECTED_DATABASE_URL.replace("ai_teacher_migrations", "production")
+        )
+    elif mutate == "runtime_bootstrap_arbitrary_command":
+        by_name["Verify disposable app_runtime role prerequisite"]["run"] = "python scripts/admin.py"
+    elif mutate == "runtime_bootstrap_shared_reference":
+        by_name["Verify disposable app_runtime role prerequisite"]["env"]["DATABASE_URL"] += " # staging"
 
     violations = _migration_contract_violations(workflow)
     assert any(expected_fragment in violation for violation in violations), violations
