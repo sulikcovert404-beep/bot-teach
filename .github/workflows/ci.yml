@@ -88,6 +88,7 @@ jobs:
       - name: Verify disposable app_runtime role prerequisite
         env:
           DATABASE_URL: postgresql+asyncpg://ci_migrations:ci_only_ephemeral_migrations_password@127.0.0.1:5432/ai_teacher_migrations
+          CI_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}
         run: python -B tests/ci_bootstrap_app_runtime.py
       - name: Verify migration chain
         env:

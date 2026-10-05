@@ -2,12 +2,17 @@ from __future__ import annotations
 
 import ipaddress
 import json
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
+from tests import ci_bootstrap_app_runtime
 from tests.ci_bootstrap_app_runtime import (
     BootstrapError,
+    _attest_service_container_address,
     _server_address_class,
+    _server_address_matches,
     _verify_role,
     ensure_app_runtime_role,
     validate_database_url,
@@ -18,6 +23,8 @@ VALID_URL = (
     "ai_teacher_migrations"
 )
 DEFAULT_IDENTITY = object()
+SERVICE_ADDRESS = ipaddress.IPv4Address("172.18.0.2")
+SERVICE_CONTAINER_ID = "a" * 64
 
 
 @pytest.mark.parametrize(
@@ -40,6 +47,12 @@ def test_database_target_rejects_non_dedicated_ci_urls(value):
 
 def test_database_target_accepts_dedicated_loopback_ci_url():
     validate_database_url(VALID_URL)
+    validate_database_url(VALID_URL.replace("127.0.0.1", "[::1]"))
+
+
+def test_database_target_rejects_hostname_alias():
+    with pytest.raises(BootstrapError, match="DATABASE_TARGET_NOT_DEDICATED_CI_POSTGRES"):
+        validate_database_url(VALID_URL.replace("127.0.0.1", "localhost"))
 
 
 class FakeConnection:
@@ -48,7 +61,7 @@ class FakeConnection:
             "current_user": "ci_migrations",
             "session_user": "ci_migrations",
             "database_name": "ai_teacher_migrations",
-            "server_address": "127.0.0.1",
+            "server_address": SERVICE_ADDRESS,
             "actor_superuser": True,
         } if identity is DEFAULT_IDENTITY else identity
         self.role = role
@@ -98,14 +111,18 @@ async def test_bootstrap_rejects_wrong_database_identity(key, value, capsys):
         "current_user": "ci_migrations",
         "session_user": "ci_migrations",
         "database_name": "ai_teacher_migrations",
-        "server_address": "127.0.0.1",
+        "server_address": SERVICE_ADDRESS,
         "actor_superuser": True,
     }
     identity[key] = value
     connection = FakeConnection(identity=identity)
 
     with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
-        await ensure_app_runtime_role(connection, lambda _: "ephemeral-only")
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=SERVICE_ADDRESS,
+            password_factory=lambda _: "ephemeral-only",
+        )
     diagnostic = json.loads(
         capsys.readouterr().out.strip().removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
     )
@@ -133,14 +150,18 @@ async def test_identity_failure_emits_only_the_failing_actor_or_database_predica
         "current_user": "ci_migrations",
         "session_user": "ci_migrations",
         "database_name": "ai_teacher_migrations",
-        "server_address": "127.0.0.1",
+        "server_address": SERVICE_ADDRESS,
         "actor_superuser": True,
     }
     identity[key] = value
     connection = FakeConnection(identity=identity)
 
     with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
-        await ensure_app_runtime_role(connection, lambda _: "diagnostic-secret")
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=SERVICE_ADDRESS,
+            password_factory=lambda _: "diagnostic-secret",
+        )
 
     line = capsys.readouterr().out.strip()
     assert line.startswith("CI_DB_IDENTITY_DIAGNOSTIC ")
@@ -159,6 +180,97 @@ def test_server_address_classification_distinguishes_loopback_families():
     assert _server_address_class("::1") == "LOOPBACK_IPV6"
     assert _server_address_class("203.0.113.7") == "NON_LOOPBACK"
     assert _server_address_class(None) == "NULL"
+
+
+def _to_ip_address(value):
+    if type(value) in (ipaddress.IPv4Address, ipaddress.IPv6Address):
+        return value
+    if type(value) in (ipaddress.IPv4Interface, ipaddress.IPv6Interface):
+        assert value.network.prefixlen == value.max_prefixlen
+        return value.ip
+    return ipaddress.ip_address(value)
+
+
+def test_service_address_identity_uses_exact_equality_not_private_ranges():
+    assert _server_address_matches(SERVICE_ADDRESS, SERVICE_ADDRESS)
+    assert not _server_address_matches("172.17.0.2", SERVICE_ADDRESS)
+    assert not _server_address_matches("10.0.0.2", SERVICE_ADDRESS)
+    assert not _server_address_matches("203.0.113.7", SERVICE_ADDRESS)
+
+
+def test_service_address_is_derived_from_the_exact_job_container_id(monkeypatch):
+    network_json = json.dumps(
+        {"job-network": {"IPAddress": "172.18.0.2", "GlobalIPv6Address": ""}}
+    )
+    calls = []
+
+    def fake_run(args, **kwargs):
+        calls.append((args, kwargs))
+        return SimpleNamespace(stdout=network_json)
+
+    monkeypatch.setattr(ci_bootstrap_app_runtime.subprocess, "run", fake_run)
+    address = _attest_service_container_address(SERVICE_CONTAINER_ID)
+
+    assert address == SERVICE_ADDRESS
+    assert len(calls) == 1
+    assert calls[0][0] == [
+        "docker",
+        "inspect",
+        "--format",
+        "{{json .NetworkSettings.Networks}}",
+        SERVICE_CONTAINER_ID,
+    ]
+    assert calls[0][1]["check"] is True
+    assert calls[0][1]["timeout"] == 10
+
+
+@pytest.mark.parametrize(
+    "network_json",
+    [
+        "{}",
+        json.dumps({"job-network": {"IPAddress": "", "GlobalIPv6Address": ""}}),
+        json.dumps(
+            {
+                "job-network": {
+                    "IPAddress": "172.18.0.2",
+                    "GlobalIPv6Address": "2001:db8::2",
+                }
+            }
+        ),
+        json.dumps({"job-network": {"IPAddress": "invalid-address"}}),
+    ],
+)
+def test_unavailable_ambiguous_or_invalid_service_addresses_fail_closed(
+    monkeypatch, network_json
+):
+    def fake_run(*_args, **_kwargs):
+        return SimpleNamespace(stdout=network_json)
+
+    monkeypatch.setattr(ci_bootstrap_app_runtime.subprocess, "run", fake_run)
+    with pytest.raises(BootstrapError, match="CI_SERVICE_ADDRESS_ATTESTATION_FAILED"):
+        _attest_service_container_address(SERVICE_CONTAINER_ID)
+
+
+def test_invalid_or_missing_service_id_fails_before_docker_inspect(monkeypatch):
+    def unexpected_run(*_args, **_kwargs):
+        pytest.fail("invalid service id must not invoke Docker")
+
+    monkeypatch.setattr(ci_bootstrap_app_runtime.subprocess, "run", unexpected_run)
+    with pytest.raises(BootstrapError, match="CI_SERVICE_ADDRESS_ATTESTATION_FAILED"):
+        _attest_service_container_address(None)
+    with pytest.raises(BootstrapError, match="CI_SERVICE_ADDRESS_ATTESTATION_FAILED"):
+        _attest_service_container_address("postgres")
+
+
+def test_workflow_binds_attestation_to_the_actual_postgres_service_context():
+    workflow = (Path(__file__).parents[1] / ".github" / "workflows" / "ci.yml").read_text()
+    step = workflow.split("- name: Verify disposable app_runtime role prerequisite", 1)[1]
+    step = step.split("- name: Verify migration chain", 1)[0]
+
+    assert "postgres:" in workflow
+    assert "127.0.0.1:5432:5432" in workflow
+    assert "CI_POSTGRES_SERVICE_ID: ${{ job.services.postgres.id }}" in step
+    assert "CI_POSTGRES_SERVER_ADDRESS" not in step
 
 
 @pytest.mark.parametrize(
@@ -198,14 +310,23 @@ async def test_server_address_diagnostic_is_classified_and_redacted(
     connection = FakeConnection(identity=identity)
 
     if expected_match:
-        await ensure_app_runtime_role(connection, lambda _: "diagnostic-secret")
+        expected_address = _to_ip_address(address) if expected_match else SERVICE_ADDRESS
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=expected_address,
+            password_factory=lambda _: "diagnostic-secret",
+        )
         output = capsys.readouterr().out
-        assert output == ""
+        assert "EXACT_SERVICE_CONTAINER_MATCH" in output
         assert len(connection.executed) == 1
         return
 
     with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
-        await ensure_app_runtime_role(connection, lambda _: "diagnostic-secret")
+        await ensure_app_runtime_role(
+            connection,
+            attested_address=SERVICE_ADDRESS,
+            password_factory=lambda _: "diagnostic-secret",
+        )
 
     output = capsys.readouterr().out.strip()
     line = output.removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
@@ -223,7 +344,7 @@ async def test_absent_identity_row_is_diagnosed_and_fails_before_role_creation(c
     connection = FakeConnection(identity=None)
 
     with pytest.raises(BootstrapError, match="DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES"):
-        await ensure_app_runtime_role(connection)
+        await ensure_app_runtime_role(connection, attested_address=SERVICE_ADDRESS)
 
     data = json.loads(
         capsys.readouterr().out.strip().removeprefix("CI_DB_IDENTITY_DIAGNOSTIC ")
@@ -272,7 +393,7 @@ async def test_existing_role_is_verified_without_mutation():
         "rolbypassrls": False,
     }
     connection = FakeConnection(role=role)
-    await ensure_app_runtime_role(connection)
+    await ensure_app_runtime_role(connection, attested_address=SERVICE_ADDRESS)
     assert connection.executed == []
 
 
@@ -289,14 +410,18 @@ async def test_role_with_membership_fails_closed_without_role_mutation():
     }
     connection = FakeConnection(role=role, memberships=1)
     with pytest.raises(BootstrapError, match="APP_RUNTIME_ROLE_MEMBERSHIP_NOT_EMPTY"):
-        await ensure_app_runtime_role(connection)
+        await ensure_app_runtime_role(connection, attested_address=SERVICE_ADDRESS)
     assert connection.executed == []
 
 
 @pytest.mark.asyncio
 async def test_absent_role_is_created_with_ephemeral_credential_then_verified():
     connection = FakeConnection()
-    await ensure_app_runtime_role(connection, lambda _: "ephemeral-only")
+    await ensure_app_runtime_role(
+        connection,
+        attested_address=SERVICE_ADDRESS,
+        password_factory=lambda _: "ephemeral-only",
+    )
     assert len(connection.executed) == 1
     assert "CREATE ROLE app_runtime" in connection.executed[0]
     assert "ALTER ROLE" not in connection.executed[0]

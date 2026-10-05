@@ -5,7 +5,9 @@ import asyncio
 import ipaddress
 import json
 import os
+import re
 import secrets
+import subprocess
 from urllib.parse import urlsplit
 
 import asyncpg
@@ -13,6 +15,72 @@ import asyncpg
 
 class BootstrapError(RuntimeError):
     """A fail-closed CI role-prerequisite error without connection details."""
+
+
+_SERVICE_CONTAINER_ID = re.compile(r"\A[0-9a-f]{64}\Z")
+_INSPECT_NETWORKS_FORMAT = "{{json .NetworkSettings.Networks}}"
+
+
+def _emit_service_address_attestation(
+    present: bool, exact_match: bool, classification: str
+) -> None:
+    """Emit only safe attestation metadata, never a raw container address."""
+    diagnostic = {
+        "service_address_attestation_present": present,
+        "server_address_exact_match": exact_match,
+        "classification": classification,
+    }
+    print(
+        "CI_SERVICE_ADDRESS_ATTESTATION "
+        + json.dumps(diagnostic, separators=(",", ":"))
+    )
+
+
+def _attest_service_container_address(container_id: str | None):
+    """Read one exact GitHub job service container address via Docker inspect."""
+    if not isinstance(container_id, str) or not _SERVICE_CONTAINER_ID.fullmatch(
+        container_id
+    ):
+        raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
+    try:
+        result = subprocess.run(
+            [
+                "docker",
+                "inspect",
+                "--format",
+                _INSPECT_NETWORKS_FORMAT,
+                container_id,
+            ],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        networks = json.loads(result.stdout)
+    except (OSError, subprocess.SubprocessError, json.JSONDecodeError, TypeError):
+        raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED") from None
+
+    if not isinstance(networks, dict) or not networks:
+        raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
+
+    candidates = []
+    for network in networks.values():
+        if not isinstance(network, dict):
+            raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
+        for field in ("IPAddress", "GlobalIPv6Address"):
+            value = network.get(field)
+            if value in (None, ""):
+                continue
+            if not isinstance(value, str):
+                raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
+            try:
+                candidates.append(ipaddress.ip_address(value))
+            except ValueError:
+                raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED") from None
+
+    if len(candidates) != 1:
+        raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
+    return candidates[0]
 
 
 def _normalize_server_address(value):
@@ -50,16 +118,17 @@ def _server_address_class(value) -> str:
     return "NON_LOOPBACK"
 
 
-def _server_address_matches(value) -> bool:
-    """Preserve the original exact 127.0.0.1/::1 acceptance set."""
-    address = _normalize_server_address(value)
-    return address in {
-        ipaddress.IPv4Address("127.0.0.1"),
-        ipaddress.IPv6Address("::1"),
-    }
+def _server_address_matches(value, attested_address) -> bool:
+    """Require exact equality with the single attested service-container IP."""
+    actual = _normalize_server_address(value)
+    return (
+        type(attested_address) in (ipaddress.IPv4Address, ipaddress.IPv6Address)
+        and actual is not None
+        and actual == attested_address
+    )
 
 
-def _emit_identity_diagnostic(identity) -> None:
+def _emit_identity_diagnostic(identity, attested_address) -> None:
     """Emit deterministic predicate evidence, never identity values or a DSN."""
     row_present = identity is not None
     current_user_match = row_present and identity["current_user"] == "ci_migrations"
@@ -67,7 +136,11 @@ def _emit_identity_diagnostic(identity) -> None:
     database_match = row_present and identity["database_name"] == "ai_teacher_migrations"
     address = identity["server_address"] if row_present else None
     address_class = _server_address_class(address)
-    address_match = row_present and _server_address_matches(address)
+    address_match = row_present and _server_address_matches(address, attested_address)
+    attestation_present = type(attested_address) in (
+        ipaddress.IPv4Address,
+        ipaddress.IPv6Address,
+    )
     actor_superuser = row_present and bool(identity["actor_superuser"])
     diagnostic = {
         "identity_row_present": row_present,
@@ -76,6 +149,15 @@ def _emit_identity_diagnostic(identity) -> None:
         "database_match": database_match,
         "server_address_match": address_match,
         "server_address_class": address_class,
+        "service_address_attestation_present": attestation_present,
+        "server_address_exact_match": address_match,
+        "service_address_class": (
+            "ATTESTATION_UNAVAILABLE"
+            if not attestation_present
+            else "EXACT_SERVICE_CONTAINER_MATCH"
+            if address_match
+            else "EXACT_SERVICE_CONTAINER_MISMATCH"
+        ),
         "actor_superuser": actor_superuser,
         "current_equals_session": (
             row_present and identity["current_user"] == identity["session_user"]
@@ -89,7 +171,7 @@ def validate_database_url(value: str) -> None:
     parsed = urlsplit(value)
     if (
         parsed.scheme != "postgresql+asyncpg"
-        or parsed.hostname not in {"127.0.0.1", "localhost", "::1"}
+        or parsed.hostname not in {"127.0.0.1", "::1"}
         or parsed.port != 5432
         or parsed.username != "ci_migrations"
         or not parsed.password
@@ -114,8 +196,13 @@ def _verify_role(role) -> None:
         raise BootstrapError("APP_RUNTIME_ROLE_ATTRIBUTES_MISMATCH")
 
 
-async def ensure_app_runtime_role(connection, password_factory=secrets.token_urlsafe) -> None:
+async def ensure_app_runtime_role(
+    connection, *, attested_address, password_factory=secrets.token_urlsafe
+) -> None:
     """Create the role only when absent; never mutate a pre-existing role."""
+    if type(attested_address) not in (ipaddress.IPv4Address, ipaddress.IPv6Address):
+        _emit_service_address_attestation(False, False, "ATTESTATION_UNAVAILABLE")
+        raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
     identity = await connection.fetchrow("""
         SELECT current_user AS current_user, session_user AS session_user,
                current_database() AS database_name,
@@ -129,11 +216,13 @@ async def ensure_app_runtime_role(connection, password_factory=secrets.token_url
         or identity["current_user"] != "ci_migrations"
         or identity["session_user"] != "ci_migrations"
         or identity["database_name"] != "ai_teacher_migrations"
-        or not _server_address_matches(identity["server_address"])
+        or not _server_address_matches(identity["server_address"], attested_address)
         or not identity["actor_superuser"]
     ):
-        _emit_identity_diagnostic(identity)
+        _emit_identity_diagnostic(identity, attested_address)
         raise BootstrapError("DATABASE_IDENTITY_NOT_DEDICATED_CI_POSTGRES")
+
+    _emit_identity_diagnostic(identity, attested_address)
 
     role = await connection.fetchrow("""
         SELECT rolcanlogin, rolinherit, rolsuper, rolcreatedb, rolcreaterole,
@@ -174,11 +263,23 @@ async def main() -> None:
     database_url = os.environ.get("DATABASE_URL", "")
     try:
         validate_database_url(database_url)
+        if os.environ.get("GITHUB_ACTIONS") != "true":
+            _emit_service_address_attestation(False, False, "ATTESTATION_UNAVAILABLE")
+            raise BootstrapError("CI_SERVICE_ADDRESS_ATTESTATION_FAILED")
+        try:
+            attested_address = _attest_service_container_address(
+                os.environ.get("CI_POSTGRES_SERVICE_ID")
+            )
+        except BootstrapError:
+            _emit_service_address_attestation(False, False, "ATTESTATION_UNAVAILABLE")
+            raise
         connection = await asyncpg.connect(
             database_url.replace("postgresql+asyncpg://", "postgresql://", 1)
         )
         try:
-            await ensure_app_runtime_role(connection)
+            await ensure_app_runtime_role(
+                connection, attested_address=attested_address
+            )
         finally:
             await connection.close()
     except BootstrapError as exc:
