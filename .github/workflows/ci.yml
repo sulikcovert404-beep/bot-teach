@@ -23,7 +23,8 @@ jobs:
         env:
           RUFF_BASE_REF: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
         run: python scripts/ruff_baseline_gate.py
-      - run: python -m mypy app
+      - name: Enforce mypy baseline (reject new findings only)
+        run: python scripts/mypy_baseline_gate.py
       - run: python -m pytest -q
       - name: Scan tracked files for credentials
         run: python scripts/secret_scan.py
