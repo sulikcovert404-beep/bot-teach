@@ -53,12 +53,14 @@ def test_ci_smoke_uses_only_an_explicit_allowed_pre_contract_target_and_gates_pu
     staging = workflow.split("  staging-smoke:", maxsplit=1)[1].split("  dependency-audit:", maxsplit=1)[0]
     docker = workflow.split("  docker:", maxsplit=1)[1].split("  staging-smoke:", maxsplit=1)[0]
 
-    assert "EXPECTED_MIGRATION_HEAD=20261003_0029" in staging
+    assert "EXPECTED_MIGRATION_HEAD=20261004_0032" in staging
     assert "--profile migration-gate run --rm migrate" in staging
     assert staging.index("run --rm migrate") < staging.index("docker compose up -d --build api")
     assert "20260912_0021" not in staging
+    assert "needs: [quality, migration-contract]" in staging
     assert "needs: [quality, staging-smoke]" in docker
-    assert "hard-crash behavior" in staging
+    assert "gate738p_hard_crash_qualification.py" not in staging
+    assert "Gate738L" not in staging
 
     local_smoke = _read("scripts/staging-smoke.ps1")
     assert "--profile migration-gate run --rm migrate" in local_smoke
