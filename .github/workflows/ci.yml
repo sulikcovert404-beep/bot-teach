@@ -219,15 +219,27 @@ jobs:
         run: |
           cp .env.example .env
           sed -i '/^EXPECTED_MIGRATION_HEAD=/d' .env
-          echo "EXPECTED_MIGRATION_HEAD=20261003_0029" >> .env
+          echo "EXPECTED_MIGRATION_HEAD=20261004_0032" >> .env
       - name: Start disposable PostgreSQL and Redis
         run: docker compose up -d --build --wait db redis
       - name: Bootstrap disposable app_runtime identity
         run: python3 -B .github/scripts/gate_maos_a5k_runtime_identity.py bootstrap-role
-      - name: Run explicit pre-contract migration smoke
-        # Exercises only allow-listed EXPAND_TARGET. It does not qualify 0033,
-        # hard-crash behavior, Gate738L, or a production release.
+      - name: Bootstrap disposable GateMAOS-A5L candidate identity
+        id: a5lr_candidate
+        run: python3 -B .github/scripts/gate_maos_a5lr_candidate_identity.py bootstrap
+      - name: Run explicit 20261004_0032 migration contract
+        env:
+          EXPECTED_MIGRATION_HEAD: "20261004_0032"
+          WRITER_GENERATION: ${{ steps.a5lr_candidate.outputs.writer_generation }}
+          WRITER_DATABASE_ROLE: ${{ steps.a5lr_candidate.outputs.writer_role }}
         run: docker compose --profile migration-gate run --rm migrate
+      - name: Verify disposable post-migration writer contract
+        env:
+          WRITER_GENERATION: ${{ steps.a5lr_candidate.outputs.writer_generation }}
+          WRITER_DATABASE_ROLE: ${{ steps.a5lr_candidate.outputs.writer_role }}
+        run: >-
+          python3 -B .github/scripts/gate_maos_a5lr_candidate_identity.py
+          verify-contract "$WRITER_DATABASE_ROLE" "$WRITER_GENERATION"
       - name: Verify app_runtime identity before API startup
         run: python3 -B .github/scripts/gate_maos_a5k_runtime_identity.py pre-api-check
       - name: Start API after migration smoke succeeds
@@ -238,7 +250,7 @@ jobs:
           for attempt in $(seq 1 45); do
             if response=$(curl --silent --show-error --fail http://localhost:8000/health/ready); then
               test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["status"])')" = "ready"
-              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "20261003_0029"
+              test "$(echo "$response" | python -c 'import json,sys; print(json.load(sys.stdin)["migration_head"])')" = "20261004_0032"
               exit 0
             fi
             sleep 2

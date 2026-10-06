@@ -135,4 +135,4 @@ def test_workflow_orders_bootstrap_migration_and_pre_api_check() -> None:
     api_start = workflow.index("docker compose up -d --build api")
 
     assert bootstrap < migration < pre_api < api_start
-    assert 'echo "EXPECTED_MIGRATION_HEAD=20261003_0029"' in workflow
+    assert 'echo "EXPECTED_MIGRATION_HEAD=20261004_0032"' in workflow
