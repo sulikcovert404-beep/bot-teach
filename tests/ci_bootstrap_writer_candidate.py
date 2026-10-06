@@ -343,20 +343,30 @@ async def assert_contract() -> None:
             raise CandidateBootstrapError("WRITER_FENCE_TRIGGER_COVERAGE_MISMATCH")
 
         _ASSERTION_DIAGNOSTICS["stage"] = "writer_state_public_acl"
-        public_table_grants = await connection.fetchval("""
-            SELECT EXISTS (
-              SELECT 1 FROM pg_catalog.aclexplode(
-                COALESCE(c.relacl, pg_catalog.acldefault('r', c.relowner))
-              ) AS acl
-              WHERE c.oid='public.ai_teacher_writer_generation_state'::regclass
-                AND acl.grantee=0
-            )
-        """)
-        if public_table_grants:
-            raise CandidateBootstrapError("WRITER_STATE_PUBLIC_PRIVILEGE_NOT_REVOKED")
+        await _assert_writer_state_public_acl(connection)
     finally:
         await connection.close()
     _ASSERTION_DIAGNOSTICS = None
+
+
+async def _assert_writer_state_public_acl(connection) -> None:
+    public_table_grants = await connection.fetchval("""
+        SELECT EXISTS (
+          SELECT 1
+            FROM pg_catalog.pg_class AS c
+            CROSS JOIN LATERAL pg_catalog.aclexplode(
+              COALESCE(c.relacl, pg_catalog.acldefault('r', c.relowner))
+            ) AS acl
+           WHERE c.oid = pg_catalog.to_regclass(
+                   'public.ai_teacher_writer_generation_state'
+                 )::oid
+             AND acl.grantee = 0
+        )
+    """)
+    if public_table_grants is True:
+        raise CandidateBootstrapError("WRITER_STATE_PUBLIC_PRIVILEGE_NOT_REVOKED")
+    if public_table_grants is not False:
+        raise CandidateBootstrapError("WRITER_STATE_PUBLIC_ACL_CHECK_INDETERMINATE")
 
 
 async def main() -> None:

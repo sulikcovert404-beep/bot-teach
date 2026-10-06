@@ -1,15 +1,61 @@
 """Tests for bounded, secret-safe Gate738K CI diagnostics."""
 from __future__ import annotations
 
+import asyncio
 import json
 import sys
 from pathlib import Path
+
+import pytest
 
 TESTS = Path(__file__).resolve().parent
 if str(TESTS) not in sys.path:
     sys.path.insert(0, str(TESTS))
 
 import ci_bootstrap_writer_candidate as candidate_bootstrap
+
+
+class FakeAclConnection:
+    def __init__(self, has_public_privilege: bool | None) -> None:
+        self.has_public_privilege = has_public_privilege
+        self.query = ""
+
+    async def fetchval(self, query: str) -> bool | None:
+        self.query = query
+        return self.has_public_privilege
+
+
+def test_writer_state_public_acl_absent_passes_and_binds_exact_relation() -> None:
+    connection = FakeAclConnection(False)
+
+    asyncio.run(candidate_bootstrap._assert_writer_state_public_acl(connection))
+
+    normalized_query = " ".join(connection.query.split())
+    assert "FROM pg_catalog.pg_class AS c" in normalized_query
+    assert "CROSS JOIN LATERAL pg_catalog.aclexplode" in normalized_query
+    assert "c.oid = pg_catalog.to_regclass(" in normalized_query
+    assert "'public.ai_teacher_writer_generation_state' )::oid" in normalized_query
+    assert "acl.grantee = 0" in normalized_query
+
+
+def test_writer_state_public_acl_present_fails_closed() -> None:
+    connection = FakeAclConnection(True)
+
+    with pytest.raises(
+        candidate_bootstrap.CandidateBootstrapError,
+        match="WRITER_STATE_PUBLIC_PRIVILEGE_NOT_REVOKED",
+    ):
+        asyncio.run(candidate_bootstrap._assert_writer_state_public_acl(connection))
+
+
+def test_writer_state_public_acl_indeterminate_fails_closed() -> None:
+    connection = FakeAclConnection(None)
+
+    with pytest.raises(
+        candidate_bootstrap.CandidateBootstrapError,
+        match="WRITER_STATE_PUBLIC_ACL_CHECK_INDETERMINATE",
+    ):
+        asyncio.run(candidate_bootstrap._assert_writer_state_public_acl(connection))
 
 
 class FakeUndefinedTableError(Exception):
