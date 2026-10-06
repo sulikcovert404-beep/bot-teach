@@ -20,8 +20,9 @@ def test_current_migration_lineage_has_one_explicit_final_head() -> None:
     config.set_main_option("script_location", str(root / "migrations"))
     script = ScriptDirectory.from_config(config)
 
-    assert script.get_heads() == ["20261006_0034"]
+    assert script.get_heads() == ["20261006_0035"]
     assert script.get_revision("20261006_0034").down_revision == FINAL_TARGET
+    assert script.get_revision("20261006_0035").down_revision == "20261006_0034"
     migration_files = list((root / "migrations" / "versions").glob("*.py"))
     assert not any(
         "20260924_0023" in path.name or "20260924_0023" in path.read_text(encoding="utf-8")

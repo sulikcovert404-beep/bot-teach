@@ -1,0 +1,15 @@
+{
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "files": [
+    {
+      "git_blob": "82044c36ee260789bbaa330d6be70ca88ac23f98",
+      "path": "migrations/versions/20261006_0035_account_lifecycle_authority.py",
+      "sha256": "a661ac36a478e1ab28c775180065cde496d559c98681c4c66f6151a998aaf7b5",
+      "size_bytes": 17909
+    }
+  ],
+  "purpose": "MAOS_A11_LIFECYCLE_V1",
+  "schema_version": 1
+}

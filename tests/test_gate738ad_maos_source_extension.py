@@ -11,12 +11,16 @@ import pytest
 
 from scripts.gate738ad_maos_source_extension import (
     A10_EXTENSION_PATH,
+    A11_EXTENSION_PATH,
+    A11_PURPOSE,
     AUTHORITY_EXTENSION_PATH,
     BASE_MANIFEST_PATH,
     EXPECTED_A10_PATHS,
+    EXPECTED_A11_PATHS,
     EXPECTED_AUTHORITY_PATHS,
     EXPECTED_MAOS_PATHS,
     EXTENSION_PATH,
+    HISTORICAL_A10_BASELINE_PATH,
     SUCCESSOR_BASELINE_PATH,
     SourceExtensionError,
     load_effective_candidate_paths,
@@ -49,14 +53,16 @@ def test_unchanged_historical_base_and_authorized_extension_pass() -> None:
     effective = load_effective_candidate_paths(ROOT)
     manifest = json.loads((ROOT / BASE_MANIFEST_PATH).read_text(encoding="utf-8"))
     base_paths = {item["path"] for item in manifest["candidate_files"]}
-    assert effective == base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS | EXPECTED_A10_PATHS
+    assert effective == base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS | EXPECTED_A10_PATHS | EXPECTED_A11_PATHS
     assert EXPECTED_MAOS_PATHS.isdisjoint(base_paths)
     assert EXPECTED_AUTHORITY_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS)
     assert EXPECTED_A10_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS)
-    assert len(effective) == 426
+    assert len(effective) == 427
     baseline = json.loads((ROOT / SUCCESSOR_BASELINE_PATH).read_text(encoding="utf-8"))
-    assert baseline["candidate_file_count"] == 426
+    assert baseline["candidate_file_count"] == 427
     assert {item["path"] for item in baseline["candidate_files"]} == effective
+    historical = json.loads((ROOT / HISTORICAL_A10_BASELINE_PATH).read_text(encoding="utf-8"))
+    assert historical["candidate_file_count"] == 426
 
 
 def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], set[str]]:
@@ -67,12 +73,16 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         EXTENSION_PATH,
         AUTHORITY_EXTENSION_PATH,
         A10_EXTENSION_PATH,
+        HISTORICAL_A10_BASELINE_PATH,
+        A11_EXTENSION_PATH,
     )
     for relative in source_paths:
         destination = root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
+        source = "index" if relative == A11_EXTENSION_PATH else "HEAD"
+        ref = f":{relative}" if source == "index" else f"HEAD:{relative}"
         oid = subprocess.run(
-            ["git", "rev-parse", "--verify", f"HEAD:{relative}"],
+            ["git", "rev-parse", "--verify", ref],
             cwd=ROOT,
             check=True,
             capture_output=True,
@@ -84,11 +94,12 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
                 ["git", "cat-file", "blob", oid], cwd=ROOT, check=True, capture_output=True
             ).stdout
         )
-    candidate_path = next(iter(EXPECTED_A10_PATHS))
+    shutil.copyfile(ROOT / "Dockerfile", root / "Dockerfile")
+    candidate_path = next(iter(EXPECTED_A11_PATHS))
     candidate = root / candidate_path
     candidate.parent.mkdir(parents=True, exist_ok=True)
     oid = subprocess.run(
-        ["git", "rev-parse", "--verify", f"HEAD:{candidate_path}"],
+        ["git", "rev-parse", "--verify", f":{candidate_path}"],
         cwd=ROOT,
         check=True,
         capture_output=True,
@@ -109,7 +120,7 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         check=True,
     )
     subprocess.run(
-        ["git", "-C", str(root), "add", "--", *source_paths, candidate_path], check=True
+        ["git", "-C", str(root), "add", "--", *source_paths, candidate_path, "Dockerfile"], check=True
     )
     subprocess.run(
         ["git", "-C", str(root), "commit", "-qm", "fixture committed source identities"],
@@ -117,8 +128,10 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
     )
 
     def canonical_blob(relative: str) -> tuple[str, bytes]:
+        source = "index" if relative == A11_EXTENSION_PATH else "HEAD"
+        ref = f":{relative}" if source == "index" else f"HEAD:{relative}"
         oid = subprocess.run(
-            ["git", "-C", str(root), "rev-parse", "--verify", f"HEAD:{relative}"],
+            ["git", "-C", str(root), "rev-parse", "--verify", ref],
             check=True,
             capture_output=True,
             text=True,
@@ -131,12 +144,13 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         ).stdout
         return oid, blob
 
-    _base_oid, base_bytes = canonical_blob(BASE_MANIFEST_PATH)
+    predecessor_oid, predecessor_bytes = canonical_blob(HISTORICAL_A10_BASELINE_PATH)
     provenance = []
     for relative, purpose in (
         (EXTENSION_PATH, "MAOS_KERNEL_V1"),
         (AUTHORITY_EXTENSION_PATH, "MAOS_AUTHORITY_V1"),
         (A10_EXTENSION_PATH, "MAOS_A10_PERSISTENCE_V1"),
+        (A11_EXTENSION_PATH, A11_PURPOSE),
     ):
         oid, content = canonical_blob(relative)
         provenance.append(
@@ -149,13 +163,13 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
             }
         )
     baseline: dict[str, object] = {
-        "schema_version": 1,
-        "purpose": "GATE738AD_SUCCESSOR_CANDIDATE_V1",
-        "predecessor_manifest": {
-            "path": BASE_MANIFEST_PATH,
-            "sha256": hashlib.sha256(base_bytes).hexdigest(),
-            "git_blob": _base_oid,
-            "size_bytes": len(base_bytes),
+        "schema_version": 2,
+        "purpose": "GATE738AD_SUCCESSOR_CANDIDATE_A11_V1",
+        "predecessor_baseline": {
+            "path": HISTORICAL_A10_BASELINE_PATH,
+            "sha256": hashlib.sha256(predecessor_bytes).hexdigest(),
+            "git_blob": predecessor_oid,
+            "size_bytes": len(predecessor_bytes),
         },
         "additive_provenance": provenance,
         "candidate_file_count": 1,
@@ -163,7 +177,18 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
     }
     entries = baseline["candidate_files"]
     assert isinstance(entries, list)
-    candidate_oid, content = canonical_blob(candidate_path)
+    candidate_oid = subprocess.run(
+        ["git", "-C", str(root), "rev-parse", "--verify", f":{candidate_path}"],
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="ascii",
+    ).stdout.strip()
+    content = subprocess.run(
+        ["git", "-C", str(root), "cat-file", "blob", candidate_oid],
+        check=True,
+        capture_output=True,
+    ).stdout
     entries.append(
         {
             "path": candidate_path,
@@ -185,10 +210,11 @@ def test_successor_provenance_is_invariant_to_crlf_checkout(tmp_path: Path) -> N
     root, _baseline, expected = _successor_fixture_root(tmp_path)
     entries = _baseline["candidate_files"]
     assert isinstance(entries, list) and entries
-    for relative in (A10_EXTENSION_PATH, entries[0]["path"]):
+    for relative in (A11_EXTENSION_PATH, entries[0]["path"]):
         path = root / relative
+        canonical_ref = f":{relative}"
         committed = subprocess.run(
-            ["git", "-C", str(root), "cat-file", "blob", f"HEAD:{relative}"],
+            ["git", "-C", str(root), "cat-file", "blob", canonical_ref],
             check=True,
             capture_output=True,
         ).stdout
@@ -214,7 +240,7 @@ def test_successor_baseline_rejects_altered_identity(tmp_path: Path) -> None:
         elif mutate == "candidate_blob":
             baseline["candidate_files"][0]["git_blob"] = "0" * 40  # type: ignore[index]
         elif mutate == "predecessor":
-            baseline["predecessor_manifest"]["sha256"] = "0" * 64  # type: ignore[index]
+            baseline["predecessor_baseline"]["sha256"] = "0" * 64  # type: ignore[index]
         elif mutate == "lineage":
             baseline["additive_provenance"][0]["purpose"] = "unreviewed"  # type: ignore[index]
         else:
@@ -555,4 +581,5 @@ def test_metadata_is_not_in_docker_image_copy_sources() -> None:
     assert EXTENSION_PATH not in copy_sources
     assert AUTHORITY_EXTENSION_PATH not in copy_sources
     assert A10_EXTENSION_PATH not in copy_sources
+    assert A11_EXTENSION_PATH not in copy_sources
     assert "docs" not in copy_sources
