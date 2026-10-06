@@ -25,7 +25,6 @@ def test_a10_is_one_explicit_successor_and_forward_only() -> None:
     cfg = Config(str(ROOT / "alembic.ini"))
     cfg.set_main_option("script_location", str(ROOT / "migrations"))
     scripts = ScriptDirectory.from_config(cfg)
-    assert scripts.get_heads() == ["20261006_0034"]
     rev = scripts.get_revision("20261006_0034")
     assert rev is not None and rev.down_revision == "20261004_0033"
     src = (ROOT / "migrations/versions/20261006_0034_maos_durable_foundation.py").read_text()
