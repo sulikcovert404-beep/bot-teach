@@ -4,26 +4,30 @@
   "predecessor_manifest": {
     "path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
     "sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
-    "git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb"
+    "git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+    "size_bytes": 101068
   },
   "additive_provenance": [
     {
       "path": "docs/GATE738AD_MAOS_KERNEL_V1_SOURCE_EXTENSION.json",
       "purpose": "MAOS_KERNEL_V1",
       "sha256": "e9b303e51cec7b39d3a8f7bd914e26d997a5e52f6b14a659957d1645b01abdd7",
-      "git_blob": "b80a65893c7c73f8941c805bcc8c839dc75f6d9b"
+      "git_blob": "b80a65893c7c73f8941c805bcc8c839dc75f6d9b",
+      "size_bytes": 3298
     },
     {
       "path": "docs/GATE738AD_MAOS_AUTHORITY_V1_SOURCE_EXTENSION.json",
       "purpose": "MAOS_AUTHORITY_V1",
       "sha256": "bbdee8417afe301a543e03e9525cd9ba5095a0d2cc566c46c4d27e2023e37eea",
-      "git_blob": "c1fc3c05ee319732167b98e4d17f9b44c00296d6"
+      "git_blob": "c1fc3c05ee319732167b98e4d17f9b44c00296d6",
+      "size_bytes": 1017
     },
     {
       "path": "docs/GATE738AD_MAOS_A10_PERSISTENCE_SOURCE_EXTENSION.json",
       "purpose": "MAOS_A10_PERSISTENCE_V1",
-      "sha256": "6bbf89caa28e5ef4b9217b9d2473c5d6c2eddab7d28a1c429dfd87a0ac2209fd",
-      "git_blob": "81f90f6bfcd906d93f2c6c93d596f15d2563eb3b"
+      "sha256": "9639f7d4acb28c6c9503ce30e3fad5b44607884977487f4fa7659645b1dbef51",
+      "git_blob": "917c7d7f084a47c972d5f7d90b0a119dd651e45e",
+      "size_bytes": 578
     }
   ],
   "candidate_file_count": 426,

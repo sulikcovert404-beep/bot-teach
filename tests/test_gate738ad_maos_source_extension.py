@@ -4,6 +4,7 @@ import copy
 import hashlib
 import json
 import shutil
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -70,26 +71,81 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
     for relative in source_paths:
         destination = root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copyfile(ROOT / relative, destination)
+        oid = subprocess.run(
+            ["git", "rev-parse", "--verify", f"HEAD:{relative}"],
+            cwd=ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="ascii",
+        ).stdout.strip()
+        destination.write_bytes(
+            subprocess.run(
+                ["git", "cat-file", "blob", oid], cwd=ROOT, check=True, capture_output=True
+            ).stdout
+        )
     candidate_path = next(iter(EXPECTED_A10_PATHS))
     candidate = root / candidate_path
     candidate.parent.mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(ROOT / candidate_path, candidate)
+    oid = subprocess.run(
+        ["git", "rev-parse", "--verify", f"HEAD:{candidate_path}"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+        encoding="ascii",
+    ).stdout.strip()
+    candidate.write_bytes(
+        subprocess.run(
+            ["git", "cat-file", "blob", oid], cwd=ROOT, check=True, capture_output=True
+        ).stdout
+    )
 
-    base_bytes = (root / BASE_MANIFEST_PATH).read_bytes()
+    subprocess.run(["git", "-C", str(root), "init", "-q"], check=True)
+    subprocess.run(["git", "-C", str(root), "config", "core.autocrlf", "false"], check=True)
+    subprocess.run(["git", "-C", str(root), "config", "user.name", "Gate fixture"], check=True)
+    subprocess.run(
+        ["git", "-C", str(root), "config", "user.email", "gate-fixture@example.invalid"],
+        check=True,
+    )
+    subprocess.run(
+        ["git", "-C", str(root), "add", "--", *source_paths, candidate_path], check=True
+    )
+    subprocess.run(
+        ["git", "-C", str(root), "commit", "-qm", "fixture committed source identities"],
+        check=True,
+    )
+
+    def canonical_blob(relative: str) -> tuple[str, bytes]:
+        oid = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--verify", f"HEAD:{relative}"],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="ascii",
+        ).stdout.strip()
+        blob = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "blob", oid],
+            check=True,
+            capture_output=True,
+        ).stdout
+        return oid, blob
+
+    _base_oid, base_bytes = canonical_blob(BASE_MANIFEST_PATH)
     provenance = []
     for relative, purpose in (
         (EXTENSION_PATH, "MAOS_KERNEL_V1"),
         (AUTHORITY_EXTENSION_PATH, "MAOS_AUTHORITY_V1"),
         (A10_EXTENSION_PATH, "MAOS_A10_PERSISTENCE_V1"),
     ):
-        content = (root / relative).read_bytes()
+        oid, content = canonical_blob(relative)
         provenance.append(
             {
                 "path": relative,
                 "purpose": purpose,
                 "sha256": hashlib.sha256(content).hexdigest(),
-                "git_blob": hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest(),
+                "git_blob": oid,
+                "size_bytes": len(content),
             }
         )
     baseline: dict[str, object] = {
@@ -98,7 +154,8 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         "predecessor_manifest": {
             "path": BASE_MANIFEST_PATH,
             "sha256": hashlib.sha256(base_bytes).hexdigest(),
-            "git_blob": hashlib.sha1(f"blob {len(base_bytes)}\0".encode() + base_bytes).hexdigest(),
+            "git_blob": _base_oid,
+            "size_bytes": len(base_bytes),
         },
         "additive_provenance": provenance,
         "candidate_file_count": 1,
@@ -106,11 +163,11 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
     }
     entries = baseline["candidate_files"]
     assert isinstance(entries, list)
-    content = candidate.read_bytes()
+    candidate_oid, content = canonical_blob(candidate_path)
     entries.append(
         {
             "path": candidate_path,
-            "git_blob": hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest(),
+            "git_blob": candidate_oid,
             "sha256": hashlib.sha256(content).hexdigest(),
             "size_bytes": len(content),
         }
@@ -124,33 +181,47 @@ def test_successor_baseline_is_exact_and_provenance_bound(tmp_path: Path) -> Non
     assert verify_successor_candidate_baseline(root, expected) == expected
 
 
-@pytest.mark.parametrize(
-    ("mutate", "message"),
-    [
+def test_successor_provenance_is_invariant_to_crlf_checkout(tmp_path: Path) -> None:
+    root, _baseline, expected = _successor_fixture_root(tmp_path)
+    entries = _baseline["candidate_files"]
+    assert isinstance(entries, list) and entries
+    for relative in (A10_EXTENSION_PATH, entries[0]["path"]):
+        path = root / relative
+        committed = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "blob", f"HEAD:{relative}"],
+            check=True,
+            capture_output=True,
+        ).stdout
+        assert b"\r\n" not in committed
+        path.write_bytes(committed.replace(b"\n", b"\r\n"))
+        assert path.read_bytes() != committed
+    assert verify_successor_candidate_baseline(root, expected) == expected
+
+
+def test_successor_baseline_rejects_altered_identity(tmp_path: Path) -> None:
+    root, original, expected = _successor_fixture_root(tmp_path)
+    cases = [
         ("candidate_sha", "candidate SHA256 mismatch"),
         ("candidate_blob", "candidate Git blob mismatch"),
         ("predecessor", "successor predecessor SHA256 mismatch"),
         ("lineage", "successor provenance purpose mismatch"),
         ("count", "successor candidate file count mismatch"),
-    ],
-)
-def test_successor_baseline_rejects_altered_identity(
-    tmp_path: Path, mutate: str, message: str
-) -> None:
-    root, baseline, expected = _successor_fixture_root(tmp_path)
-    if mutate == "candidate_sha":
-        baseline["candidate_files"][0]["sha256"] = "0" * 64  # type: ignore[index]
-    elif mutate == "candidate_blob":
-        baseline["candidate_files"][0]["git_blob"] = "0" * 40  # type: ignore[index]
-    elif mutate == "predecessor":
-        baseline["predecessor_manifest"]["sha256"] = "0" * 64  # type: ignore[index]
-    elif mutate == "lineage":
-        baseline["additive_provenance"][0]["purpose"] = "unreviewed"  # type: ignore[index]
-    else:
-        baseline["candidate_file_count"] = 2
-    (root / SUCCESSOR_BASELINE_PATH).write_text(json.dumps(baseline), encoding="utf-8")
-    with pytest.raises(SourceExtensionError, match=message):
-        verify_successor_candidate_baseline(root, expected)
+    ]
+    for mutate, message in cases:
+        baseline = copy.deepcopy(original)
+        if mutate == "candidate_sha":
+            baseline["candidate_files"][0]["sha256"] = "0" * 64  # type: ignore[index]
+        elif mutate == "candidate_blob":
+            baseline["candidate_files"][0]["git_blob"] = "0" * 40  # type: ignore[index]
+        elif mutate == "predecessor":
+            baseline["predecessor_manifest"]["sha256"] = "0" * 64  # type: ignore[index]
+        elif mutate == "lineage":
+            baseline["additive_provenance"][0]["purpose"] = "unreviewed"  # type: ignore[index]
+        else:
+            baseline["candidate_file_count"] = 2
+        (root / SUCCESSOR_BASELINE_PATH).write_text(json.dumps(baseline), encoding="utf-8")
+        with pytest.raises(SourceExtensionError, match=message):
+            verify_successor_candidate_baseline(root, expected)
 
 
 def _a10_fixture_root(

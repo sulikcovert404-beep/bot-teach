@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import subprocess
 from pathlib import Path, PurePosixPath
 from typing import Any
 
@@ -64,7 +65,7 @@ _SUCCESSOR_KEYS = {
     "candidate_file_count",
     "candidate_files",
 }
-_SUCCESSOR_LINEAGE_KEYS = {"path", "purpose", "sha256", "git_blob"}
+_SUCCESSOR_LINEAGE_KEYS = {"path", "purpose", "sha256", "git_blob", "size_bytes"}
 
 
 class SourceExtensionError(ValueError):
@@ -99,6 +100,30 @@ def _relative_file(root: Path, path: Any) -> tuple[str, bytes]:
         f"bound source is missing, not a regular file, or a symlink: {path}",
     )
     return path, target.read_bytes()
+
+
+def _canonical_git_blob(root: Path, path: str) -> tuple[str, bytes]:
+    """Read the exact committed blob bytes used as canonical source identity."""
+    spec = f"HEAD:{path}"
+    try:
+        oid = subprocess.run(
+            ["git", "-C", str(root), "rev-parse", "--verify", spec],
+            check=True,
+            capture_output=True,
+            text=True,
+            encoding="ascii",
+        ).stdout.strip()
+        content = subprocess.run(
+            ["git", "-C", str(root), "cat-file", "blob", oid],
+            check=True,
+            capture_output=True,
+        ).stdout
+    except (OSError, subprocess.CalledProcessError) as exc:
+        raise SourceExtensionError(f"canonical Git blob is unavailable: {path}") from exc
+    _require(len(oid) == 40 and all(char in "0123456789abcdef" for char in oid),
+             f"invalid canonical Git blob identity: {path}")
+    _require(_git_blob_oid(content) == oid, f"canonical Git blob bytes mismatch: {path}")
+    return oid, content
 
 
 def verify_source_extension(
@@ -238,11 +263,17 @@ def verify_successor_candidate_baseline(
 
     predecessor = baseline["predecessor_manifest"]
     _require(isinstance(predecessor, dict), "successor predecessor identity must be an object")
-    _require(set(predecessor) == {"path", "sha256", "git_blob"}, "invalid predecessor identity keys")
+    _require(
+        set(predecessor) == {"path", "sha256", "git_blob", "size_bytes"},
+        "invalid predecessor identity keys",
+    )
     _require(predecessor["path"] == BASE_MANIFEST_PATH, "successor predecessor path mismatch")
-    base_bytes = (root / BASE_MANIFEST_PATH).read_bytes()
+    _relative_file(root, BASE_MANIFEST_PATH)
+    base_oid, base_bytes = _canonical_git_blob(root, BASE_MANIFEST_PATH)
     _require(predecessor["sha256"] == _sha256(base_bytes), "successor predecessor SHA256 mismatch")
-    _require(predecessor["git_blob"] == _git_blob_oid(base_bytes), "successor predecessor Git blob mismatch")
+    _require(predecessor["git_blob"] == base_oid, "successor predecessor Git blob mismatch")
+    _require(type(predecessor["size_bytes"]) is int, "invalid successor predecessor size")
+    _require(predecessor["size_bytes"] == len(base_bytes), "successor predecessor size mismatch")
 
     provenance = baseline["additive_provenance"]
     _require(isinstance(provenance, list), "successor additive provenance must be a list")
@@ -257,9 +288,12 @@ def verify_successor_candidate_baseline(
         _require(set(item) == _SUCCESSOR_LINEAGE_KEYS, "invalid successor provenance entry keys")
         _require(item["path"] == expected_path, "successor provenance path/order mismatch")
         _require(item["purpose"] == expected_purpose, "successor provenance purpose mismatch")
-        _, content = _relative_file(root, item["path"])
+        _relative_file(root, item["path"])
+        oid, content = _canonical_git_blob(root, item["path"])
         _require(item["sha256"] == _sha256(content), f"successor provenance SHA256 mismatch: {expected_path}")
-        _require(item["git_blob"] == _git_blob_oid(content), f"successor provenance Git blob mismatch: {expected_path}")
+        _require(item["git_blob"] == oid, f"successor provenance Git blob mismatch: {expected_path}")
+        _require(type(item["size_bytes"]) is int, f"invalid successor provenance size: {expected_path}")
+        _require(item["size_bytes"] == len(content), f"successor provenance size mismatch: {expected_path}")
 
     entries = baseline["candidate_files"]
     _require(isinstance(entries, list), "successor candidate_files must be a list")
@@ -269,13 +303,14 @@ def verify_successor_candidate_baseline(
     previous_path = ""
     for item in entries:
         _require(isinstance(item, dict) and set(item) == _FILE_KEYS, "invalid successor candidate file entry")
-        candidate_path, content = _relative_file(root, item["path"])
+        candidate_path, _ = _relative_file(root, item["path"])
+        oid, content = _canonical_git_blob(root, candidate_path)
         _require(candidate_path > previous_path, "successor candidate paths must be unique and sorted")
         previous_path = candidate_path
         _require(type(item["size_bytes"]) is int, f"invalid candidate size for {candidate_path}")
         _require(item["size_bytes"] == len(content), f"candidate size mismatch: {candidate_path}")
         _require(item["sha256"] == _sha256(content), f"candidate SHA256 mismatch: {candidate_path}")
-        _require(item["git_blob"] == _git_blob_oid(content), f"candidate Git blob mismatch: {candidate_path}")
+        _require(item["git_blob"] == oid, f"candidate Git blob mismatch: {candidate_path}")
         candidate_paths.add(candidate_path)
     _require(candidate_paths == expected_paths, "successor candidate path set differs from qualified provenance closure")
     return candidate_paths
