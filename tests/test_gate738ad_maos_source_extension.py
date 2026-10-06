@@ -9,15 +9,20 @@ from pathlib import Path
 import pytest
 
 from scripts.gate738ad_maos_source_extension import (
+    A10_EXTENSION_PATH,
     AUTHORITY_EXTENSION_PATH,
     BASE_MANIFEST_PATH,
+    EXPECTED_A10_PATHS,
     EXPECTED_AUTHORITY_PATHS,
     EXPECTED_MAOS_PATHS,
     EXTENSION_PATH,
+    SUCCESSOR_BASELINE_PATH,
     SourceExtensionError,
     load_effective_candidate_paths,
+    verify_a10_source_extension,
     verify_authority_source_extension,
     verify_source_extension,
+    verify_successor_candidate_baseline,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -43,10 +48,227 @@ def test_unchanged_historical_base_and_authorized_extension_pass() -> None:
     effective = load_effective_candidate_paths(ROOT)
     manifest = json.loads((ROOT / BASE_MANIFEST_PATH).read_text(encoding="utf-8"))
     base_paths = {item["path"] for item in manifest["candidate_files"]}
-    assert effective == base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+    assert effective == base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS | EXPECTED_A10_PATHS
     assert EXPECTED_MAOS_PATHS.isdisjoint(base_paths)
     assert EXPECTED_AUTHORITY_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS)
-    assert len(effective) == 425
+    assert EXPECTED_A10_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS)
+    assert len(effective) == 426
+    baseline = json.loads((ROOT / SUCCESSOR_BASELINE_PATH).read_text(encoding="utf-8"))
+    assert baseline["candidate_file_count"] == 426
+    assert {item["path"] for item in baseline["candidate_files"]} == effective
+
+
+def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], set[str]]:
+    root = tmp_path / "successor"
+    root.mkdir()
+    source_paths = (
+        BASE_MANIFEST_PATH,
+        EXTENSION_PATH,
+        AUTHORITY_EXTENSION_PATH,
+        A10_EXTENSION_PATH,
+    )
+    for relative in source_paths:
+        destination = root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, destination)
+    candidate_path = next(iter(EXPECTED_A10_PATHS))
+    candidate = root / candidate_path
+    candidate.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / candidate_path, candidate)
+
+    base_bytes = (root / BASE_MANIFEST_PATH).read_bytes()
+    provenance = []
+    for relative, purpose in (
+        (EXTENSION_PATH, "MAOS_KERNEL_V1"),
+        (AUTHORITY_EXTENSION_PATH, "MAOS_AUTHORITY_V1"),
+        (A10_EXTENSION_PATH, "MAOS_A10_PERSISTENCE_V1"),
+    ):
+        content = (root / relative).read_bytes()
+        provenance.append(
+            {
+                "path": relative,
+                "purpose": purpose,
+                "sha256": hashlib.sha256(content).hexdigest(),
+                "git_blob": hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest(),
+            }
+        )
+    baseline: dict[str, object] = {
+        "schema_version": 1,
+        "purpose": "GATE738AD_SUCCESSOR_CANDIDATE_V1",
+        "predecessor_manifest": {
+            "path": BASE_MANIFEST_PATH,
+            "sha256": hashlib.sha256(base_bytes).hexdigest(),
+            "git_blob": hashlib.sha1(f"blob {len(base_bytes)}\0".encode() + base_bytes).hexdigest(),
+        },
+        "additive_provenance": provenance,
+        "candidate_file_count": 1,
+        "candidate_files": [],
+    }
+    entries = baseline["candidate_files"]
+    assert isinstance(entries, list)
+    content = candidate.read_bytes()
+    entries.append(
+        {
+            "path": candidate_path,
+            "git_blob": hashlib.sha1(f"blob {len(content)}\0".encode() + content).hexdigest(),
+            "sha256": hashlib.sha256(content).hexdigest(),
+            "size_bytes": len(content),
+        }
+    )
+    (root / SUCCESSOR_BASELINE_PATH).write_text(json.dumps(baseline), encoding="utf-8")
+    return root, baseline, {candidate_path}
+
+
+def test_successor_baseline_is_exact_and_provenance_bound(tmp_path: Path) -> None:
+    root, _baseline, expected = _successor_fixture_root(tmp_path)
+    assert verify_successor_candidate_baseline(root, expected) == expected
+
+
+@pytest.mark.parametrize(
+    ("mutate", "message"),
+    [
+        ("candidate_sha", "candidate SHA256 mismatch"),
+        ("candidate_blob", "candidate Git blob mismatch"),
+        ("predecessor", "successor predecessor SHA256 mismatch"),
+        ("lineage", "successor provenance purpose mismatch"),
+        ("count", "successor candidate file count mismatch"),
+    ],
+)
+def test_successor_baseline_rejects_altered_identity(
+    tmp_path: Path, mutate: str, message: str
+) -> None:
+    root, baseline, expected = _successor_fixture_root(tmp_path)
+    if mutate == "candidate_sha":
+        baseline["candidate_files"][0]["sha256"] = "0" * 64  # type: ignore[index]
+    elif mutate == "candidate_blob":
+        baseline["candidate_files"][0]["git_blob"] = "0" * 40  # type: ignore[index]
+    elif mutate == "predecessor":
+        baseline["predecessor_manifest"]["sha256"] = "0" * 64  # type: ignore[index]
+    elif mutate == "lineage":
+        baseline["additive_provenance"][0]["purpose"] = "unreviewed"  # type: ignore[index]
+    else:
+        baseline["candidate_file_count"] = 2
+    (root / SUCCESSOR_BASELINE_PATH).write_text(json.dumps(baseline), encoding="utf-8")
+    with pytest.raises(SourceExtensionError, match=message):
+        verify_successor_candidate_baseline(root, expected)
+
+
+def _a10_fixture_root(
+    tmp_path: Path,
+) -> tuple[Path, bytes, dict[str, object]]:
+    root, base_bytes, _ = _fixture_root(tmp_path)
+    for relative in EXPECTED_A10_PATHS:
+        destination = root / relative
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copyfile(ROOT / relative, destination)
+    extension = json.loads((ROOT / A10_EXTENSION_PATH).read_text(encoding="utf-8"))
+    return root, base_bytes, extension
+
+
+def test_a10_extension_is_exact_and_bound_to_frozen_base() -> None:
+    extension = json.loads((ROOT / A10_EXTENSION_PATH).read_text(encoding="utf-8"))
+    manifest = json.loads((ROOT / BASE_MANIFEST_PATH).read_text(encoding="utf-8"))
+    base_paths = {item["path"] for item in manifest["candidate_files"]}
+    authority = json.loads((ROOT / AUTHORITY_EXTENSION_PATH).read_text(encoding="utf-8"))
+    prior_paths = EXPECTED_MAOS_PATHS | {item["path"] for item in authority["files"]}
+    paths = {item["path"] for item in extension["files"]}
+    assert paths == EXPECTED_A10_PATHS
+    assert paths.isdisjoint(base_paths | prior_paths)
+    assert verify_a10_source_extension(
+        ROOT,
+        (ROOT / BASE_MANIFEST_PATH).read_bytes(),
+        extension,
+        frozenset(prior_paths),
+    ) == base_paths | EXPECTED_A10_PATHS
+
+
+def test_a10_missing_path_fails_closed(tmp_path: Path) -> None:
+    root, base_bytes, extension = _a10_fixture_root(tmp_path)
+    (root / next(iter(EXPECTED_A10_PATHS))).unlink()
+    with pytest.raises(SourceExtensionError, match="missing, not a regular file"):
+        verify_a10_source_extension(
+            root, base_bytes, extension, EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+        )
+
+
+def test_a10_unknown_path_fails_closed(tmp_path: Path) -> None:
+    root, base_bytes, extension = _a10_fixture_root(tmp_path)
+    extension = copy.deepcopy(extension)
+    extra = "migrations/versions/20261006_9999_unapproved.py"
+    (root / extra).write_text("revision = 'x'\n", encoding="utf-8")
+    _refresh_entry(root, extension, 0, extra)
+    with pytest.raises(SourceExtensionError, match="incomplete or contains unapproved paths"):
+        verify_a10_source_extension(
+            root, base_bytes, extension, EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+        )
+
+
+def test_a10_duplicate_path_fails_closed(tmp_path: Path) -> None:
+    root, base_bytes, extension = _a10_fixture_root(tmp_path)
+    extension = copy.deepcopy(extension)
+    extension["files"].append(copy.deepcopy(extension["files"][0]))
+    with pytest.raises(SourceExtensionError, match="duplicate/conflicting extension path"):
+        verify_a10_source_extension(
+            root, base_bytes, extension, EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+        )
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("sha256", "0" * 64, "SHA256 mismatch"),
+        ("git_blob", "0" * 40, "Git blob mismatch"),
+        ("size_bytes", -1, "source size mismatch"),
+    ],
+)
+def test_a10_altered_metadata_fails_closed(
+    tmp_path: Path, field: str, value: object, message: str
+) -> None:
+    root, base_bytes, extension = _a10_fixture_root(tmp_path)
+    extension = copy.deepcopy(extension)
+    extension["files"][0][field] = value
+    with pytest.raises(SourceExtensionError, match=message):
+        verify_a10_source_extension(
+            root, base_bytes, extension, EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+        )
+
+
+def test_a10_wrong_base_identity_fails_closed(tmp_path: Path) -> None:
+    root, base_bytes, extension = _a10_fixture_root(tmp_path)
+    extension = copy.deepcopy(extension)
+    extension["base_manifest_sha256"] = "0" * 64
+    with pytest.raises(SourceExtensionError, match="extension base SHA256 mismatch"):
+        verify_a10_source_extension(
+            root, base_bytes, extension, EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+        )
+
+
+def test_a10_overlap_with_previous_extension_fails_closed(tmp_path: Path) -> None:
+    root, base_bytes, extension = _a10_fixture_root(tmp_path)
+    extension = copy.deepcopy(extension)
+    overlap = "app/maos/authority_v1/contracts.py"
+    destination = root / overlap
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / overlap, destination)
+    _refresh_entry(root, extension, 0, overlap)
+    with pytest.raises(SourceExtensionError, match="overlaps another source extension"):
+        verify_a10_source_extension(
+            root, base_bytes, extension, EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+        )
+
+
+def test_a10_test_path_is_rejected(tmp_path: Path) -> None:
+    root, base_bytes, extension = _a10_fixture_root(tmp_path)
+    extension = copy.deepcopy(extension)
+    test_path = "tests/test_maos_a10_persistence_postgres.py"
+    destination = root / test_path
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / test_path, destination)
+    _refresh_entry(root, extension, 0, test_path)
+    with pytest.raises(SourceExtensionError, match="outside approved namespace"):
+        verify_a10_source_extension(
+            root, base_bytes, extension, EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS
+        )
 
 
 def _authority_fixture_root(
@@ -176,7 +398,7 @@ def test_authority_test_path_is_rejected(tmp_path: Path) -> None:
     shutil.copyfile(ROOT / test_path, destination)
     extension = copy.deepcopy(extension)
     _refresh_entry(root, extension, 0, test_path)
-    with pytest.raises(SourceExtensionError, match="outside MAOS app namespace"):
+    with pytest.raises(SourceExtensionError, match="outside approved namespace"):
         verify_authority_source_extension(root, base_bytes, extension)
 
 
@@ -260,4 +482,6 @@ def test_metadata_is_not_in_docker_image_copy_sources() -> None:
         for source in line.split()[1:-1]
     }
     assert EXTENSION_PATH not in copy_sources
+    assert AUTHORITY_EXTENSION_PATH not in copy_sources
+    assert A10_EXTENSION_PATH not in copy_sources
     assert "docs" not in copy_sources

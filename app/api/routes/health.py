@@ -12,7 +12,7 @@ from app.db.base import build_session_factory
 
 router = APIRouter(tags=["health"])
 
-EXPECTED_MIGRATION_HEAD = "20261004_0033"
+EXPECTED_MIGRATION_HEAD = "20261006_0034"
 
 
 def migration_heads() -> tuple[str, ...]:

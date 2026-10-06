@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "purpose": "MAOS_A10_PERSISTENCE_V1",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "files": [
+    {
+      "path": "migrations/versions/20261006_0034_maos_durable_foundation.py",
+      "git_blob": "a27339adaee11586cd98078769d61fbbba2d0af7",
+      "sha256": "0f9e1a6e8e9743d273f325dd9adda9945fe857572fcebfa045c4c9dec4e8035d",
+      "size_bytes": 20329
+    }
+  ]
+}
