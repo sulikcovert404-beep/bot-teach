@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "purpose": "MAOS_AUTHORITY_V1",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "files": [
+    {
+      "path": "app/maos/authority_v1/__init__.py",
+      "git_blob": "0d7ce8f85bbc182ff7a7fa876e3fa072c3ac9679",
+      "sha256": "3387431b05a5e009e87f2f13c5f998acfef391f83d7665cd1bcaf86b14e6c33e",
+      "size_bytes": 1559
+    },
+    {
+      "path": "app/maos/authority_v1/contracts.py",
+      "git_blob": "d382db3f798aa6cb33e994dfd4e404d8d55d5670",
+      "sha256": "a599c272a2c58100d580532f0352549510eb791b28de91c8c02e719f2e29eb05",
+      "size_bytes": 19366
+    },
+    {
+      "path": "app/maos/authority_v1/operation.py",
+      "git_blob": "dce236f172a015b3e409d3ef9e5932db9752639c",
+      "sha256": "82880304615a7d8fa591f49d1497299233ded8304eee9f649f095dbee9a82cb1",
+      "size_bytes": 4664
+    }
+  ]
+}

@@ -9,9 +9,11 @@ from typing import Any
 
 BASE_MANIFEST_PATH = "docs/GATE738AD_CANDIDATE_MANIFEST.json"
 EXTENSION_PATH = "docs/GATE738AD_MAOS_KERNEL_V1_SOURCE_EXTENSION.json"
+AUTHORITY_EXTENSION_PATH = "docs/GATE738AD_MAOS_AUTHORITY_V1_SOURCE_EXTENSION.json"
 BASE_MANIFEST_SHA256 = "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6"
 BASE_MANIFEST_GIT_BLOB = "8d54d63d9332d6872a51d1ba652d1d266de523eb"
 PURPOSE = "MAOS_KERNEL_V1"
+AUTHORITY_PURPOSE = "MAOS_AUTHORITY_V1"
 
 EXPECTED_MAOS_PATHS = frozenset(
     {
@@ -28,6 +30,13 @@ EXPECTED_MAOS_PATHS = frozenset(
         "app/maos/kernel_v1/ports.py",
         "app/maos/kernel_v1/risk.py",
         "app/maos/kernel_v1/tenant.py",
+    }
+)
+EXPECTED_AUTHORITY_PATHS = frozenset(
+    {
+        "app/maos/authority_v1/__init__.py",
+        "app/maos/authority_v1/contracts.py",
+        "app/maos/authority_v1/operation.py",
     }
 )
 
@@ -82,6 +91,35 @@ def verify_source_extension(
     extension: Any,
 ) -> set[str]:
     """Validate frozen base identity and the complete MAOS-only extension."""
+    return _verify_extension(
+        root, base_manifest_bytes, extension, purpose=PURPOSE,
+        expected_paths=EXPECTED_MAOS_PATHS, forbidden_paths=frozenset(),
+    )
+
+
+def verify_authority_source_extension(
+    root: Path,
+    base_manifest_bytes: bytes,
+    extension: Any,
+    kernel_paths: frozenset[str] = EXPECTED_MAOS_PATHS,
+) -> set[str]:
+    """Validate the exact Authority V1 extension and its disjointness."""
+    return _verify_extension(
+        root, base_manifest_bytes, extension, purpose=AUTHORITY_PURPOSE,
+        expected_paths=EXPECTED_AUTHORITY_PATHS, forbidden_paths=kernel_paths,
+    )
+
+
+def _verify_extension(
+    root: Path,
+    base_manifest_bytes: bytes,
+    extension: Any,
+    *,
+    purpose: str,
+    expected_paths: frozenset[str],
+    forbidden_paths: frozenset[str],
+) -> set[str]:
+    """Validate one exact additive source record against the frozen base."""
     _require(
         _sha256(base_manifest_bytes) == BASE_MANIFEST_SHA256,
         "frozen Gate738AD base manifest SHA256 mismatch",
@@ -107,7 +145,7 @@ def verify_source_extension(
     _require(isinstance(extension, dict), "source extension must be a JSON object")
     _require(set(extension) == _EXTENSION_KEYS, "source extension keys do not match schema v1")
     _require(extension["schema_version"] == 1, "unknown source extension schema_version")
-    _require(extension["purpose"] == PURPOSE, "source extension purpose mismatch")
+    _require(extension["purpose"] == purpose, "source extension purpose mismatch")
     _require(extension["base_manifest_path"] == BASE_MANIFEST_PATH, "base manifest path mismatch")
     _require(extension["base_manifest_sha256"] == BASE_MANIFEST_SHA256, "extension base SHA256 mismatch")
     _require(
@@ -121,20 +159,18 @@ def verify_source_extension(
     for item in entries:
         _require(isinstance(item, dict) and set(item) == _FILE_KEYS, "invalid extension file entry")
         path, content = _relative_file(root, item["path"])
+        _require(path not in base_paths, f"extension conflicts with frozen base path: {path}")
+        _require(path not in forbidden_paths, f"extension overlaps another source extension: {path}")
         _require(path.startswith("app/maos/"), f"extension path outside MAOS app namespace: {path}")
         _require(path.endswith(".py"), f"unsupported MAOS source type: {path}")
         _require(path not in extension_paths, f"duplicate/conflicting extension path: {path}")
-        _require(path not in base_paths, f"extension conflicts with frozen base path: {path}")
         _require(type(item["size_bytes"]) is int, f"invalid byte size for {path}")
         _require(item["size_bytes"] == len(content), f"source size mismatch: {path}")
         _require(item["sha256"] == _sha256(content), f"source SHA256 mismatch: {path}")
         _require(item["git_blob"] == _git_blob_oid(content), f"source Git blob mismatch: {path}")
         extension_paths.add(path)
 
-    _require(
-        extension_paths == EXPECTED_MAOS_PATHS,
-        "MAOS extension is incomplete or contains unapproved paths",
-    )
+    _require(extension_paths == expected_paths, "source extension is incomplete or contains unapproved paths")
     dockerfile = (root / "Dockerfile").read_text(encoding="utf-8")
     _require(
         "COPY app ./app" in dockerfile,
@@ -144,13 +180,26 @@ def verify_source_extension(
 
 
 def load_effective_candidate_paths(root: Path) -> set[str]:
-    """Load the immutable Gate738AD base plus its fail-closed MAOS extension."""
+    """Load the immutable base plus separately validated Kernel and Authority extensions."""
     base_path = root / BASE_MANIFEST_PATH
     extension_path = root / EXTENSION_PATH
+    authority_extension_path = root / AUTHORITY_EXTENSION_PATH
     _require(base_path.is_file(), "frozen Gate738AD base manifest is missing")
     _require(extension_path.is_file(), "MAOS source extension metadata is missing")
+    _require(authority_extension_path.is_file(), "MAOS Authority source extension metadata is missing")
     try:
         extension = json.loads(extension_path.read_text(encoding="utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise SourceExtensionError("MAOS source extension is not valid JSON") from exc
-    return verify_source_extension(root, base_path.read_bytes(), extension)
+    try:
+        authority_extension = json.loads(authority_extension_path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SourceExtensionError("MAOS Authority source extension is not valid JSON") from exc
+    base_bytes = base_path.read_bytes()
+    base = json.loads(base_bytes)
+    base_paths = {item["path"] for item in base["candidate_files"]}
+    kernel_paths = verify_source_extension(root, base_bytes, extension) - base_paths
+    authority_paths = verify_authority_source_extension(
+        root, base_bytes, authority_extension, frozenset(kernel_paths)
+    )
+    return base_paths | kernel_paths | authority_paths
