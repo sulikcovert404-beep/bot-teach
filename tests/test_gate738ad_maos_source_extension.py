@@ -17,6 +17,8 @@ from scripts.gate738ad_maos_source_extension import (
     A12F_PURPOSE,
     A12TC_EXTENSION_PATH,
     A12TC_PURPOSE,
+    A12TGI_EXTENSION_PATH,
+    A12TGI_PURPOSE,
     A12TI_EXTENSION_PATH,
     A12TI_PURPOSE,
     AUTHORITY_EXTENSION_PATH,
@@ -25,6 +27,7 @@ from scripts.gate738ad_maos_source_extension import (
     EXPECTED_A11_PATHS,
     EXPECTED_A12F_PATHS,
     EXPECTED_A12TC_PATHS,
+    EXPECTED_A12TGI_PATHS,
     EXPECTED_A12TI_PATHS,
     EXPECTED_AUTHORITY_PATHS,
     EXPECTED_MAOS_PATHS,
@@ -32,6 +35,7 @@ from scripts.gate738ad_maos_source_extension import (
     HISTORICAL_A10_BASELINE_PATH,
     HISTORICAL_A11_BASELINE_PATH,
     HISTORICAL_A12FP_BASELINE_PATH,
+    HISTORICAL_A12TCP_BASELINE_PATH,
     HISTORICAL_A12TIP_BASELINE_PATH,
     SUCCESSOR_BASELINE_PATH,
     SourceExtensionError,
@@ -39,6 +43,7 @@ from scripts.gate738ad_maos_source_extension import (
     verify_a10_source_extension,
     verify_a12f_source_extension,
     verify_a12tc_source_extension,
+    verify_a12tgi_source_extension,
     verify_a12ti_source_extension,
     verify_authority_source_extension,
     verify_source_extension,
@@ -77,13 +82,14 @@ def test_unchanged_historical_base_and_authorized_extension_pass() -> None:
         | EXPECTED_A12F_PATHS
         | EXPECTED_A12TI_PATHS
         | EXPECTED_A12TC_PATHS
+        | EXPECTED_A12TGI_PATHS
     )
     assert EXPECTED_MAOS_PATHS.isdisjoint(base_paths)
     assert EXPECTED_AUTHORITY_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS)
     assert EXPECTED_A10_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS)
-    assert len(effective) == 430
+    assert len(effective) == 431
     baseline = json.loads((ROOT / SUCCESSOR_BASELINE_PATH).read_text(encoding="utf-8"))
-    assert baseline["candidate_file_count"] == 430
+    assert baseline["candidate_file_count"] == 431
     assert {item["path"] for item in baseline["candidate_files"]} == effective
     historical = json.loads((ROOT / HISTORICAL_A10_BASELINE_PATH).read_text(encoding="utf-8"))
     assert historical["candidate_file_count"] == 426
@@ -110,6 +116,8 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         HISTORICAL_A11_BASELINE_PATH,
         HISTORICAL_A12FP_BASELINE_PATH,
         HISTORICAL_A12TIP_BASELINE_PATH,
+        HISTORICAL_A12TCP_BASELINE_PATH,
+        A12TGI_EXTENSION_PATH,
     )
     for relative in source_paths:
         destination = root / relative
@@ -119,6 +127,7 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
             A12F_EXTENSION_PATH,
             A12TI_EXTENSION_PATH,
             A12TC_EXTENSION_PATH,
+            A12TGI_EXTENSION_PATH,
         } else "HEAD"
         ref = f":{relative}" if source == "index" else f"HEAD:{relative}"
         oid = subprocess.run(
@@ -134,12 +143,12 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
                 ["git", "cat-file", "blob", oid], cwd=ROOT, check=True, capture_output=True
             ).stdout
         )
-    prior_candidate_paths = sorted(EXPECTED_A12F_PATHS | EXPECTED_A12TI_PATHS)
+    prior_candidate_paths = sorted(EXPECTED_A12F_PATHS | EXPECTED_A12TI_PATHS | EXPECTED_A12TGI_PATHS)
     for relative in prior_candidate_paths:
         destination = root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
         oid = subprocess.run(
-            ["git", "rev-parse", "--verify", f"HEAD:{relative}"],
+            ["git", "rev-parse", "--verify", f":{relative}"],
             cwd=ROOT,
             check=True,
             capture_output=True,
@@ -190,6 +199,7 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
             A12F_EXTENSION_PATH,
             A12TI_EXTENSION_PATH,
             A12TC_EXTENSION_PATH,
+            A12TGI_EXTENSION_PATH,
         } else "HEAD"
         ref = f":{relative}" if source == "index" else f"HEAD:{relative}"
         oid = subprocess.run(
@@ -206,7 +216,7 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         ).stdout
         return oid, blob
 
-    predecessor_oid, predecessor_bytes = canonical_blob(HISTORICAL_A12TIP_BASELINE_PATH)
+    predecessor_oid, predecessor_bytes = canonical_blob(HISTORICAL_A12TCP_BASELINE_PATH)
     provenance = []
     for relative, purpose in (
         (EXTENSION_PATH, "MAOS_KERNEL_V1"),
@@ -216,6 +226,7 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         (A12F_EXTENSION_PATH, A12F_PURPOSE),
         (A12TI_EXTENSION_PATH, A12TI_PURPOSE),
         (A12TC_EXTENSION_PATH, A12TC_PURPOSE),
+        (A12TGI_EXTENSION_PATH, A12TGI_PURPOSE),
     ):
         oid, content = canonical_blob(relative)
         provenance.append(
@@ -229,9 +240,9 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         )
     baseline: dict[str, object] = {
         "schema_version": 2,
-        "purpose": "GATE738AD_SUCCESSOR_CANDIDATE_A12TCP_V1",
+        "purpose": "GATE738AD_SUCCESSOR_CANDIDATE_A12TGIQ2_V1",
         "predecessor_baseline": {
-            "path": HISTORICAL_A12TIP_BASELINE_PATH,
+            "path": HISTORICAL_A12TCP_BASELINE_PATH,
             "sha256": hashlib.sha256(predecessor_bytes).hexdigest(),
             "git_blob": predecessor_oid,
             "size_bytes": len(predecessor_bytes),
@@ -779,3 +790,19 @@ def test_metadata_is_not_in_docker_image_copy_sources() -> None:
     assert A10_EXTENSION_PATH not in copy_sources
     assert A11_EXTENSION_PATH not in copy_sources
     assert "docs" not in copy_sources
+
+
+def test_a12tgi_extension_binds_exact_reviewed_migration(tmp_path: Path) -> None:
+    root, _baseline, _expected = _successor_fixture_root(tmp_path)
+    base_bytes = (root / BASE_MANIFEST_PATH).read_bytes()
+    extension = json.loads((root / A12TGI_EXTENSION_PATH).read_text(encoding="utf-8"))
+    prior = frozenset(EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS | EXPECTED_A10_PATHS
+                      | EXPECTED_A11_PATHS | EXPECTED_A12F_PATHS | EXPECTED_A12TI_PATHS
+                      | EXPECTED_A12TC_PATHS)
+    base_paths = {item["path"] for item in json.loads(base_bytes)["candidate_files"]}
+    assert verify_a12tgi_source_extension(root, base_bytes, extension, prior) == (
+        base_paths | EXPECTED_A12TGI_PATHS
+    )
+    extension["files"][0]["sha256"] = "0" * 64
+    with pytest.raises(SourceExtensionError, match="source SHA256 mismatch"):
+        verify_a12tgi_source_extension(root, base_bytes, extension, prior)

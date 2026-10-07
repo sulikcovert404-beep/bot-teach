@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "purpose": "MAOS_A12TGI_PUBLIC_MEMBERSHIP_LEASE_V1",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "files": [
+    {
+      "path": "migrations/versions/20261007_0036_public_membership_lease.py",
+      "git_blob": "01b6faf978fe4d0873bba122df6fbb510094bed6",
+      "sha256": "bad8445663f88463968e81d6514a973abbd1ff3a7a1a24ea5d63a82bbdab3043",
+      "size_bytes": 11873
+    }
+  ]
+}

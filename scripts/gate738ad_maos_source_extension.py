@@ -24,7 +24,10 @@ HISTORICAL_A12FP_SHA256 = "e57de7778266655770d740ec63e74fe6033d98f914a11e04a4034
 HISTORICAL_A12FP_GIT_BLOB = "beea83b7c14df4e3ac49523e4a9cf84a3c1d6949"
 HISTORICAL_A12TIP_SHA256 = "09dd37d2754ac0ebde6f9330cd2def860d7b6ed97689208af82b57ff123d9ed8"
 HISTORICAL_A12TIP_GIT_BLOB = "679876ef0dfdba887e67cec6be66406b389ce623"
-SUCCESSOR_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A12TCP.json"
+HISTORICAL_A12TCP_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A12TCP.json"
+HISTORICAL_A12TCP_SHA256 = "31b6379d1c5ad78ed85cc544c9cd2ed04ddd096c968d03555b8c43766925c554"
+HISTORICAL_A12TCP_GIT_BLOB = "6f4fa7ad95974a88e856995dab0234f4989c1e65"
+SUCCESSOR_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A12TGIQ2.json"
 BASE_MANIFEST_SHA256 = "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6"
 BASE_MANIFEST_GIT_BLOB = "8d54d63d9332d6872a51d1ba652d1d266de523eb"
 PURPOSE = "MAOS_KERNEL_V1"
@@ -34,7 +37,10 @@ A11_PURPOSE = "MAOS_A11_LIFECYCLE_V1"
 A12F_PURPOSE = "MAOS_A12F_PRINCIPAL_SNAPSHOT_V1"
 A12TI_PURPOSE = "MAOS_A12TI_TENANT_AUTHORITY_SNAPSHOT_V1"
 A12TC_PURPOSE = "MAOS_A12TC_REQUEST_AUTHORITY_COMPOSITION_V1"
-SUCCESSOR_BASELINE_PURPOSE = "GATE738AD_SUCCESSOR_CANDIDATE_A12TCP_V1"
+SUCCESSOR_BASELINE_PURPOSE = "GATE738AD_SUCCESSOR_CANDIDATE_A12TGIQ2_V1"
+A12TGI_EXTENSION_PATH = "docs/GATE738AD_MAOS_A12TGI_PUBLIC_LEASE_SOURCE_EXTENSION.json"
+A12TGI_PURPOSE = "MAOS_A12TGI_PUBLIC_MEMBERSHIP_LEASE_V1"
+EXPECTED_A12TGI_PATHS = frozenset({"migrations/versions/20261007_0036_public_membership_lease.py"})
 
 EXPECTED_MAOS_PATHS = frozenset(
     {
@@ -274,6 +280,19 @@ def verify_a12tc_source_extension(
     )
 
 
+def verify_a12tgi_source_extension(
+    root: Path, base_manifest_bytes: bytes, extension: Any,
+    prior_paths: frozenset[str],
+) -> set[str]:
+    """Bind the reviewed public lease migration to its canonical index bytes."""
+    return _verify_extension(
+        root, base_manifest_bytes, extension,
+        purpose=A12TGI_PURPOSE, expected_paths=EXPECTED_A12TGI_PATHS,
+        forbidden_paths=prior_paths, allowed_prefix="migrations/versions/",
+        copy_line="COPY migrations ./migrations", identity_source="index",
+    )
+
+
 def _verify_extension(
     root: Path,
     base_manifest_bytes: bytes,
@@ -381,6 +400,17 @@ def _verify_historical_a12tip_baseline(root: Path) -> tuple[str, bytes]:
     return oid, content
 
 
+def _verify_historical_a12tcp_baseline(root: Path) -> tuple[str, bytes]:
+    """Preserve the immutable immediate predecessor's canonical identity."""
+    _relative_file(root, HISTORICAL_A12TCP_BASELINE_PATH)
+    oid, content = _canonical_git_blob(root, HISTORICAL_A12TCP_BASELINE_PATH, source="HEAD")
+    _require(_sha256(content) == HISTORICAL_A12TCP_SHA256, "historical A12TCP baseline SHA256 changed")
+    _require(oid == HISTORICAL_A12TCP_GIT_BLOB, "historical A12TCP baseline Git blob changed")
+    historical = json.loads(content)
+    _require(historical.get("candidate_file_count") == 430, "historical A12TCP candidate count changed")
+    return oid, content
+
+
 def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) -> set[str]:
     """Validate the versioned, complete candidate identity without rewriting history."""
     path = root / SUCCESSOR_BASELINE_PATH
@@ -399,10 +429,11 @@ def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) ->
 
     _verify_historical_a12fp_baseline(root)
     _verify_historical_a12tip_baseline(root)
+    _verify_historical_a12tcp_baseline(root)
     predecessor = baseline["predecessor_baseline"]
     _require(isinstance(predecessor, dict), "successor predecessor identity must be an object")
     _require(set(predecessor) == _PREDECESSOR_KEYS, "invalid predecessor identity keys")
-    _require(predecessor["path"] == HISTORICAL_A12TIP_BASELINE_PATH, "successor predecessor path mismatch")
+    _require(predecessor["path"] == HISTORICAL_A12TCP_BASELINE_PATH, "successor predecessor path mismatch")
     _relative_file(root, predecessor["path"])
     predecessor_oid, predecessor_bytes = _canonical_git_blob(
         root, predecessor["path"], source="HEAD"
@@ -422,6 +453,7 @@ def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) ->
         (A12F_EXTENSION_PATH, A12F_PURPOSE),
         (A12TI_EXTENSION_PATH, A12TI_PURPOSE),
         (A12TC_EXTENSION_PATH, A12TC_PURPOSE),
+        (A12TGI_EXTENSION_PATH, A12TGI_PURPOSE),
     )
     _require(len(provenance) == len(expected_provenance), "successor provenance history is incomplete")
     for item, (expected_path, expected_purpose) in zip(provenance, expected_provenance, strict=True):
@@ -435,6 +467,7 @@ def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) ->
             A12F_EXTENSION_PATH,
             A12TI_EXTENSION_PATH,
             A12TC_EXTENSION_PATH,
+            A12TGI_EXTENSION_PATH,
         } else "HEAD"
         oid, content = _canonical_git_blob(root, item["path"], source=source)
         _require(item["sha256"] == _sha256(content), f"successor provenance SHA256 mismatch: {expected_path}")
@@ -551,4 +584,11 @@ def load_effective_candidate_paths(root: Path) -> set[str]:
         | a12ti_paths
         | a12tc_paths
     )
-    return verify_successor_candidate_baseline(root, effective_paths)
+    try:
+        a12tgi_extension = json.loads((root / A12TGI_EXTENSION_PATH).read_text(encoding="utf-8"))
+    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SourceExtensionError("MAOS A12TGI source extension is missing or invalid") from exc
+    a12tgi_paths = verify_a12tgi_source_extension(
+        root, base_bytes, a12tgi_extension, frozenset(effective_paths),
+    )
+    return verify_successor_candidate_baseline(root, effective_paths | a12tgi_paths)

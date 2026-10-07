@@ -56,7 +56,7 @@ def test_dual_parent_lineage_convergence_0009_and_0019_to_0020():
 
     # 1. Verify single converged head
     heads = script.get_heads()
-    assert heads == ["20261006_0035"]
+    assert heads == ["20261007_0036"]
 
     rev_0021 = script.get_revision("20260912_0021")
     assert rev_0021.down_revision == "20260912_0020"
@@ -71,6 +71,7 @@ def test_dual_parent_lineage_convergence_0009_and_0019_to_0020():
     rev_0035 = script.get_revision("20261006_0035")
     assert rev_0034.down_revision == "20261004_0033"
     assert rev_0035.down_revision == "20261006_0034"
+    assert script.get_revision("20261007_0036").down_revision == "20261006_0035"
     rev_0024 = script.get_revision("20261003_0024")
     assert rev_0032.down_revision == "20261003_0029"
     assert rev_0030.down_revision == "20261004_0032"
