@@ -15,12 +15,16 @@ A10_EXTENSION_PATH = "docs/GATE738AD_MAOS_A10_PERSISTENCE_SOURCE_EXTENSION.json"
 A11_EXTENSION_PATH = "docs/GATE738AD_MAOS_A11_LIFECYCLE_SOURCE_EXTENSION.json"
 A12F_EXTENSION_PATH = "docs/GATE738AD_MAOS_A12F_PRINCIPAL_SNAPSHOT_SOURCE_EXTENSION.json"
 A12TI_EXTENSION_PATH = "docs/GATE738AD_MAOS_A12TI_TENANT_AUTHORITY_SNAPSHOT_SOURCE_EXTENSION.json"
+A12TC_EXTENSION_PATH = "docs/GATE738AD_MAOS_A12TC_REQUEST_AUTHORITY_SOURCE_EXTENSION.json"
 HISTORICAL_A10_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A10P.json"
 HISTORICAL_A11_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A11P.json"
 HISTORICAL_A12FP_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A12FP.json"
+HISTORICAL_A12TIP_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A12TIP.json"
 HISTORICAL_A12FP_SHA256 = "e57de7778266655770d740ec63e74fe6033d98f914a11e04a40349d39eb4d366"
 HISTORICAL_A12FP_GIT_BLOB = "beea83b7c14df4e3ac49523e4a9cf84a3c1d6949"
-SUCCESSOR_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A12TIP.json"
+HISTORICAL_A12TIP_SHA256 = "09dd37d2754ac0ebde6f9330cd2def860d7b6ed97689208af82b57ff123d9ed8"
+HISTORICAL_A12TIP_GIT_BLOB = "679876ef0dfdba887e67cec6be66406b389ce623"
+SUCCESSOR_BASELINE_PATH = "docs/GATE738AD_CANDIDATE_BASELINE_A12TCP.json"
 BASE_MANIFEST_SHA256 = "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6"
 BASE_MANIFEST_GIT_BLOB = "8d54d63d9332d6872a51d1ba652d1d266de523eb"
 PURPOSE = "MAOS_KERNEL_V1"
@@ -29,7 +33,8 @@ A10_PURPOSE = "MAOS_A10_PERSISTENCE_V1"
 A11_PURPOSE = "MAOS_A11_LIFECYCLE_V1"
 A12F_PURPOSE = "MAOS_A12F_PRINCIPAL_SNAPSHOT_V1"
 A12TI_PURPOSE = "MAOS_A12TI_TENANT_AUTHORITY_SNAPSHOT_V1"
-SUCCESSOR_BASELINE_PURPOSE = "GATE738AD_SUCCESSOR_CANDIDATE_A12TIP_V1"
+A12TC_PURPOSE = "MAOS_A12TC_REQUEST_AUTHORITY_COMPOSITION_V1"
+SUCCESSOR_BASELINE_PURPOSE = "GATE738AD_SUCCESSOR_CANDIDATE_A12TCP_V1"
 
 EXPECTED_MAOS_PATHS = frozenset(
     {
@@ -63,6 +68,7 @@ EXPECTED_A11_PATHS = frozenset(
 )
 EXPECTED_A12F_PATHS = frozenset({"app/security/authority_snapshot.py"})
 EXPECTED_A12TI_PATHS = frozenset({"app/security/tenant_authority_snapshot.py"})
+EXPECTED_A12TC_PATHS = frozenset({"app/security/request_authority.py"})
 
 _EXTENSION_KEYS = {
     "schema_version",
@@ -248,6 +254,26 @@ def verify_a12ti_source_extension(
     )
 
 
+def verify_a12tc_source_extension(
+    root: Path,
+    base_manifest_bytes: bytes,
+    extension: Any,
+    prior_paths: frozenset[str],
+) -> set[str]:
+    """Validate the exact A12TC runtime source from canonical staged Git bytes."""
+    return _verify_extension(
+        root,
+        base_manifest_bytes,
+        extension,
+        purpose=A12TC_PURPOSE,
+        expected_paths=EXPECTED_A12TC_PATHS,
+        forbidden_paths=prior_paths,
+        allowed_prefix="app/security/",
+        copy_line="COPY app ./app",
+        identity_source="index",
+    )
+
+
 def _verify_extension(
     root: Path,
     base_manifest_bytes: bytes,
@@ -340,6 +366,21 @@ def _verify_historical_a12fp_baseline(root: Path) -> tuple[str, bytes]:
     return oid, content
 
 
+def _verify_historical_a12tip_baseline(root: Path) -> tuple[str, bytes]:
+    """Bind the immediate predecessor baseline to its immutable qualified bytes."""
+    _relative_file(root, HISTORICAL_A12TIP_BASELINE_PATH)
+    oid, content = _canonical_git_blob(root, HISTORICAL_A12TIP_BASELINE_PATH, source="HEAD")
+    _require(_sha256(content) == HISTORICAL_A12TIP_SHA256, "historical A12TIP baseline SHA256 changed")
+    _require(oid == HISTORICAL_A12TIP_GIT_BLOB, "historical A12TIP baseline Git blob changed")
+    try:
+        historical = json.loads(content)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SourceExtensionError("historical A12TIP baseline is not valid JSON") from exc
+    _require(isinstance(historical, dict), "historical A12TIP baseline must be a JSON object")
+    _require(historical.get("candidate_file_count") == 429, "historical A12TIP candidate count changed")
+    return oid, content
+
+
 def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) -> set[str]:
     """Validate the versioned, complete candidate identity without rewriting history."""
     path = root / SUCCESSOR_BASELINE_PATH
@@ -357,10 +398,11 @@ def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) ->
     )
 
     _verify_historical_a12fp_baseline(root)
+    _verify_historical_a12tip_baseline(root)
     predecessor = baseline["predecessor_baseline"]
     _require(isinstance(predecessor, dict), "successor predecessor identity must be an object")
     _require(set(predecessor) == _PREDECESSOR_KEYS, "invalid predecessor identity keys")
-    _require(predecessor["path"] == HISTORICAL_A12FP_BASELINE_PATH, "successor predecessor path mismatch")
+    _require(predecessor["path"] == HISTORICAL_A12TIP_BASELINE_PATH, "successor predecessor path mismatch")
     _relative_file(root, predecessor["path"])
     predecessor_oid, predecessor_bytes = _canonical_git_blob(
         root, predecessor["path"], source="HEAD"
@@ -379,6 +421,7 @@ def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) ->
         (A11_EXTENSION_PATH, A11_PURPOSE),
         (A12F_EXTENSION_PATH, A12F_PURPOSE),
         (A12TI_EXTENSION_PATH, A12TI_PURPOSE),
+        (A12TC_EXTENSION_PATH, A12TC_PURPOSE),
     )
     _require(len(provenance) == len(expected_provenance), "successor provenance history is incomplete")
     for item, (expected_path, expected_purpose) in zip(provenance, expected_provenance, strict=True):
@@ -387,7 +430,12 @@ def verify_successor_candidate_baseline(root: Path, expected_paths: set[str]) ->
         _require(item["path"] == expected_path, "successor provenance path/order mismatch")
         _require(item["purpose"] == expected_purpose, "successor provenance purpose mismatch")
         _relative_file(root, item["path"])
-        source = "index" if expected_path in {A11_EXTENSION_PATH, A12F_EXTENSION_PATH, A12TI_EXTENSION_PATH} else "HEAD"
+        source = "index" if expected_path in {
+            A11_EXTENSION_PATH,
+            A12F_EXTENSION_PATH,
+            A12TI_EXTENSION_PATH,
+            A12TC_EXTENSION_PATH,
+        } else "HEAD"
         oid, content = _canonical_git_blob(root, item["path"], source=source)
         _require(item["sha256"] == _sha256(content), f"successor provenance SHA256 mismatch: {expected_path}")
         _require(item["git_blob"] == oid, f"successor provenance Git blob mismatch: {expected_path}")
@@ -424,6 +472,7 @@ def load_effective_candidate_paths(root: Path) -> set[str]:
     a11_extension_path = root / A11_EXTENSION_PATH
     a12f_extension_path = root / A12F_EXTENSION_PATH
     a12ti_extension_path = root / A12TI_EXTENSION_PATH
+    a12tc_extension_path = root / A12TC_EXTENSION_PATH
     _require(base_path.is_file(), "frozen Gate738AD base manifest is missing")
     _require(extension_path.is_file(), "MAOS source extension metadata is missing")
     _require(authority_extension_path.is_file(), "MAOS Authority source extension metadata is missing")
@@ -431,6 +480,7 @@ def load_effective_candidate_paths(root: Path) -> set[str]:
     _require(a11_extension_path.is_file(), "MAOS A11 source extension metadata is missing")
     _require(a12f_extension_path.is_file(), "MAOS A12F source extension metadata is missing")
     _require(a12ti_extension_path.is_file(), "MAOS A12TI source extension metadata is missing")
+    _require(a12tc_extension_path.is_file(), "MAOS A12TC source extension metadata is missing")
     try:
         extension = json.loads(extension_path.read_text(encoding="utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
@@ -481,7 +531,24 @@ def load_effective_candidate_paths(root: Path) -> set[str]:
         a12ti_extension,
         frozenset(kernel_paths | authority_paths | a10_paths | a11_paths | a12f_paths),
     )
+    try:
+        a12tc_extension = json.loads(a12tc_extension_path.read_text(encoding="utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SourceExtensionError("MAOS A12TC source extension is not valid JSON") from exc
+    a12tc_paths = verify_a12tc_source_extension(
+        root,
+        base_bytes,
+        a12tc_extension,
+        frozenset(kernel_paths | authority_paths | a10_paths | a11_paths | a12f_paths | a12ti_paths),
+    )
     effective_paths = (
-        base_paths | kernel_paths | authority_paths | a10_paths | a11_paths | a12f_paths | a12ti_paths
+        base_paths
+        | kernel_paths
+        | authority_paths
+        | a10_paths
+        | a11_paths
+        | a12f_paths
+        | a12ti_paths
+        | a12tc_paths
     )
     return verify_successor_candidate_baseline(root, effective_paths)

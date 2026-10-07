@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "purpose": "MAOS_A12TC_REQUEST_AUTHORITY_COMPOSITION_V1",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "files": [
+    {
+      "path": "app/security/request_authority.py",
+      "git_blob": "a02e93c5582f3ab7780774f58faff000993ca816",
+      "sha256": "1e5b31bd0ae259d35199b0f8a25330b970a16ea04ae51f28ec953877751bdbf4",
+      "size_bytes": 1632
+    }
+  ]
+}
