@@ -1,0 +1,15 @@
+{
+  "schema_version": 1,
+  "purpose": "MAOS_A12TI_TENANT_AUTHORITY_SNAPSHOT_V1",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "files": [
+    {
+      "path": "app/security/tenant_authority_snapshot.py",
+      "git_blob": "fcd66e4292a054679d8cb5f0a8c5ccf540b6da65",
+      "sha256": "ba5ba91932214f00f2e798a2ae3fbd85870b3b399d672588c6b98e2d827d4ba7",
+      "size_bytes": 3625
+    }
+  ]
+}
