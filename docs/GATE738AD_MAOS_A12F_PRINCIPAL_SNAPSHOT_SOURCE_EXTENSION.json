@@ -1,0 +1,15 @@
+{
+  "base_manifest_git_blob": "8d54d63d9332d6872a51d1ba652d1d266de523eb",
+  "base_manifest_path": "docs/GATE738AD_CANDIDATE_MANIFEST.json",
+  "base_manifest_sha256": "17d8f9ef3a89631f8608ab46712554f1c0109723c1ab7cc25de50c15ff1ad8b6",
+  "files": [
+    {
+      "git_blob": "c5a27496ffec1f2d460af00c2ea9f3fc1301520f",
+      "path": "app/security/authority_snapshot.py",
+      "sha256": "48fae47f42d404168d96c84277c0d0ef696c771400dab3b96534e54f944d2fa6",
+      "size_bytes": 4872
+    }
+  ],
+  "purpose": "MAOS_A12F_PRINCIPAL_SNAPSHOT_V1",
+  "schema_version": 1
+}

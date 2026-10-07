@@ -13,18 +13,23 @@ from scripts.gate738ad_maos_source_extension import (
     A10_EXTENSION_PATH,
     A11_EXTENSION_PATH,
     A11_PURPOSE,
+    A12F_EXTENSION_PATH,
+    A12F_PURPOSE,
     AUTHORITY_EXTENSION_PATH,
     BASE_MANIFEST_PATH,
     EXPECTED_A10_PATHS,
     EXPECTED_A11_PATHS,
+    EXPECTED_A12F_PATHS,
     EXPECTED_AUTHORITY_PATHS,
     EXPECTED_MAOS_PATHS,
     EXTENSION_PATH,
     HISTORICAL_A10_BASELINE_PATH,
+    HISTORICAL_A11_BASELINE_PATH,
     SUCCESSOR_BASELINE_PATH,
     SourceExtensionError,
     load_effective_candidate_paths,
     verify_a10_source_extension,
+    verify_a12f_source_extension,
     verify_authority_source_extension,
     verify_source_extension,
     verify_successor_candidate_baseline,
@@ -53,16 +58,26 @@ def test_unchanged_historical_base_and_authorized_extension_pass() -> None:
     effective = load_effective_candidate_paths(ROOT)
     manifest = json.loads((ROOT / BASE_MANIFEST_PATH).read_text(encoding="utf-8"))
     base_paths = {item["path"] for item in manifest["candidate_files"]}
-    assert effective == base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS | EXPECTED_A10_PATHS | EXPECTED_A11_PATHS
+    assert effective == (
+        base_paths
+        | EXPECTED_MAOS_PATHS
+        | EXPECTED_AUTHORITY_PATHS
+        | EXPECTED_A10_PATHS
+        | EXPECTED_A11_PATHS
+        | EXPECTED_A12F_PATHS
+    )
     assert EXPECTED_MAOS_PATHS.isdisjoint(base_paths)
     assert EXPECTED_AUTHORITY_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS)
     assert EXPECTED_A10_PATHS.isdisjoint(base_paths | EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS)
-    assert len(effective) == 427
+    assert len(effective) == 428
     baseline = json.loads((ROOT / SUCCESSOR_BASELINE_PATH).read_text(encoding="utf-8"))
-    assert baseline["candidate_file_count"] == 427
+    assert baseline["candidate_file_count"] == 428
     assert {item["path"] for item in baseline["candidate_files"]} == effective
     historical = json.loads((ROOT / HISTORICAL_A10_BASELINE_PATH).read_text(encoding="utf-8"))
     assert historical["candidate_file_count"] == 426
+    prior = json.loads((ROOT / HISTORICAL_A11_BASELINE_PATH).read_text(encoding="utf-8"))
+    assert prior["candidate_file_count"] == 427
+    assert not any(path.startswith("tests/") for path in effective)
 
 
 def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], set[str]]:
@@ -75,11 +90,13 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         A10_EXTENSION_PATH,
         HISTORICAL_A10_BASELINE_PATH,
         A11_EXTENSION_PATH,
+        A12F_EXTENSION_PATH,
+        HISTORICAL_A11_BASELINE_PATH,
     )
     for relative in source_paths:
         destination = root / relative
         destination.parent.mkdir(parents=True, exist_ok=True)
-        source = "index" if relative == A11_EXTENSION_PATH else "HEAD"
+        source = "index" if relative in {A11_EXTENSION_PATH, A12F_EXTENSION_PATH} else "HEAD"
         ref = f":{relative}" if source == "index" else f"HEAD:{relative}"
         oid = subprocess.run(
             ["git", "rev-parse", "--verify", ref],
@@ -95,7 +112,7 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
             ).stdout
         )
     shutil.copyfile(ROOT / "Dockerfile", root / "Dockerfile")
-    candidate_path = next(iter(EXPECTED_A11_PATHS))
+    candidate_path = next(iter(EXPECTED_A12F_PATHS))
     candidate = root / candidate_path
     candidate.parent.mkdir(parents=True, exist_ok=True)
     oid = subprocess.run(
@@ -128,7 +145,7 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
     )
 
     def canonical_blob(relative: str) -> tuple[str, bytes]:
-        source = "index" if relative == A11_EXTENSION_PATH else "HEAD"
+        source = "index" if relative in {A11_EXTENSION_PATH, A12F_EXTENSION_PATH} else "HEAD"
         ref = f":{relative}" if source == "index" else f"HEAD:{relative}"
         oid = subprocess.run(
             ["git", "-C", str(root), "rev-parse", "--verify", ref],
@@ -144,13 +161,14 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         ).stdout
         return oid, blob
 
-    predecessor_oid, predecessor_bytes = canonical_blob(HISTORICAL_A10_BASELINE_PATH)
+    predecessor_oid, predecessor_bytes = canonical_blob(HISTORICAL_A11_BASELINE_PATH)
     provenance = []
     for relative, purpose in (
         (EXTENSION_PATH, "MAOS_KERNEL_V1"),
         (AUTHORITY_EXTENSION_PATH, "MAOS_AUTHORITY_V1"),
         (A10_EXTENSION_PATH, "MAOS_A10_PERSISTENCE_V1"),
         (A11_EXTENSION_PATH, A11_PURPOSE),
+        (A12F_EXTENSION_PATH, A12F_PURPOSE),
     ):
         oid, content = canonical_blob(relative)
         provenance.append(
@@ -164,9 +182,9 @@ def _successor_fixture_root(tmp_path: Path) -> tuple[Path, dict[str, object], se
         )
     baseline: dict[str, object] = {
         "schema_version": 2,
-        "purpose": "GATE738AD_SUCCESSOR_CANDIDATE_A11_V1",
+        "purpose": "GATE738AD_SUCCESSOR_CANDIDATE_A12F_V1",
         "predecessor_baseline": {
-            "path": HISTORICAL_A10_BASELINE_PATH,
+            "path": HISTORICAL_A11_BASELINE_PATH,
             "sha256": hashlib.sha256(predecessor_bytes).hexdigest(),
             "git_blob": predecessor_oid,
             "size_bytes": len(predecessor_bytes),
@@ -206,11 +224,44 @@ def test_successor_baseline_is_exact_and_provenance_bound(tmp_path: Path) -> Non
     assert verify_successor_candidate_baseline(root, expected) == expected
 
 
+def test_a12f_extension_binds_only_the_frozen_runtime_module(tmp_path: Path) -> None:
+    root, _baseline, _expected = _successor_fixture_root(tmp_path)
+    base_bytes = (root / BASE_MANIFEST_PATH).read_bytes()
+    extension = json.loads((root / A12F_EXTENSION_PATH).read_text(encoding="utf-8"))
+    prior_paths = EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS | EXPECTED_A10_PATHS | EXPECTED_A11_PATHS
+    base_paths = {item["path"] for item in json.loads(base_bytes)["candidate_files"]}
+
+    assert extension["purpose"] == A12F_PURPOSE
+    assert verify_a12f_source_extension(
+        root, base_bytes, extension, frozenset(prior_paths)
+    ) == base_paths | EXPECTED_A12F_PATHS
+
+
+def test_a12f_extension_rejects_test_sources(tmp_path: Path) -> None:
+    root, _baseline, _expected = _successor_fixture_root(tmp_path)
+    base_bytes = (root / BASE_MANIFEST_PATH).read_bytes()
+    extension = json.loads((root / A12F_EXTENSION_PATH).read_text(encoding="utf-8"))
+    test_path = "tests/test_principal_authority_snapshot.py"
+    destination = root / test_path
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(ROOT / test_path, destination)
+    subprocess.run(["git", "-C", str(root), "add", "--", test_path], check=True)
+    subprocess.run(["git", "-C", str(root), "commit", "-qm", "fixture test path"], check=True)
+    extension["files"][0]["path"] = test_path
+    with pytest.raises(SourceExtensionError, match="outside approved namespace"):
+        verify_a12f_source_extension(
+            root,
+            base_bytes,
+            extension,
+            frozenset(EXPECTED_MAOS_PATHS | EXPECTED_AUTHORITY_PATHS | EXPECTED_A10_PATHS | EXPECTED_A11_PATHS),
+        )
+
+
 def test_successor_provenance_is_invariant_to_crlf_checkout(tmp_path: Path) -> None:
     root, _baseline, expected = _successor_fixture_root(tmp_path)
     entries = _baseline["candidate_files"]
     assert isinstance(entries, list) and entries
-    for relative in (A11_EXTENSION_PATH, entries[0]["path"]):
+    for relative in (A11_EXTENSION_PATH, A12F_EXTENSION_PATH, entries[0]["path"]):
         path = root / relative
         canonical_ref = f":{relative}"
         committed = subprocess.run(
